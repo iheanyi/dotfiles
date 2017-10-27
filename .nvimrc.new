@@ -61,6 +61,7 @@ Plugin 'mxw/vim-jsx'
 Plugin 'fatih/vim-go'
 Plugin 'captbaritone/better-indent-support-for-php-with-html'
 Plugin 'christoomey/vim-tmux-navigator'
+Plugin 'posva/vim-vue'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 
@@ -68,7 +69,7 @@ call vundle#end()            " required
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux
 
 " Ctrl-P Settings
-let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|.git|tmp\|_build\|deps'
+let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|\.git\|tmp\|_build\|deps\|vendor'
 let g:ctrlp_show_hidden = 1
 
 " Syntastic Settings
@@ -83,6 +84,7 @@ let g:syntastic_check_on_wq = 0
 let g:syntastic_javascript_checkers = ['eslint']
 let g:syntastic_ruby_checkers = ['rubocop']
 let g:syntastic_scss_checkers=["sass_lint"]
+let g:syntastic_javascript_eslint_exe='$(npm bin)/eslint'
 
 " Airline Settings
 let g:airline#extensions#syntastic#enabled = 1
@@ -116,7 +118,8 @@ nnoremap <leader>s :w<CR>
 
 let g:syntastic_filetype_map = { 
       \ "html.handlebars": "handlebars",
-      \ "handlebars.html": "handlebars"
+      \ "handlebars.html": "handlebars",
+      \ "vue": "javascript"
       \ }
 
 if filereadable(expand("~/.vimrc_background"))
