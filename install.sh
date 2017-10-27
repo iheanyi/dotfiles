@@ -50,8 +50,6 @@ for package in "$packages[@]"
   do brew_install $package
 done
 
-copy_configs()
-
 languages=(
     elixir
     go
