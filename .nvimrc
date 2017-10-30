@@ -62,6 +62,7 @@ Plugin 'fatih/vim-go'
 Plugin 'captbaritone/better-indent-support-for-php-with-html'
 Plugin 'christoomey/vim-tmux-navigator'
 Plugin 'posva/vim-vue'
+Plugin 'junegunn/fzf.vim'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 
