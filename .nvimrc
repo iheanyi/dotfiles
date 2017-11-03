@@ -32,39 +32,38 @@ set hlsearch        " Highlight searches by default
 set ignorecase      " Ignore case when searching...
 set smartcase       " ...unless we type a capital
 
-" set the runtime path to include Vundle and initialize
-filetype off                  " required
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'scrooloose/syntastic'
-Plugin 'scrooloose/nerdtree.git'
-Plugin 'Valloric/YouCompleteMe'
-Plugin 'kien/ctrlp.vim'
-Plugin 'tpope/vim-surround'
-Plugin 'kchmck/vim-coffee-script'
-Plugin 'mattn/emmet-vim'
-Plugin 'Raimondi/delimitMate'
-Plugin 'janko-m/vim-test'
-Plugin 'airblade/vim-gitgutter'
-Plugin 'mustache/vim-mustache-handlebars'
-Plugin 'tpope/vim-fugitive'
-Plugin 'elixir-lang/vim-elixir'
-Plugin 'mileszs/ack.vim'
-Plugin 'heavenshell/vim-jsdoc'
-Plugin 'flazz/vim-colorschemes'
-Plugin 'bling/vim-airline'
-Plugin 'chriskempson/base16-vim'
-Plugin 'pangloss/vim-javascript'
-Plugin 'gcorne/vim-sass-lint'
-Plugin 'mxw/vim-jsx'
-Plugin 'fatih/vim-go'
-Plugin 'captbaritone/better-indent-support-for-php-with-html'
-Plugin 'christoomey/vim-tmux-navigator'
-Plugin 'posva/vim-vue'
-Plugin 'junegunn/fzf.vim'
+call plug#begin('~/.vim/bundle')
+Plug 'VundleVim/Vundle.vim'
+Plug 'scrooloose/syntastic'
+Plug 'scrooloose/nerdtree'
+Plug 'Valloric/YouCompleteMe'
+Plug 'kien/ctrlp.vim'
+Plug 'tpope/vim-surround'
+Plug 'kchmck/vim-coffee-script'
+Plug 'mattn/emmet-vim'
+Plug 'Raimondi/delimitMate'
+Plug 'janko-m/vim-test'
+Plug 'airblade/vim-gitgutter'
+Plug 'mustache/vim-mustache-handlebars'
+Plug 'tpope/vim-fugitive'
+Plug 'elixir-lang/vim-elixir'
+Plug 'mileszs/ack.vim'
+Plug 'heavenshell/vim-jsdoc'
+Plug 'flazz/vim-colorschemes'
+Plug 'bling/vim-airline'
+Plug 'chriskempson/base16-vim'
+Plug 'pangloss/vim-javascript'
+Plug 'gcorne/vim-sass-lint'
+Plug 'mxw/vim-jsx'
+Plug 'fatih/vim-go'
+Plug 'captbaritone/better-indent-support-for-php-with-html'
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'posva/vim-vue'
+Plug '/usr/local/opt/fzf'
+Plug 'junegunn/fzf.vim'
+Plug 'jparise/vim-graphql'
 " All of your Plugins must be added before the following line
-call vundle#end()            " required
+call plug#end()
 
 " Ignoring files
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux
