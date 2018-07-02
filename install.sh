@@ -90,6 +90,7 @@ applications=(
     spotify
     sequel-pro
     font-source-code-pro
+    plex-media-server
 )
 
 for application in "$applications[@]"
