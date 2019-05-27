@@ -1,5 +1,7 @@
 #!/bin/sh
 # Software for provisioning up a Macbook Pro and all that good stuff.
+# Inspired by komputer-maschine by Lauren Dorman
+# (https://github.com/laurendorman/komputer-maschine)
 brew_install() {
     if test ! $(brew list | grep $package); then
       brew install "$@"
@@ -44,6 +46,7 @@ packages=(
     emacs-plus
     tmux
     neovim
+    reattach-to-user-namespace
 )
 
 for package in "$packages[@]"
@@ -94,11 +97,12 @@ applications=(
 )
 
 for application in "$applications[@]"
+  echo "installing $application"
   do cask_install $application
 done
 
 # Install Node Version Manager (NVM)
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.26.1/install.sh | bash
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.26.1/install.sh | zsh
 
 # Install latest
 nvm install stable
@@ -107,15 +111,17 @@ nvm alias default stable
 # Install Neovim
 
 # Install and Move Vim Colors Stuff
-mkdir ~/.vim/colors
-curl https://raw.githubusercontent.com/chriskempson/tomorrow-theme/master/vim/colors/Tomorrow-Night-Eighties.vim
-mv Tomorrow-Night-Eighties.vim ~/.vim/colors 
+mkdir -p ~/.vim/colors
+# curl https://raw.githubusercontent.com/chriskempson/tomorrow-theme/master/vim/colors/Tomorrow-Night-Eighties.vim
+# `mv Tomorrow-Night-Eighties.vim ~/.vim/colors 
 
-# Install Vundle
-git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+# Install plug
+curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 # Install Pure
 npm install --global pure-prompt
+copy_configs
 
 # Install Spacemacs
-git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
+# git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
