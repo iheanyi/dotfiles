@@ -53,13 +53,14 @@ else
 endif
 Plug 'majutsushi/tagbar'
 Plug 'tpope/vim-rails'
+Plug 'tpope/vim-commentary'
 Plug 'vim-ruby/vim-ruby'
-Plug 'ambv/black'
+Plug 'python/black'
 Plug 'ruby-formatter/rufo-vim'
 Plug 'mdempsky/gocode', { 'rtp': 'nvim/', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' }
 Plug 'deoplete-plugins/deoplete-go', { 'do': 'make'}
 Plug 'rust-lang/rust.vim'
-Plug 'scrooloose/syntastic'
+Plug 'w0rp/ale'
 Plug 'scrooloose/nerdtree'
 Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
 Plug 'ctrlpvim/ctrlp.vim'
@@ -69,10 +70,12 @@ Plug 'mattn/emmet-vim'
 Plug 'Raimondi/delimitMate'
 Plug 'janko-m/vim-test'
 Plug 'airblade/vim-gitgutter'
+Plug 'airblade/vim-rooter' " Determines the project root for NERDTree/fzf
 Plug 'mustache/vim-mustache-handlebars'
 Plug 'tpope/vim-fugitive'
 Plug 'elixir-lang/vim-elixir'
 Plug 'mileszs/ack.vim'
+" Plug 'mhartington/nvim-typescript', {'do': './install.sh'}
 Plug 'flowtype/vim-flow', { 'do': 'npm install -g flow-bin' }
 Plug 'heavenshell/vim-jsdoc'
 Plug 'flazz/vim-colorschemes'
@@ -110,29 +113,13 @@ set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux
 let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|\.git\|tmp\|_build\|deps\|vendor'
 let g:ctrlp_show_hidden = 1
 
-" Syntastic Settings
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
-
-let g:syntastic_python_python_exec = '/usr/local/bin/python3'
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-let g:syntastic_javascript_checkers = ['eslint']
-let g:syntastic_ruby_checkers = ['rubocop']
-let g:syntastic_scss_checkers=["sass_lint"]
-let g:syntastic_typescript_checkers = ['eslint', 'tslint', 'tsc']
-let g:syntastic_javascript_eslint_exe='$(npm bin)/eslint'
-" autofix with eslint
-let g:syntastic_javascript_eslint_args = ['--fix']
-function! SyntasticCheckHook(errors)
-  checktime
-endfunction
+" ALE Settings
+let g:ale_fixers = {'typescript': ['prettier', 'tslint'], 'python': ['black']}
+let g:ale_linters = {'typescript': ['tslint', 'tsserver'],'python': ['flake8']}
+let g:ale_fix_on_save = 1
 
 " Airline Settings
-let g:airline#extensions#syntastic#enabled = 1
+let g:airline#extensions#ale#enabled = 1
 
 if executable('ag')
   let g:ackprg = 'ag --vimgrep'
@@ -247,6 +234,7 @@ call deoplete#custom#option('omni_patterns', { 'go': '[^. *\t]\.\w*' })
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
+let g:black_virtualenv = '/usr/local/bin/'
 autocmd BufWritePost *.py execute ':Black'
 let g:rustfmt_autosave = 1
 
