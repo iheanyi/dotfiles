@@ -46,7 +46,7 @@ packages=(
     emacs-plus
     tmux
     neovim
-    reattach-to-user-namespace
+    nvm
 )
 
 for package in "$packages[@]"
@@ -112,8 +112,6 @@ nvm alias default stable
 
 # Install and Move Vim Colors Stuff
 mkdir -p ~/.vim/colors
-# curl https://raw.githubusercontent.com/chriskempson/tomorrow-theme/master/vim/colors/Tomorrow-Night-Eighties.vim
-# `mv Tomorrow-Night-Eighties.vim ~/.vim/colors 
 
 # Install plug
 curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
