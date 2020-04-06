@@ -18,7 +18,6 @@ set clipboard=unnamed
 " Display tabs and trailing spaces visually
 set list listchars=tab:\ \ ,trail:·
 
-let home_dir=shellescape(fnamemodify('~', ':p'))
 let python_highlight_all=1
 let g:python3_host_prog="/usr/local/bin/python3"
 let g:coc_node_path="~/.nvm/versions/node/v13.10.1/bin/node"
