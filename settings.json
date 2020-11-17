@@ -1,0 +1,129 @@
+{
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "defaultProfile": "{c6eaf9f4-32a7-5fdc-b5cf-066e8a4b1e40}",
+    "profiles": [
+        {
+            // Make changes here to the powershell.exe profile
+            "guid": "{61c55bbd-c2c6-5271-96e7-009a87ff44bf}",
+            "name": "Windows PowerShell",
+            "commandline": "powershell.exe",
+            "hidden": false
+        },
+        {
+            // Make changes here to the cmd.exe profile
+            "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+            "name": "cmd",
+            "commandline": "cmd.exe",
+            "hidden": false
+        },
+        {
+            "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+            "hidden": false,
+            "name": "PowerShell Core",
+            "source": "Windows.Terminal.PowershellCore"
+        },
+        {
+            "guid": "{c6eaf9f4-32a7-5fdc-b5cf-066e8a4b1e40}",
+            "startingDirectory": "\\\\wsl$\\Ubuntu-18.04\\home\\iheanyi",
+            "hidden": false,
+            "name": "Ubuntu-18.04",
+            "tabTitle": "Ubuntu",
+            "cursorColor": "#FFFFFF",
+            "cursorShape": "vintage",
+            "fontFace": "Cascadia Mono PL",
+            "acrylicOpacity": 0.85,
+            "useAcrylic": true,
+            "source": "Windows.Terminal.Wsl",
+            "colorScheme": "Ocean"
+        },
+        {
+            "guid": "{1777cdf0-b2c4-5a63-a204-eb60f349ea7c}",
+            "hidden": true,
+            "name": "Alpine",
+            "source": "Windows.Terminal.Wsl"
+        },
+        {
+            "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
+            "hidden": false,
+            "name": "Azure Cloud Shell",
+            "source": "Windows.Terminal.Azure"
+        },
+        {
+            "guid": "{63e31163-583f-5850-9c1e-24e227dd2da9}",
+            "hidden": false,
+            "name": "PowerShell (dotnet global)",
+            "source": "Windows.Terminal.PowershellCore"
+        }
+    ],
+    // Add custom color schemes to this array
+    "schemes": [
+        {
+            "background": "#2C001E",
+            "black": "#4E9A06",
+            "blue": "#3465A4",
+            "brightBlack": "#555753",
+            "brightBlue": "#729FCF",
+            "brightCyan": "#34E2E2",
+            "brightGreen": "#8AE234",
+            "brightPurple": "#AD7FA8",
+            "brightRed": "#EF2929",
+            "brightWhite": "#EEEEEE",
+            "brightYellow": "#FCE94F",
+            "cyan": "#06989A",
+            "foreground": "#EEEEEE",
+            "green": "#300A24",
+            "name": "UbuntuLegit",
+            "purple": "#75507B",
+            "red": "#CC0000",
+            "white": "#D3D7CF",
+            "yellow": "#C4A000"
+        },
+        {
+            "name": "Tomorrow Night Eighties",
+            "black": "#000000",
+            "red": "#f2777a",
+            "green": "#99cc99",
+            "yellow": "#ffcc66",
+            "blue": "#6699cc",
+            "purple": "#cc99cc",
+            "cyan": "#66cccc",
+            "white": "#ffffff",
+            "brightBlack": "#000000",
+            "brightRed": "#f2777a",
+            "brightGreen": "#99cc99",
+            "brightYellow": "#ffcc66",
+            "brightBlue": "#6699cc",
+            "brightPurple": "#cc99cc",
+            "brightCyan": "#66cccc",
+            "brightWhite": "#ffffff",
+            "background": "#2d2d2d",
+            "foreground": "#cccccc"
+        },
+        // Base 16 Ocean 256 Color Configuration - Windows Terminal
+        // Colors made by Chris Kempson (http://chriskempson.com)
+        {
+            "name": "Ocean",
+            "background": "#2b303b",
+            "foreground": "#c0c5ce",
+            "black": "#2b303b",
+            "red": "#bf616a",
+            "green": "#a3be8c",
+            "yellow": "#ebcb8b",
+            "blue": "#8fa1b3",
+            "purple": "#b48ead",
+            "cyan": "#96b5b4",
+            "white": "#c0c5ce",
+            "brightBlack": "#65737e",
+            "brightRed": "#bf616a",
+            "brightGreen": "#a3be8c",
+            "brightYellow": "#ebcb8b",
+            "brightBlue": "#8fa1b3",
+            "brightPurple": "#b48ead",
+            "brightCyan": "#96b5b4",
+            "brightWhite": "#eff1f5"
+        }
+    ],
+    // Add any keybinding overrides to this array.
+    // To unbind a default keybinding, set the command to "unbound"
+    "keybindings": []
+}
