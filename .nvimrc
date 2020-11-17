@@ -1,6 +1,6 @@
 set hidden
 " Disable preview menu
-set completeopt-=preview
+" set completeopt-=preview
 set encoding=utf-8
 
 augroup filetype
@@ -62,12 +62,14 @@ Plug 'majutsushi/tagbar'
 Plug 'tpope/vim-rails'
 Plug 'tpope/vim-commentary'
 Plug 'vim-ruby/vim-ruby'
-Plug 'python/black'
+Plug 'psf/black', { 'branch': 'stable' }
+" Plug 'edkolev/tmuxline.vim'
 Plug 'ruby-formatter/rufo-vim'
 Plug 'fatih/vim-hclfmt'
 Plug 'mdempsky/gocode', { 'rtp': 'nvim/', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' }
 Plug 'rust-lang/rust.vim'
 Plug 'dense-analysis/ale'
+Plug 'joukevandermaas/vim-ember-hbs'
 Plug 'scrooloose/nerdtree'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'tpope/vim-surround'
@@ -78,7 +80,6 @@ Plug 'mhinz/vim-signify'
 Plug 'airblade/vim-rooter' " Determines the project root for NERDTree/fzf
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-rhubarb'
-Plug 'elixir-lang/vim-elixir'
 Plug 'mileszs/ack.vim'
 Plug 'flazz/vim-colorschemes'
 Plug 'vim-airline/vim-airline'
@@ -87,8 +88,11 @@ Plug 'chriskempson/base16-vim'
 Plug 'pangloss/vim-javascript'
 Plug 'mxw/vim-jsx'
 Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
+Plug 'sebdah/vim-delve'
+Plug 'nullvoxpopuli/coc-ember', {'do': 'yarn install --frozen-lockfile'}
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'christoomey/vim-tmux-navigator'
+Plug 'mustache/vim-mustache-handlebars'
 Plug 'posva/vim-vue'
 Plug 'junegunn/fzf', { 'do': './install --bin' }
 Plug 'junegunn/fzf.vim'
@@ -101,6 +105,8 @@ Plug 'tpope/vim-markdown'
 Plug 'junegunn/goyo.vim'
 Plug 'mattly/vim-markdown-enhancements'
 Plug 'ap/vim-css-color'
+Plug 'slashmili/alchemist.vim'
+Plug 'elixir-editors/vim-elixir'
 " All of your Plugins must be added before the following line
 call plug#end()
 
@@ -112,8 +118,8 @@ let g:ctrlp_custom_ignore = 'DS_Store\|\.git\|tmp\|_build\|deps\|vendor'
 let g:ctrlp_show_hidden = 1
 
 " ALE Settings
-let g:ale_fixers = {'html': ['html-beautify'], 'typescript': ['prettier','eslint'], 'python': ['black'], 'javascript': ['prettier', 'eslint'], 'ruby': ['rubocop', 'rufo'], 'vue': ['prettier', 'eslint'], 'scss': ['stylelint', 'prettier']}
-let g:ale_linters = {'typescript': ['tsserver', 'prettier'], 'python': ['flake8'], 'javascript': ['prettier', 'eslint'], 'ruby': ['rubocop'], 'scss': ['stylelint'], 'vue': ['eslint', 'prettier', 'vls', 'tslint']}
+let g:ale_fixers = {'html': ['html-beautify'], 'typescriptreact': ['prettier', 'eslint'], 'typescript': ['prettier','eslint'], 'python': ['black'], 'javascript': ['prettier', 'eslint'], 'ruby': ['rubocop', 'rufo'], 'vue': ['prettier', 'eslint'], 'scss': ['stylelint', 'prettier'], 'elixir': ['mix_format']}
+let g:ale_linters = {'typescript': ['tsserver', 'prettier'], 'typescriptreact': ['tsserver', 'prettier'], 'python': ['flake8'], 'javascript': ['prettier', 'eslint'], 'ruby': ['rubocop', 'solargraph'], 'scss': ['stylelint'], 'vue': ['eslint', 'prettier', 'vls', 'tslint']}
 let g:ale_fix_on_save = 1
 
 " Airline Settings
@@ -257,6 +263,7 @@ call deoplete#custom#option('omni_patterns', { 'go': '[^. *\t]\.\w*' })
 
 " gopls for vim-go
 let g:go_def_mode='gopls'
+let g:go_def_mapping_enabled=0
 let g:go_info_mode='gopls'
 " Override tab to autocomplete Go functions
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
