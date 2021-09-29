@@ -20,7 +20,7 @@ set list listchars=tab:\ \ ,trail:·
 
 let python_highlight_all=1
 let g:python3_host_prog="/usr/local/bin/python3"
-let g:coc_node_path="~/.nvm/versions/node/v13.10.1/bin/node"
+let g:coc_node_path = substitute(system('which node'), '\n', '', '')
 
 syntax on
 "set linebreak    "Wrap lines at convenient points
@@ -50,6 +50,8 @@ if has('nvim')
   set inccommand=split
 endif
 
+let g:ale_disable_lsp = 1
+
 call plug#begin('~/.config/nvim/plugged')
 if has('nvim')
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
@@ -58,13 +60,15 @@ else
   Plug 'roxma/nvim-yarp'
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
+Plug 'jxnblk/vim-mdx-js'
 Plug 'majutsushi/tagbar'
 Plug 'tpope/vim-rails'
 Plug 'tpope/vim-commentary'
 Plug 'vim-ruby/vim-ruby'
+Plug 'pantharshit00/vim-prisma'
 Plug 'psf/black', { 'branch': 'stable' }
 " Plug 'edkolev/tmuxline.vim'
-Plug 'ruby-formatter/rufo-vim'
+" Plug 'ruby-formatter/rufo-vim'
 Plug 'fatih/vim-hclfmt'
 Plug 'mdempsky/gocode', { 'rtp': 'nvim/', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' }
 Plug 'rust-lang/rust.vim'
@@ -107,6 +111,8 @@ Plug 'mattly/vim-markdown-enhancements'
 Plug 'ap/vim-css-color'
 Plug 'slashmili/alchemist.vim'
 Plug 'elixir-editors/vim-elixir'
+Plug 'ianks/vim-tsx'
+Plug 'leafgarland/typescript-vim'
 " All of your Plugins must be added before the following line
 call plug#end()
 
@@ -118,9 +124,48 @@ let g:ctrlp_custom_ignore = 'DS_Store\|\.git\|tmp\|_build\|deps\|vendor'
 let g:ctrlp_show_hidden = 1
 
 " ALE Settings
-let g:ale_fixers = {'html': ['html-beautify'], 'typescriptreact': ['prettier', 'eslint'], 'typescript': ['prettier','eslint'], 'python': ['black'], 'javascript': ['prettier', 'eslint'], 'ruby': ['rubocop', 'rufo'], 'vue': ['prettier', 'eslint'], 'scss': ['stylelint', 'prettier'], 'elixir': ['mix_format']}
-let g:ale_linters = {'typescript': ['tsserver', 'prettier'], 'typescriptreact': ['tsserver', 'prettier'], 'python': ['flake8'], 'javascript': ['prettier', 'eslint'], 'ruby': ['rubocop', 'solargraph'], 'scss': ['stylelint'], 'vue': ['eslint', 'prettier', 'vls', 'tslint']}
+let js_fixers = ['prettier', 'eslint']
+let g:ale_fixers = {
+\ '*': ['remove_trailing_lines', 'trim_whitespace'],
+\ 'html': ['html-beautify'],
+\ 'typescriptreact': js_fixers,
+\ 'typescript': js_fixers,
+\ 'python': ['black'],
+\ 'javascript': js_fixers,
+\ 'ruby': ['rubocop'],
+\ 'vue': ['prettier', 'eslint'],
+\ 'css': ['pretier'],
+\ 'scss': ['stylelint', 'prettier'],
+\ 'elixir': ['mix_format']
+\ }
+let g:ale_linters = {
+\ 'go': ['gofmt', 'govet', 'gobuild', 'golangci-lint'],
+\ 'typescript': ['tsserver', 'eslint', 'prettier'],
+\ 'typescriptreact': ['tsserver', 'eslint', 'prettier'],
+\ 'python': ['flake8'],
+\ 'javascript': ['prettier', 'eslint'],
+\ 'ruby': ['rubocop', 'solargraph'],
+\ 'scss': ['stylelint'],
+\ 'vue': ['eslint', 'prettier', 'vls', 'tslint'],
+\ 'eruby': ['erb']
+\ }
 let g:ale_fix_on_save = 1
+
+" ALE Go Settings
+let g:ale_go_golangci_lint_options = ""
+
+" ALE Ruby Settings
+let g:ale_ruby_rubocop_executable = 'bundle'
+
+" ALE TypeScript / JavaScript settings
+
+let g:ale_javascript_eslint_options = "--ext .ts,.tsx"
+let g:ale_completion_tsserver_autoimport = 1
+
+" CoC Settings
+let g:coc_filetype_map = {
+  \ "htmldjango": "html",
+  \ }
 
 " Airline Settings
 let g:airline#extensions#ale#enabled = 1
@@ -177,7 +222,7 @@ inoremap <leader>s <Esc>:w<CR>i
 nnoremap <leader>s :w<CR>
 nmap <leader>f :FZF<CR>
 
-let g:syntastic_filetype_map = { 
+let g:syntastic_filetype_map = {
       \ "html.handlebars": "handlebars",
       \ "handlebars.html": "handlebars",
       \ "vue": "javascript"
@@ -315,8 +360,3 @@ inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm() : "\<C-g>u\<CR>"
 inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
-
-let g:ale_completion_tsserver_autoimport = 1
-let g:coc_filetype_map = {
-  \ "htmldjango": "html",
-  \ }
