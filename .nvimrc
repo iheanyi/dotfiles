@@ -19,15 +19,16 @@ set clipboard=unnamed
 set list listchars=tab:\ \ ,trail:·
 
 let python_highlight_all=1
-let g:python3_host_prog="/usr/local/bin/python3"
+let g:python3_host_prog="/opt/homebrew/bin/python3"
 let g:coc_node_path = substitute(system('which node'), '\n', '', '')
+let g:copilot_node_command = "/opt/homebrew/opt/node@16/bin/node"
 
 syntax on
 "set linebreak    "Wrap lines at convenient points
 " set tab as 4 spaces
 set nowrap       "Don't wrap lines
 set background=dark
-set textwidth=80
+set textwidth=120
 set colorcolumn=80
 set number
 set smarttab
@@ -60,6 +61,9 @@ else
   Plug 'roxma/nvim-yarp'
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'evanleck/vim-svelte'
+Plug 'github/copilot.vim'
 Plug 'jxnblk/vim-mdx-js'
 Plug 'majutsushi/tagbar'
 Plug 'tpope/vim-rails'
@@ -111,7 +115,7 @@ Plug 'mattly/vim-markdown-enhancements'
 Plug 'ap/vim-css-color'
 Plug 'slashmili/alchemist.vim'
 Plug 'elixir-editors/vim-elixir'
-Plug 'ianks/vim-tsx'
+" Plug 'ianks/vim-tsx'
 Plug 'leafgarland/typescript-vim'
 " All of your Plugins must be added before the following line
 call plug#end()
@@ -130,24 +134,27 @@ let g:ale_fixers = {
 \ 'html': ['html-beautify'],
 \ 'typescriptreact': js_fixers,
 \ 'typescript': js_fixers,
+\ 'go': ['gofmt', 'goimports'],
 \ 'python': ['black'],
 \ 'javascript': js_fixers,
 \ 'ruby': ['rubocop'],
 \ 'vue': ['prettier', 'eslint'],
-\ 'css': ['pretier'],
+\ 'css': ['prettier'],
 \ 'scss': ['stylelint', 'prettier'],
-\ 'elixir': ['mix_format']
+\ 'elixir': ['mix_format'],
+\ 'rust': ['rustfmt']
 \ }
 let g:ale_linters = {
 \ 'go': ['gofmt', 'govet', 'gobuild', 'golangci-lint'],
 \ 'typescript': ['tsserver', 'eslint', 'prettier'],
 \ 'typescriptreact': ['tsserver', 'eslint', 'prettier'],
-\ 'python': ['flake8'],
+\ 'python': ['flake8', 'black'],
 \ 'javascript': ['prettier', 'eslint'],
 \ 'ruby': ['rubocop', 'solargraph'],
 \ 'scss': ['stylelint'],
 \ 'vue': ['eslint', 'prettier', 'vls', 'tslint'],
-\ 'eruby': ['erb']
+\ 'eruby': ['erb'],
+\ 'rust': ['analyzer']
 \ }
 let g:ale_fix_on_save = 1
 
@@ -162,10 +169,14 @@ let g:ale_ruby_rubocop_executable = 'bundle'
 let g:ale_javascript_eslint_options = "--ext .ts,.tsx"
 let g:ale_completion_tsserver_autoimport = 1
 
+let g:coc_disable_transparent_cursor = 1
+
 " CoC Settings
 let g:coc_filetype_map = {
   \ "htmldjango": "html",
   \ }
+command! -nargs=* -range CocAction :call CocActionAsync('codeActionRange', <line1>, <line2>, <f-args>)
+command! -nargs=* -range CocFix    :call CocActionAsync('codeActionRange', <line1>, <line2>, 'quickfix')
 
 " Airline Settings
 let g:airline#extensions#ale#enabled = 1
@@ -314,7 +325,7 @@ let g:go_info_mode='gopls'
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
-let g:black_virtualenv = '/usr/local/bin/'
+let g:black_virtualenv = '/opt/homebrew/bin/'
 autocmd BufWritePre *.py execute ':Black'
 let g:rustfmt_autosave = 1
 
@@ -360,3 +371,10 @@ inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm() : "\<C-g>u\<CR>"
 inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
+
+
+" vim-test config
+nmap <silent> <leader>n :TestNearest<CR>
+nmap <silent> <leader>t :TestFile<CR>
+nmap <silent> <leader>a :TestSuite<CR>
+nmap <silent> <leader>l :TestLast<CR>
