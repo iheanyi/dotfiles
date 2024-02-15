@@ -42,14 +42,27 @@ end
 require("lazy").setup({
   -- colorscheme
   {
-    "chriskempson/base16-vim",
-    priority = 1000, -- make sure to load this before all the other start plugins
+    "jasonlong/poimandres.nvim",
+    lazy = false,
+    opts = {
+      style = "storm",
+      transparent = true,
+    },
     config = function()
       change_background()
-      vim.cmd([[colorscheme base16-ocean]])
-    end,
+      vim.cmd([[colorscheme poimandres]])
+    end
   },
 
+  --{
+    --"chriskempson/base16-vim",
+    --priority = 1000, -- make sure to load this before all the other start plugins
+    --config = function()
+      --change_background()
+      -- vim.cmd([[colorscheme base16-ocean]])
+    --end,
+  --},
+  
   --{
   --"RRethy/base16-nvim",
   --},
@@ -81,7 +94,7 @@ require("lazy").setup({
   },
 
   {
-    "junegunn/fzf.vim", 
+    "junegunn/fzf.vim",
     dependencies = { "junegunn/fzf" },
   },
 
@@ -161,7 +174,7 @@ require("lazy").setup({
   -- fzf extension for telescope with better speed
   {
     "nvim-telescope/telescope-fzf-native.nvim",
-    run = "make",
+    build = "make",
   },
 
   { "nvim-telescope/telescope-ui-select.nvim" },
@@ -169,7 +182,7 @@ require("lazy").setup({
   -- fuzzy finder framework
   {
     "nvim-telescope/telescope.nvim",
-    tag = "0.1.5",
+    tag = "0.1.4",
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
@@ -182,19 +195,20 @@ require("lazy").setup({
             fuzzy = true, -- false will only do exact matching
             override_generic_sorter = true, -- override the generic sorter
             override_file_sorter = true, -- override the file sorter
-            case_mode = "smart_case", -- or "ignore_case" or "respect_case"
-            -- the default case_mode is "smart_case"
+            case_mode = "smart_case", -- or "ignore_case" or "respect_case" the default case_mode is "smart_case"
           },
         },
       })
 
-      -- To get fzf loaded and working with telescope, you need to call
-      -- load_extension, somewhere after setup function:
-      require("telescope").load_extension("fzf")
-
+      
       -- To get ui-select loaded and working with telescope, you need to call
       -- load_extension, somewhere after setup function:
       require("telescope").load_extension("ui-select")
+
+      -- To get fzf loaded and working with telescope, you need to call
+      -- load_extension, somewhere after setup function:
+      require('telescope').load_extension('fzf')
+
     end,
   },
   {
@@ -204,9 +218,10 @@ require("lazy").setup({
     "airblade/vim-rooter",
   },
   {
-    "mileszs/ack.vim", config = function ()
-      vim.g["ackprg"] = 'ag --vimgrep'
-    end
+    "mileszs/ack.vim",
+    config = function()
+      vim.g["ackprg"] = "ag --vimgrep"
+    end,
   },
 
   -- save my last cursor position
@@ -321,9 +336,8 @@ require("lazy").setup({
         },
       })
 
-      require("lspconfig").solargraph.setup{}
-      require("lspconfig").tsserver.setup{}
-
+      require("lspconfig").solargraph.setup({})
+      require("lspconfig").tsserver.setup({})
     end,
   },
 
@@ -713,7 +727,14 @@ vim.keymap.set("n", "<leader>tl", ":TestLast -v<CR>", { noremap = true, silent =
 -- File-tree mappings
 vim.keymap.set("n", "<leader>n", ":NvimTreeToggle<CR>", { noremap = true })
 vim.keymap.set("n", "<leader>e", ":NvimTreeFindFile<CR>f", { noremap = true })
-vim.keymap.set("n", "<leader>f", ":FZF<CR>")
+
+-- File search
+vim.keymap.set("n", "<leader>F", ":FZF<CR>")
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
+vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
+vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
+vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
 
 -- telescope
 local builtin = require("telescope.builtin")
