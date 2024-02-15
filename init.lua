@@ -55,14 +55,14 @@ require("lazy").setup({
   },
 
   --{
-    --"chriskempson/base16-vim",
-    --priority = 1000, -- make sure to load this before all the other start plugins
-    --config = function()
-      --change_background()
-      -- vim.cmd([[colorscheme base16-ocean]])
-    --end,
+  --"chriskempson/base16-vim",
+  --priority = 1000, -- make sure to load this before all the other start plugins
+  --config = function()
+  --change_background()
+  -- vim.cmd([[colorscheme base16-ocean]])
+  --end,
   --},
-  
+
   --{
   --"RRethy/base16-nvim",
   --},
@@ -125,6 +125,13 @@ require("lazy").setup({
     config = function()
       vim.g["test#strategy"] = "neovim"
       vim.g["test#neovim#start_normal"] = "1"
+    end,
+  },
+
+  {
+    'dinhhuy258/git.nvim',
+    config = function ()
+      require("git").setup()
     end,
   },
 
@@ -200,7 +207,7 @@ require("lazy").setup({
         },
       })
 
-      
+
       -- To get ui-select loaded and working with telescope, you need to call
       -- load_extension, somewhere after setup function:
       require("telescope").load_extension("ui-select")
@@ -336,8 +343,27 @@ require("lazy").setup({
         },
       })
 
-      require("lspconfig").solargraph.setup({})
-      require("lspconfig").tsserver.setup({})
+      require("lspconfig").solargraph.setup({
+        settings = {
+          -- flags = { debounce_text_changes = 200 },
+
+          solargraph = {
+            autoformat = true,
+            completion = true,
+            diagnostics = true,
+            folding = true,
+            references = true,
+            rename = true,
+            symbols = true,
+          },
+        },
+      })
+      require("lspconfig").tsserver.setup({
+        settings = {
+          -- flags = { debounce_text_changes = 200 },
+          documentFormatting = true
+        }
+      })
     end,
   },
 
@@ -785,6 +811,24 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 
     vim.lsp.buf.format()
   end,
+})
+
+-- Run Rubocop on save
+-- vim.api.nvim_create_autocmd("FileType", {
+--  pattern = "ruby",
+--  callback = function()
+--    vim.lsp.start {
+--      name = "rubocop",
+--      cmd = { "bundle", "exec", "rubocop", "--lsp" },
+ --   }
+-- end,
+--})
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.rb",
+  callback = function()
+  vim.lsp.buf.format()
+end,
 })
 
 -- Use LspAttach autocommand to only map the following keys
