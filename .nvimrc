@@ -62,6 +62,8 @@ else
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'nvim-treesitter/nvim-treesitter-textobjects'
+
 Plug 'evanleck/vim-svelte'
 Plug 'github/copilot.vim'
 Plug 'jxnblk/vim-mdx-js'
