@@ -813,22 +813,11 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   end,
 })
 
--- Run Rubocop on save
--- vim.api.nvim_create_autocmd("FileType", {
---  pattern = "ruby",
---  callback = function()
---    vim.lsp.start {
---      name = "rubocop",
---      cmd = { "bundle", "exec", "rubocop", "--lsp" },
- --   }
--- end,
---})
-
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = "*.rb",
   callback = function()
-  vim.lsp.buf.format()
-end,
+    vim.lsp.buf.format()
+  end,
 })
 
 -- Use LspAttach autocommand to only map the following keys
@@ -884,3 +873,11 @@ vim.api.nvim_create_autocmd("FileType", {
   group = qfgroup,
   command = "setlocal wrap",
 })
+
+-- highlight yanked text for 200ms using the "Visual" highlight group
+vim.cmd([[
+augroup highlight_yank
+autocmd!
+au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=200})
+augroup END
+]])
