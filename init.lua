@@ -148,9 +148,15 @@ require("lazy").setup({
   -- testing framework
   {
     "vim-test/vim-test",
+    keys = {
+      {"<leader>tn", ":TestNearest -v<CR>", { noremap = true, silent = true }, desc = "Test Nearest" },
+      {"<leader>tf", ":TestFile -v<CR>", { noremap = true, silent = true }, desc = "Test File"},
+      {"<leader>ta", ":TestSuite -v<CR>", { noremap = true, silent = true }, desc = "Test Suite" },
+      {"<leader>tl", ":TestLast -v<CR>", { noremap = true, silent = true }, desc = "Test Last"},
+    },
     config = function()
       vim.g["test#strategy"] = "neovim"
-      vim.g["test#neovim#start_normal"] = "1"
+      -- vim.g["test#neovim#start_normal"] = "1"
     end,
   },
 
@@ -800,12 +806,6 @@ vim.api.nvim_create_user_command("GBrowse", 'lua require("git.browse").open(true
 vim.api.nvim_create_user_command("GBlame", 'lua require("git.blame").blame()<CR>', {})
 vim.api.nvim_create_user_command("Gblame", 'lua require("git.blame").blame()<CR>', {})
 
--- vim-test
-vim.keymap.set("n", "<leader>tn", ":TestNearest -v<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<leader>tf", ":TestFile -v<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<leader>ta", ":TestSuite -v<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<leader>tl", ":TestLast -v<CR>", { noremap = true, silent = true })
-
 -- File-tree mappings
 vim.keymap.set("n", "<leader>n", ":NvimTreeToggle<CR>", { noremap = true })
 vim.keymap.set("n", "<leader>e", ":NvimTreeFindFile<CR>f", { noremap = true })
@@ -819,7 +819,6 @@ vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
 
 -- telescope
-local builtin = require("telescope.builtin")
 vim.keymap.set("n", "<C-p>", builtin.git_files, {})
 vim.keymap.set("n", "<C-b>", builtin.find_files, {})
 vim.keymap.set("n", "<C-g>", builtin.lsp_document_symbols, {})
