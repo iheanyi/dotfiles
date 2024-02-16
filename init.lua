@@ -156,7 +156,7 @@ require("lazy").setup({
     },
     config = function()
       vim.g["test#strategy"] = "neovim"
-      -- vim.g["test#neovim#start_normal"] = "1"
+      vim.g["test#neovim#start_normal"] = "1"
     end,
   },
 
@@ -273,9 +273,7 @@ require("lazy").setup({
   {
     "jremmen/vim-ripgrep",
   },
-  {
-    "airblade/vim-rooter",
-  },
+  -- { "airblade/vim-rooter" },
   {
     "mileszs/ack.vim",
     config = function()
@@ -662,7 +660,7 @@ vim.opt.showmatch = true -- Highlight matching parenthesis
 vim.opt.splitright = true -- Split windows right to the current windows
 vim.opt.splitbelow = true -- Split windows below to the current windows
 vim.opt.autowrite = true -- Automatically save before :next, :make etc.
-vim.opt.autochdir = true -- Change CWD when I open a file
+-- vim.opt.autochdir = true -- Change CWD when I open a file
 
 vim.opt.mouse = "a" -- Enable mouse support
 vim.opt.clipboard = "unnamedplus" -- Copy/paste to system clipboard
@@ -744,11 +742,11 @@ vim.keymap.set("n", "<Down>", "gj")
 -- vim.keymap.set("n", "Y", "y$")
 
 -- Terminal
--- Clost terminal window, even if we are in insert mode
+-- Close terminal window, even if we are in insert mode
 vim.keymap.set("t", "<leader>q", "<C-\\><C-n>:q<cr>")
 
 -- switch to normal mode with esc
--- vim.keymap.set("t", "<ESC>", "<C-\\><C-n>")
+vim.keymap.set("t", "<ESC>", "<C-\\><C-n>")
 
 -- Open terminal in vertical and horizontal split
 vim.keymap.set("n", "<leader>tv", "<cmd>vnew term://zsh<CR>", { noremap = true })
