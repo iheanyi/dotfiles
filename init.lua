@@ -66,19 +66,6 @@ require("lazy").setup({
     end
   },
 
-  --{
-  --"chriskempson/base16-vim",
-  --priority = 1000, -- make sure to load this before all the other start plugins
-  --config = function()
-  --change_background()
-  -- vim.cmd([[colorscheme base16-ocean]])
-  --end,
-  --},
-
-  --{
-  --"RRethy/base16-nvim",
-  --},
-
   -- LSP
   {
     "williamboman/mason.nvim",
