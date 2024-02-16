@@ -46,11 +46,23 @@ require("lazy").setup({
     lazy = false,
     opts = {
       style = "storm",
-      transparent = true,
     },
     config = function()
       change_background()
       vim.cmd([[colorscheme poimandres]])
+    end
+  },
+
+  -- commenting out lines
+  {
+    "numToStr/Comment.nvim",
+    config = function()
+      require('Comment').setup({
+        opleader = {
+          ---Block-comment keymap
+          block = '<Nop>',
+        },
+      })
     end
   },
 
