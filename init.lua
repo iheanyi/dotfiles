@@ -40,10 +40,19 @@ end
 
 -- Plugins
 require("lazy").setup({
+  {
+    'JoosepAlviste/nvim-ts-context-commentstring',
+      config = function ()
+        require('ts_context_commentstring').setup({
+          enable_autocmd = false,
+        })
+      end
+  },
   -- colorscheme
   {
     "jasonlong/poimandres.nvim",
     lazy = false,
+    priority = 1000,
     opts = {
       style = "storm",
     },
@@ -53,11 +62,15 @@ require("lazy").setup({
     end
   },
 
+
+  { 'echasnovski/mini.surround', version = false },
+
   -- commenting out lines
   {
     "numToStr/Comment.nvim",
     config = function()
       require('Comment').setup({
+        pre_hook = require('ts_context_commentstring.integrations.comment_nvim').create_pre_hook(),
         opleader = {
           ---Block-comment keymap
           block = '<Nop>',
@@ -133,10 +146,30 @@ require("lazy").setup({
       require("git").setup()
     end,
   },
+  {
+    'lewis6991/gitsigns.nvim',
+    config = function ()
+      require('gitsigns').setup()
+    end
+  },
 
   -- copilot
   {
     "github/copilot.vim",
+  },
+  {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    config = function()
+      require("copilot").setup({})
+    end,
+  },
+  {
+    "zbirenbaum/copilot-cmp",
+    config = function ()
+      require("copilot_cmp").setup()
+    end
   },
 
   -- file explorer
@@ -188,7 +221,7 @@ require("lazy").setup({
   -- fuzzy finder framework
   {
     "nvim-telescope/telescope.nvim",
-    tag = "0.1.4",
+    tag = "0.1.5",
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
@@ -361,6 +394,16 @@ require("lazy").setup({
         settings = {
           -- flags = { debounce_text_changes = 200 },
           documentFormatting = true
+        }
+      })
+
+      require("lspconfig").lua_ls.setup({
+        settings = {
+          Lua = {
+            diagnostics = {
+              globals = { 'vim' }
+            }
+          }
         }
       })
     end,
