@@ -41,12 +41,12 @@ end
 -- Plugins
 require("lazy").setup({
   {
-    'JoosepAlviste/nvim-ts-context-commentstring',
-      config = function ()
-        require('ts_context_commentstring').setup({
-          enable_autocmd = false,
-        })
-      end
+    "JoosepAlviste/nvim-ts-context-commentstring",
+    config = function()
+      require("ts_context_commentstring").setup({
+        enable_autocmd = false,
+      })
+    end,
   },
   -- colorscheme
   {
@@ -59,12 +59,11 @@ require("lazy").setup({
     config = function()
       change_background()
       vim.cmd([[colorscheme poimandres]])
-    end
+    end,
   },
 
-
   {
-    'echasnovski/mini.surround',
+    "echasnovski/mini.surround",
     version = false,
     opts = {
       mappings = {
@@ -76,21 +75,21 @@ require("lazy").setup({
         replace = "gsr", -- Replace surrounding
         update_n_lines = "gsn", -- Update `n_lines`
       },
-    }
+    },
   },
 
   -- commenting out lines
   {
     "numToStr/Comment.nvim",
     config = function()
-      require('Comment').setup({
-        pre_hook = require('ts_context_commentstring.integrations.comment_nvim').create_pre_hook(),
+      require("Comment").setup({
+        pre_hook = require("ts_context_commentstring.integrations.comment_nvim").create_pre_hook(),
         opleader = {
           ---Block-comment keymap
-          block = '<Nop>',
+          block = "<Nop>",
         },
       })
-    end
+    end,
   },
 
   -- LSP
@@ -117,6 +116,39 @@ require("lazy").setup({
         },
       })
     end,
+  },
+
+  -- formatter
+  {
+    "stevearc/conform.nvim",
+    opts = {
+      format_on_save = {
+        -- These options will be passed to conform.format()
+        timeout_ms = 500,
+        lsp_fallback = true,
+      },
+      formatters_by_ft = {
+        lua = { "stylua" },
+        python = { "isort", "black" },
+        ruby = { "rubocop" },
+        ["javascript"] = { "prettier" },
+        ["javascriptreact"] = { "prettier" },
+        ["typescript"] = { "prettier" },
+        ["typescriptreact"] = { "prettier" },
+        ["vue"] = { "prettier" },
+        ["css"] = { "prettier" },
+        ["scss"] = { "prettier" },
+        ["less"] = { "prettier" },
+        ["html"] = { "prettier" },
+        ["json"] = { "prettier" },
+        ["jsonc"] = { "prettier" },
+        ["yaml"] = { "prettier" },
+        ["markdown"] = { "prettier" },
+        ["markdown.mdx"] = { "prettier" },
+        ["graphql"] = { "prettier" },
+        ["handlebars"] = { "prettier" },
+      },
+    },
   },
 
   {
@@ -149,10 +181,10 @@ require("lazy").setup({
   {
     "vim-test/vim-test",
     keys = {
-      {"<leader>tn", ":TestNearest -v<CR>", { noremap = true, silent = true }, desc = "Test Nearest" },
-      {"<leader>tf", ":TestFile -v<CR>", { noremap = true, silent = true }, desc = "Test File"},
-      {"<leader>ta", ":TestSuite -v<CR>", { noremap = true, silent = true }, desc = "Test Suite" },
-      {"<leader>tl", ":TestLast -v<CR>", { noremap = true, silent = true }, desc = "Test Last"},
+      { "<leader>tn", ":TestNearest -v<CR>", { noremap = true, silent = true }, desc = "Test Nearest" },
+      { "<leader>tf", ":TestFile -v<CR>", { noremap = true, silent = true }, desc = "Test File" },
+      { "<leader>ta", ":TestSuite -v<CR>", { noremap = true, silent = true }, desc = "Test Suite" },
+      { "<leader>tl", ":TestLast -v<CR>", { noremap = true, silent = true }, desc = "Test Last" },
     },
     config = function()
       vim.g["test#strategy"] = "neovim"
@@ -161,16 +193,16 @@ require("lazy").setup({
   },
 
   {
-    'dinhhuy258/git.nvim',
-    config = function ()
+    "dinhhuy258/git.nvim",
+    config = function()
       require("git").setup()
     end,
   },
   {
-    'lewis6991/gitsigns.nvim',
-    config = function ()
-      require('gitsigns').setup()
-    end
+    "lewis6991/gitsigns.nvim",
+    config = function()
+      require("gitsigns").setup()
+    end,
   },
 
   -- copilot
@@ -187,9 +219,9 @@ require("lazy").setup({
   },
   {
     "zbirenbaum/copilot-cmp",
-    config = function ()
+    config = function()
       require("copilot_cmp").setup()
-    end
+    end,
   },
 
   -- file explorer
@@ -259,21 +291,19 @@ require("lazy").setup({
         },
       })
 
-
       -- To get ui-select loaded and working with telescope, you need to call
       -- load_extension, somewhere after setup function:
       require("telescope").load_extension("ui-select")
 
       -- To get fzf loaded and working with telescope, you need to call
       -- load_extension, somewhere after setup function:
-      require('telescope').load_extension('fzf')
-
+      require("telescope").load_extension("fzf")
     end,
   },
   {
     "jremmen/vim-ripgrep",
   },
-  -- { "airblade/vim-rooter" },
+  { "airblade/vim-rooter" },
   {
     "mileszs/ack.vim",
     config = function()
@@ -341,15 +371,22 @@ require("lazy").setup({
     cmd = { "MarkdownPreview" },
   },
 
+  {
+    "folke/neodev.nvim",
+    config = function()
+      require("neodev").setup()
+    end,
+  },
+
   -- lsp-config
   {
     "neovim/nvim-lspconfig",
     config = function()
       require("mason").setup()
       require("mason-lspconfig").setup()
-      util = require("lspconfig/util")
+      local util = require("lspconfig/util")
 
-      local capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
+      local capabilities = require("cmp_nvim_lsp").default_capabilities(util.capabilities)
       capabilities.textDocument.completion.completionItem.snippetSupport = true
 
       require("lspconfig").gopls.setup({
@@ -411,18 +448,18 @@ require("lazy").setup({
       require("lspconfig").tsserver.setup({
         settings = {
           -- flags = { debounce_text_changes = 200 },
-          documentFormatting = true
-        }
+          documentFormatting = true,
+        },
       })
 
       require("lspconfig").lua_ls.setup({
         settings = {
           Lua = {
             diagnostics = {
-              globals = { 'vim' }
-            }
-          }
-        }
+              globals = { "vim" },
+            },
+          },
+        },
       })
     end,
   },
@@ -683,7 +720,7 @@ vim.opt.wrap = true
 
 -- Fast saving
 vim.keymap.set("n", "<Leader>s", ":write!<CR>")
-vim.keymap.set("n", "<Leader>q", ":q!<CR>", { silent = true })
+-- vim.keymap.set("n", "<Leader>q", ":q!<CR>", { silent = true })
 
 -- Some useful quickfix shortcuts for quickfix
 vim.keymap.set("n", "<C-n>", "<cmd>cnext<CR>zz")
@@ -810,11 +847,11 @@ vim.keymap.set("n", "<leader>e", ":NvimTreeFindFile<CR>f", { noremap = true })
 
 -- File search
 vim.keymap.set("n", "<leader>F", ":FZF<CR>")
-local builtin = require('telescope.builtin')
-vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
-vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
-vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
-vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
+local builtin = require("telescope.builtin")
+vim.keymap.set("n", "<leader>ff", builtin.find_files, {})
+vim.keymap.set("n", "<leader>fg", builtin.live_grep, {})
+vim.keymap.set("n", "<leader>fb", builtin.buffers, {})
+vim.keymap.set("n", "<leader>fh", builtin.help_tags, {})
 
 -- telescope
 vim.keymap.set("n", "<C-p>", builtin.git_files, {})
@@ -862,6 +899,13 @@ vim.api.nvim_create_autocmd("BufWritePre", {
       end
     end
 
+    vim.lsp.buf.format()
+  end,
+})
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.rb",
+  callback = function()
     vim.lsp.buf.format()
   end,
 })
