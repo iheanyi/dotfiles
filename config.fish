@@ -45,3 +45,5 @@ source $HOMEBREW_PREFIX/share/autojump/autojump.fish
 
 eval "$(rbenv init -)"
 
+# SSH Agent
+eval (ssh-agent -c)
