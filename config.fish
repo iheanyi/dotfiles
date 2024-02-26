@@ -9,7 +9,7 @@ set -gxp PATH $HOME/development/go/bin /opt/homebrew/bin /opt/homebrew/opt/openj
 set -gx EDITOR vim
 set -gx TERM tmux-256color
 set -gx COLORTERM truecolor
-set -gx FZF_CTRL_T_COMMAND nvim
+# set -gx FZF_CTRL_T_COMMAND nvim
 set -gx BAT_THEME "base16"
 set -gx FZF_DEFAULT_COMMAND 'ag --hidden --ignore .git -g ""'
 set -gx NVM_DIR "$HOME/.nvim"
