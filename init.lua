@@ -461,6 +461,10 @@ require("lazy").setup({
         },
       })
 
+      require("lspconfig").eslint.setup({
+        capabilities = capabilities,
+      })
+
       require("lspconfig").lua_ls.setup({
         settings = {
           Lua = {
