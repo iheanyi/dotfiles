@@ -47,3 +47,6 @@ eval "$(rbenv init -)"
 
 # SSH Agent
 eval (ssh-agent -c)
+
+test -e {$HOME}/.iterm2_shell_integration.fish ; and source {$HOME}/.iterm2_shell_integration.fish
+
