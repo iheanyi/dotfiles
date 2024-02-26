@@ -707,6 +707,23 @@ require("lazy").setup({
       })
     end,
   },
+  {
+    "christoomey/vim-tmux-navigator",
+    cmd = {
+      "TmuxNavigateLeft",
+      "TmuxNavigateDown",
+      "TmuxNavigateUp",
+      "TmuxNavigateRight",
+      "TmuxNavigatePrevious",
+    },
+    keys = {
+      { "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
+      { "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
+      { "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
+      { "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+      { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+    },
+  },
 })
 
 ----------------
@@ -795,10 +812,10 @@ vim.keymap.set("x", "p", '"_dP')
 vim.keymap.set("n", "<leader>rw", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
 -- Better split switching
-vim.keymap.set("", "<C-j>", "<C-W>j")
-vim.keymap.set("", "<C-k>", "<C-W>k")
-vim.keymap.set("", "<C-h>", "<C-W>h")
-vim.keymap.set("", "<C-l>", "<C-W>l")
+-- vim.keymap.set("", "<C-j>", "<C-W>j")
+-- vim.keymap.set("", "<C-k>", "<C-W>k")
+-- vim.keymap.set("", "<C-h>", "<C-W>h")
+-- vim.keymap.set("", "<C-l>", "<C-W>l")
 
 -- Visual linewise up and down by default (and use gj gk to go quicker)
 vim.keymap.set("n", "<Up>", "gk")
