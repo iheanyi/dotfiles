@@ -717,6 +717,9 @@ require("lazy").setup({
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
+-- Disable Perl Provider for mason.nvim
+vim.g.loaded_perl_provider = 0
+
 vim.opt.termguicolors = true -- Enable 24-bit RGB colors
 vim.opt.number = true -- Show line numbers
 vim.opt.showmatch = true -- Highlight matching parenthesis
