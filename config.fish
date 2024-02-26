@@ -3,18 +3,19 @@ if status is-interactive
     # source (jump shell fish | psub)
 end
 
-# Starship prompt
-starship init fish | source
 
 # Globals
-set -gxp PATH $HOME/development/go/bin /opt/homebrew/bin
+set -gxp PATH $HOME/development/go/bin /opt/homebrew/bin /opt/homebrew/opt/openjdk/bin
 set -gx EDITOR vim
-set -gx TERM xterm-256color
+set -gx TERM tmux-256color
 set -gx COLORTERM truecolor
 set -gx FZF_CTRL_T_COMMAND nvim
 set -gx BAT_THEME "base16"
 set -gx FZF_DEFAULT_COMMAND 'ag --hidden --ignore .git -g ""'
 set -gx NVM_DIR "$HOME/.nvim"
+
+# Starship prompt
+starship init fish | source
 
 # Disable Spring rails
 set -gx DISABLE_SPRING 1
@@ -22,7 +23,6 @@ set -gx DISABLE_SPRING 1
 # don't show any greetings
 set fish_greeting ""
 
-alias tmux="env TERM=xterm-256color tmux"
 alias python="python3"
 alias cat="bat"
 alias ss="bundle exec spring stop"
