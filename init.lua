@@ -598,6 +598,7 @@ require("lazy").setup({
   {
     "L3MON4D3/LuaSnip",
     dependencies = { "rafamadriz/friendly-snippets" },
+    build = "make install_jsregexp",
     config = function()
       require("luasnip.loaders.from_vscode").lazy_load()
     end,
@@ -613,6 +614,16 @@ require("lazy").setup({
       "saadparwaiz1/cmp_luasnip",
       "onsails/lspkind-nvim",
     },
+    enabled = function()
+      -- disable completion in comments
+      local context = require("cmp.config.context")
+      -- keep command mode completion enabled when cursor is in a comment
+      if vim.api.nvim_get_mode().mode == "c" then
+        return true
+      else
+        return not context.in_treesitter_capture("comment") and not context.in_syntax_group("Comment")
+      end
+    end,
     config = function()
       local cmp = require("cmp")
       local luasnip = require("luasnip")
@@ -691,6 +702,7 @@ require("lazy").setup({
           { name = "nvim_lsp" },
           { name = "luasnip", keyword_length = 2 },
           { name = "buffer", keyword_length = 5 },
+          { name = "copilot", keyword_length = 5 },
         },
       })
     end,
@@ -936,6 +948,8 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 vim.api.nvim_create_autocmd("LspAttach", {
   group = vim.api.nvim_create_augroup("UserLspConfig", {}),
   callback = function(ev)
+    vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
+
     -- Buffer local mappings.
     -- See `:help vim.lsp.*` for documentation on any of the below functions
     local opts = { buffer = ev.buf }
