@@ -17,17 +17,8 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- ChangeBackground changes the background mode based on macOS's `Appearance
--- setting.
-local function change_background()
-  local m = vim.fn.system("defaults read -g AppleInterfaceStyle")
-  m = m:gsub("%s+", "") -- trim whitespace
-  if m == "Dark" then
-    vim.o.background = "dark"
-  else
-    vim.o.background = "light"
-  end
-end
+-- Always keep a black background
+vim.o.background = "dark"
 
 -- run :GoBuild or :GoTestCompile based on the go file
 local function build_go_files()
@@ -57,7 +48,6 @@ require("lazy").setup({
       style = "storm",
     },
     config = function()
-      change_background()
       vim.cmd([[colorscheme poimandres]])
     end,
   },
