@@ -431,6 +431,7 @@ require("lazy").setup({
       })
 
       require("lspconfig").solargraph.setup({
+        capabilities = capabilities,
         settings = {
           -- flags = { debounce_text_changes = 200 },
 
@@ -446,6 +447,7 @@ require("lazy").setup({
         },
       })
       require("lspconfig").tsserver.setup({
+        capabilities = capabilities,
         settings = {
           -- flags = { debounce_text_changes = 200 },
           documentFormatting = true,
@@ -626,6 +628,7 @@ require("lazy").setup({
           format = lspkind.cmp_format({
             with_text = true,
             menu = {
+              path = "[Path]",
               buffer = "[Buffer]",
               nvim_lsp = "[LSP]",
               nvim_lua = "[Lua]",
@@ -720,7 +723,7 @@ vim.opt.wrap = true
 
 -- Fast saving
 vim.keymap.set("n", "<Leader>s", ":write!<CR>")
--- vim.keymap.set("n", "<Leader>q", ":q!<CR>", { silent = true })
+vim.keymap.set("n", "<Leader>q", ":q!<CR>", { silent = true })
 
 -- Some useful quickfix shortcuts for quickfix
 vim.keymap.set("n", "<C-n>", "<cmd>cnext<CR>zz")
