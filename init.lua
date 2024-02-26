@@ -448,6 +448,12 @@ require("lazy").setup({
       })
       require("lspconfig").tsserver.setup({
         capabilities = capabilities,
+        init_options = {
+          hostInfo = "neovim",
+          preferences = {
+            importModuleSpecifierPreference = "non-relative",
+          },
+        },
         settings = {
           -- flags = { debounce_text_changes = 200 },
           documentFormatting = true,
