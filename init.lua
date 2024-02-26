@@ -959,7 +959,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.keymap.set("n", "<leader>v", "<cmd>vsplit | lua require('telescope.builtin').lsp_definitions()<CR>", opts)
     vim.keymap.set(
       "n",
-      "<leader>v",
+      "<leader>h",
       "<cmd>belowright split| lua require('telescope.builtin').lsp_definitions()<CR>",
       opts
     )
