@@ -330,6 +330,7 @@ require("lazy").setup({
       require("other-nvim").setup({
         mappings = {
           "rails", --builtin mapping
+          "livewire",
           {
             pattern = "(.*).go$",
             target = "%1_test.go",
@@ -341,6 +342,8 @@ require("lazy").setup({
             context = "file",
           },
         },
+
+        showMissingFiles = false,
       })
 
       vim.api.nvim_create_user_command("A", function(opts)
@@ -354,6 +357,14 @@ require("lazy").setup({
       vim.api.nvim_create_user_command("AS", function(opts)
         require("other-nvim").openSplit(opts.fargs[1])
       end, { nargs = "*" })
+
+      vim.api.nvim_set_keymap("n", "<leader>ll", "<cmd>:Other<CR>", { noremap = true, silent = true })
+      vim.api.nvim_set_keymap("n", "<leader>lh", "<cmd>:OtherSplit<CR>", { noremap = true, silent = true })
+      vim.api.nvim_set_keymap("n", "<leader>lv", "<cmd>:OtherVSplit<CR>", { noremap = true, silent = true })
+      vim.api.nvim_set_keymap("n", "<leader>lc", "<cmd>:OtherClear<CR>", { noremap = true, silent = true })
+
+      -- Context specific bindings
+      vim.api.nvim_set_keymap("n", "<leader>lt", "<cmd>:Other test<CR>", { noremap = true, silent = true })
     end,
   },
 
