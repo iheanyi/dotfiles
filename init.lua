@@ -499,10 +499,14 @@ require("lazy").setup({
     "nvim-treesitter/nvim-treesitter",
     dependencies = {
       "nvim-treesitter/nvim-treesitter-textobjects",
+      "RRethy/nvim-treesitter-endwise",
     },
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter.configs").setup({
+        endwise = {
+          enable = true,
+        },
         ensure_installed = {
           "go",
           "gomod",
