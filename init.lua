@@ -450,11 +450,16 @@ require("lazy").setup({
 
       require("lspconfig").solargraph.setup({
         capabilities = capabilities,
+
+        init_options = {
+          formatting = true,
+        },
         settings = {
           -- flags = { debounce_text_changes = 200 },
 
           solargraph = {
-            autoformat = true,
+            autoformat = false,
+            formatting = true,
             completion = true,
             diagnostics = true,
             folding = true,
@@ -474,7 +479,7 @@ require("lazy").setup({
         },
         settings = {
           -- flags = { debounce_text_changes = 200 },
-          documentFormatting = true,
+          -- documentFormatting = true,
         },
       })
 
