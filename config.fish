@@ -24,11 +24,11 @@ set -gx DISABLE_SPRING 1
 set fish_greeting ""
 
 alias python="python3"
-alias cat="bat"
-alias ss="bundle exec spring stop"
-alias cowork="npx @koddsson/coworking-with"
-alias close-right-tmux-windows="for win_id in $(tmux list-windows -F '#{window_active} #{window_id}' | awk '/^1/ { active=1; next } active { print $2 }'); do tmux kill-window -t "$win_id"; done"
-alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+# alias cat="bat"
+# alias ss="bundle exec spring stop"
+# alias cowork="npx @koddsson/coworking-with"
+# alias close-right-tmux-windows="for win_id in $(tmux list-windows -F '#{window_active} #{window_id}' | awk '/^1/ { active=1; next } active { print $2 }'); do tmux kill-window -t "$win_id"; done"
+# alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
 
 # Autocompletions
 if test -d (brew --prefix)"/share/fish/completions"
