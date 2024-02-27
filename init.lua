@@ -138,6 +138,7 @@ require("lazy").setup({
         lua = { "stylua" },
         python = { "isort", "black" },
         ruby = { "rubocop" },
+        go = { "gofumpt", "gofmt" },
         ["javascript"] = { "prettier" },
         ["javascriptreact"] = { "prettier", "eslint" },
         ["typescript"] = { "prettier", "eslint" },
