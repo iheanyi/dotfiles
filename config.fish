@@ -6,6 +6,8 @@ end
 
 # Globals
 set -gxp PATH $HOME/development/go/bin /opt/homebrew/bin /opt/homebrew/opt/openjdk/bin
+set -gx GOBIN $HOME/development/go/bin
+
 set -gx EDITOR vim
 set -gx TERM tmux-256color
 set -gx COLORTERM truecolor
@@ -22,6 +24,8 @@ set -gx DISABLE_SPRING 1
 
 # don't show any greetings
 set fish_greeting ""
+# Sensitive functions taht are not pushed to GitHub, usually work-related.
+source ~/.private.fish
 
 alias python="python3"
 # alias cat="bat"
@@ -39,14 +43,20 @@ if test -d (brew --prefix)"/share/fish/vendor_completions.d"
     set -p fish_complete_path (brew --prefix)/share/fish/vendor_completions.d
 end
 
-# Autojump
-[ -f $HOMEBREW_PREFIX/share/autojump/autojump.fish ]
-source $HOMEBREW_PREFIX/share/autojump/autojump.fish
-
 eval "$(rbenv init -)"
 
 # SSH Agent
-eval (ssh-agent -c)
+# https://gist.github.com/josh-padnick/c90183be3d0e1feb89afd7573505cab3
+if test -z (pgrep ssh-agent)
+  # Cleanup old processes
+  trap "kill $SSH_AGENT_PID" exit
+  trap "ssh-agent -k" exit
+  eval (ssh-agent -c)
+  set -Ux SSH_AUTH_SOCK $SSH_AUTH_SOCK
+  set -Ux SSH_AGENT_PID $SSH_AGENT_PID
+  set -Ux SSH_AUTH_SOCK $SSH_AUTH_SOCK
+end
 
+# Autojump
 test -e {$HOME}/.iterm2_shell_integration.fish ; and source {$HOME}/.iterm2_shell_integration.fish
-
+[ -f /opt/homebrew/share/autojump/autojump.fish ]; and source /opt/homebrew/share/autojump/autojump.fish
