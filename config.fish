@@ -47,7 +47,7 @@ eval "$(rbenv init -)"
 
 # SSH Agent
 # https://gist.github.com/josh-padnick/c90183be3d0e1feb89afd7573505cab3
-if test -z (pgrep ssh-agent)
+if test -z (pgrep ssh-agent | string collect)
   # Cleanup old processes
   trap "kill $SSH_AGENT_PID" exit
   trap "ssh-agent -k" exit
