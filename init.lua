@@ -53,7 +53,6 @@ require("lazy").setup({
       vim.cmd([[colorscheme poimandres]])
     end,
   },
-
   {
     "echasnovski/mini.surround",
     version = false,
@@ -73,11 +72,12 @@ require("lazy").setup({
   -- commenting out lines
   {
     "numToStr/Comment.nvim",
+    lazy = false,
     config = function()
       require("Comment").setup({
         pre_hook = require("ts_context_commentstring.integrations.comment_nvim").create_pre_hook(),
         opleader = {
-          ---Block-comment keymap
+          -- Block-comment keymap
           block = "<Nop>",
         },
       })
@@ -136,7 +136,7 @@ require("lazy").setup({
 
       formatters_by_ft = {
         lua = { "stylua" },
-        python = { "isort", "black" },
+        python = { "black" },
         ruby = { "rubocop" },
         go = { "gofumpt", "gofmt" },
         ["javascript"] = { "prettier" },
@@ -217,20 +217,20 @@ require("lazy").setup({
   {
     "github/copilot.vim",
   },
-  {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
-    event = "InsertEnter",
-    config = function()
-      require("copilot").setup({})
-    end,
-  },
-  {
-    "zbirenbaum/copilot-cmp",
-    config = function()
-      require("copilot_cmp").setup()
-    end,
-  },
+  -- {
+  --   "zbirenbaum/copilot.lua",
+  --   cmd = "Copilot",
+  --   event = "InsertEnter",
+  --   config = function()
+  --     require("copilot").setup({})
+  --   end,
+  -- },
+  -- {
+  --   "zbirenbaum/copilot-cmp",
+  --   config = function()
+  --     require("copilot_cmp").setup()
+  --   end,
+  -- },
 
   -- file explorer
   {
@@ -281,7 +281,7 @@ require("lazy").setup({
   -- fuzzy finder framework
   {
     "nvim-telescope/telescope.nvim",
-    tag = "0.1.5",
+    tag = "0.1.6",
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
@@ -482,6 +482,10 @@ require("lazy").setup({
           -- flags = { debounce_text_changes = 200 },
           -- documentFormatting = true,
         },
+      })
+
+      require("lspconfig").bufls.setup({
+        capabilities = capabilities,
       })
 
       require("lspconfig").eslint.setup({
@@ -729,7 +733,6 @@ require("lazy").setup({
           { name = "nvim_lsp" },
           { name = "luasnip", keyword_length = 2 },
           { name = "buffer", keyword_length = 5 },
-          { name = "copilot", keyword_length = 5 },
         },
       })
     end,
