@@ -216,6 +216,16 @@ require("lazy").setup({
   -- copilot
   {
     "github/copilot.vim",
+    config = function()
+      vim.keymap.set("i", "<C-L>", 'copilot#Accept("\\<CR>")', {
+        expr = true,
+        replace_keycodes = false,
+      })
+
+      vim.g.copilot_no_tab_map = true
+      vim.g.copilot_assume_mapped = true
+      vim.g.copilot_tab_fallback = ""
+    end,
   },
   -- {
   --   "zbirenbaum/copilot.lua",
@@ -695,12 +705,15 @@ require("lazy").setup({
           ["<C-f>"] = cmp.mapping.scroll_docs(4),
           ["<CR>"] = cmp.mapping.confirm({ select = true }),
           ["<Tab>"] = cmp.mapping(function(fallback)
+            local copilot_keys = vim.fn["copilot#Accept"]()
             if cmp.visible() then
               cmp.select_next_item()
             elseif luasnip.expand_or_locally_jumpable() then
               luasnip.expand_or_jump()
             elseif has_words_before() then
               cmp.complete()
+            elseif copilot_keys ~= "" and type(copilot_keys) == "string" then
+              vim.api.nvim_feedkeys(copilot_keys, "i", true)
             else
               fallback()
             end
