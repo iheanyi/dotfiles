@@ -679,7 +679,11 @@ require("lazy").setup({
 
       cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
 
-      luasnip.config.setup({})
+      luasnip.config.setup({
+        history = true,
+        region_check_events = "InsertEnter",
+        delete_check_events = "TextChanged,InsertLeave",
+      })
 
       local has_words_before = function()
         unpack = unpack or table.unpack
