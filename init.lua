@@ -982,6 +982,13 @@ vim.api.nvim_create_autocmd("Filetype", {
   command = "setlocal noexpandtab tabstop=4 shiftwidth=4",
 })
 
+-- Update configuration for Markdown
+vim.api.nvim_create_autocmd("Filetype", {
+  group = vim.api.nvim_create_augroup("setIndent", { clear = true }),
+  pattern = { "md" },
+  command = "setlocal expandtab tabstop=2 shiftwidth=2",
+})
+
 -- Run gofmt/gofmpt, import packages automatically on save
 vim.api.nvim_create_autocmd("BufWritePre", {
   group = vim.api.nvim_create_augroup("setGoFormatting", { clear = true }),
