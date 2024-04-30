@@ -556,6 +556,7 @@ require("lazy").setup({
           "yaml",
           "bash",
           "tsx",
+          "dockerfile",
         },
         indent = { enable = true },
         incremental_selection = {
