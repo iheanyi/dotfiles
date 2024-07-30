@@ -356,10 +356,15 @@ require("lazy").setup({
         require("other-nvim").openSplit(opts.fargs[1])
       end, { nargs = "*" })
 
+      vim.api.nvim_create_user_command("AT", function(opts)
+        require("other-nvim").openTabNew(opts.fargs[1])
+      end, { nargs = "*" })
+
       vim.api.nvim_set_keymap("n", "<leader>ll", "<cmd>:Other<CR>", { noremap = true, silent = true })
       vim.api.nvim_set_keymap("n", "<leader>lh", "<cmd>:OtherSplit<CR>", { noremap = true, silent = true })
       vim.api.nvim_set_keymap("n", "<leader>lv", "<cmd>:OtherVSplit<CR>", { noremap = true, silent = true })
       vim.api.nvim_set_keymap("n", "<leader>lc", "<cmd>:OtherClear<CR>", { noremap = true, silent = true })
+      vim.api.nvim_set_keymap("n", "<leader>ln", "<cmd>:OtherTabNew<CR>", { noremap = true, silent = true })
 
       -- Context specific bindings
       vim.api.nvim_set_keymap("n", "<leader>lt", "<cmd>:Other test<CR>", { noremap = true, silent = true })
@@ -468,10 +473,7 @@ require("lazy").setup({
             importModuleSpecifierPreference = "non-relative",
           },
         },
-        settings = {
-          -- flags = { debounce_text_changes = 200 },
-          -- documentFormatting = true,
-        },
+        single_file_support = false,
       })
 
       require("lspconfig").bufls.setup({
