@@ -508,6 +508,7 @@ require("lazy").setup({
     dependencies = {
       "nvim-treesitter/nvim-treesitter-textobjects",
       "RRethy/nvim-treesitter-endwise",
+      "andymass/vim-matchup",
     },
     build = ":TSUpdate",
     config = function()
@@ -551,6 +552,9 @@ require("lazy").setup({
           },
         },
         autopairs = {
+          enable = true,
+        },
+        matchup = {
           enable = true,
         },
         highlight = {
