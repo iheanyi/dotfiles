@@ -170,10 +170,10 @@ require("lazy").setup({
   {
     "vim-test/vim-test",
     keys = {
-      { "<leader>tn", ":TestNearest -v<CR>", { noremap = true, silent = true }, desc = "Test Nearest" },
-      { "<leader>tf", ":TestFile -v<CR>", { noremap = true, silent = true }, desc = "Test File" },
-      { "<leader>ta", ":TestSuite -v<CR>", { noremap = true, silent = true }, desc = "Test Suite" },
-      { "<leader>tl", ":TestLast -v<CR>", { noremap = true, silent = true }, desc = "Test Last" },
+      { "<leader>tn", ":TestNearest --verbose<CR>", { noremap = true, silent = true }, desc = "Test Nearest" },
+      { "<leader>tf", ":TestFile --verbose<CR>", { noremap = true, silent = true }, desc = "Test File" },
+      { "<leader>ta", ":TestSuite --verbose<CR>", { noremap = true, silent = true }, desc = "Test Suite" },
+      { "<leader>tl", ":TestLast --verbose<CR>", { noremap = true, silent = true }, desc = "Test Last" },
     },
     config = function()
       vim.g["test#strategy"] = "neovim"
