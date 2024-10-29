@@ -465,7 +465,7 @@ require("lazy").setup({
           },
         },
       })
-      require("lspconfig").tsserver.setup({
+      require("lspconfig").ts_ls.setup({
         capabilities = capabilities,
         init_options = {
           hostInfo = "neovim",
@@ -474,6 +474,22 @@ require("lazy").setup({
           },
         },
         single_file_support = false,
+        on_attach = function(client, bufnr)
+          -- Remove unused imports on save
+          vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+            group = vim.api.nvim_create_augroup("ts_imports", { clear = true }),
+            pattern = { "*.tsx,*.ts" },
+            callback = function()
+              vim.lsp.buf.code_action({
+                apply = true,
+                context = {
+                  only = { "source.removeUnused.ts" },
+                  diagnostics = {},
+                },
+              })
+            end,
+          })
+        end,
       })
 
       require("lspconfig").bufls.setup({
