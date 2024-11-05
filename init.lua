@@ -195,33 +195,62 @@ require("lazy").setup({
   },
 
   -- copilot
+  -- configuration taken from here: https://github.com/MariaSolOs/dotfiles/blob/e9eb1f8e027840f872e69e00e082e2be10237499/.config/nvim/lua/plugins/copilot.lua
   {
-    "github/copilot.vim",
-    config = function()
-      vim.g.copilot_no_tab_map = true
-      vim.g.copilot_assume_mapped = true
-      vim.g.copilot_tab_fallback = ""
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    lazy = true,
+    opts = {
+      panel = { enabled = false },
+      suggestion = { auto_trigger = true },
+      filetypes = { markdown = true },
+      keymap = {
+        accept = "<C-l>",
+        accept_word = "<M-w>",
+        accept_line = "<M-l>",
+        next = "<M-]>",
+        prev = "<M-[>",
+      },
+    },
+    config = function(_, opts)
+      local cmp = require("cmp")
+      local copilot = require("copilot.suggestion")
+      local luasnip = require("luasnip")
 
-      vim.keymap.set("i", "<C-L>", 'copilot#Accept("\\<CR>")', {
-        expr = true,
-        replace_keycodes = false,
+      require("copilot").setup(opts)
+
+      local function set_trigger(trigger)
+        vim.b.copilot_suggestion_auto_trigger = trigger
+        vim.b.copilot_suggestion_hidden = not trigger
+      end
+
+      -- Hide suggestions when the completion menu is open.
+      cmp.event:on("menu_opened", function()
+        if copilot.is_visible() then
+          copilot.dismiss()
+        end
+        set_trigger(false)
+      end)
+
+      -- Disable suggestions when inside a snippet.
+      cmp.event:on("menu_closed", function()
+        set_trigger(not luasnip.expand_or_locally_jumpable())
+      end)
+      vim.api.nvim_create_autocmd("User", {
+        pattern = { "LuasnipInsertNodeEnter", "LuasnipInsertNodeLeave" },
+        callback = function()
+          set_trigger(not luasnip.expand_or_locally_jumpable())
+        end,
       })
     end,
   },
-  -- {
-  --   "zbirenbaum/copilot.lua",
-  --   cmd = "Copilot",
-  --   event = "InsertEnter",
-  --   config = function()
-  --     require("copilot").setup({})
-  --   end,
-  -- },
-  -- {
-  --   "zbirenbaum/copilot-cmp",
-  --   config = function()
-  --     require("copilot_cmp").setup()
-  --   end,
-  -- },
+  {
+    "zbirenbaum/copilot-cmp",
+    config = function()
+      require("copilot_cmp").setup()
+    end,
+  },
 
   -- file explorer
   {
@@ -721,24 +750,23 @@ require("lazy").setup({
           ["<C-f>"] = cmp.mapping.scroll_docs(4),
           ["<CR>"] = cmp.mapping.confirm({ select = true }),
           ["<Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
+            local copilot = require("copilot.suggestion")
+
+            if copilot.is_visible() then
+              copilot.accept()
+            elseif cmp.visible() then
               cmp.select_next_item()
             elseif luasnip.expand_or_locally_jumpable() then
               luasnip.expand_or_jump()
-            elseif has_words_before() then
-              cmp.complete()
             else
               fallback()
             end
           end, { "i", "s" }),
           ["<S-Tab>"] = cmp.mapping(function(fallback)
-            local copilot_keys = vim.fn["copilot#Accept"]()
             if cmp.visible() then
               cmp.select_prev_item()
-            elseif luasnip.jumpable(-1) then
+            elseif luasnip.expand_or_locally_jumpable(-1) then
               luasnip.jump(-1)
-            elseif copilot_keys ~= "" and type(copilot_keys) == "string" then
-              vim.api.nvim_feedkeys(copilot_keys, "i", true)
             else
               fallback()
             end
