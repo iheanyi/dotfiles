@@ -488,7 +488,7 @@ require("lazy").setup({
           },
         },
         single_file_support = false,
-        on_attach = function(client, bufnr)
+        on_attach = function()
           -- Remove unused imports on save
           vim.api.nvim_create_autocmd({ "BufWritePre" }, {
             group = vim.api.nvim_create_augroup("ts_imports", { clear = true }),
@@ -512,7 +512,7 @@ require("lazy").setup({
 
       require("lspconfig").eslint.setup({
         capabilities = capabilities,
-        on_attach = function(client, bufnr)
+        on_attach = function(_, bufnr)
           vim.api.nvim_create_autocmd("BufWritePre", {
             buffer = bufnr,
             command = "EslintFixAll",
@@ -594,7 +594,7 @@ require("lazy").setup({
           enable = true,
 
           -- Disable slow treesitter highlight for large files
-          disable = function(lang, buf)
+          disable = function(_, buf)
             local max_filesize = 100 * 1024 -- 100 KB
             local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
             if ok and stats and stats.size > max_filesize then
