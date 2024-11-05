@@ -705,12 +705,6 @@ require("lazy").setup({
         delete_check_events = "TextChanged,InsertLeave",
       })
 
-      local has_words_before = function()
-        unpack = unpack or table.unpack
-        local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-        return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
-      end
-
       require("cmp").setup({
         snippet = {
           expand = function(args)
@@ -1061,16 +1055,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
     -- See `:help vim.lsp.*` for documentation on any of the below functions
     local opts = { buffer = ev.buf }
 
-    -- Commented out native LSP keymaps,  it was bugging but good to know.
-    -- vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
-    -- vim.keymap.set("n", "<leader>v", "<cmd>vsplit | lua vim.lsp.buf.definition()<CR>", opts)
-    -- vim.keymap.set("n", "<leader>h", "<cmd>belowright split | lua vim.lsp.buf.definition()<CR>", opts)
-    -- vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-    -- vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
-
-    vim.keymap.set("n", "gd", builtin.lsp_definitions, opts)
-    vim.keymap.set("n", "gT", builtin.lsp_type_definitions, opts)
-
     vim.keymap.set("n", "<leader>v", "<cmd>vsplit | lua require('telescope.builtin').lsp_definitions()<CR>", opts)
     vim.keymap.set(
       "n",
@@ -1079,6 +1063,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
       opts
     )
 
+    vim.keymap.set("n", "gd", builtin.lsp_definitions, opts)
+    vim.keymap.set("n", "gT", builtin.lsp_type_definitions, opts)
     vim.keymap.set("n", "gr", builtin.lsp_references, opts)
     vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
     vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
