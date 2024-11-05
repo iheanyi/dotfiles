@@ -473,27 +473,12 @@ require("lazy").setup({
         },
       })
 
-      require("lspconfig").solargraph.setup({
+      require("lspconfig").ruby_lsp.setup({
         capabilities = capabilities,
-
-        init_options = {
-          formatting = true,
-        },
-        settings = {
-          -- flags = { debounce_text_changes = 200 },
-
-          solargraph = {
-            autoformat = false,
-            formatting = true,
-            completion = true,
-            diagnostics = true,
-            folding = true,
-            references = true,
-            rename = true,
-            symbols = true,
-          },
-        },
+        mason = false,
+        cmd = { vim.fn.expand("~/.rbenv/shims/ruby-lsp") },
       })
+
       require("lspconfig").ts_ls.setup({
         capabilities = capabilities,
         init_options = {
