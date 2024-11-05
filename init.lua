@@ -203,15 +203,18 @@ require("lazy").setup({
     lazy = true,
     opts = {
       panel = { enabled = false },
-      suggestion = { auto_trigger = true },
-      filetypes = { markdown = true },
-      keymap = {
-        accept = "<C-l>",
-        accept_word = "<M-w>",
-        accept_line = "<M-l>",
-        next = "<M-]>",
-        prev = "<M-[>",
+      suggestion = {
+        auto_trigger = true,
+        hide_during_completion = false,
+        keymap = {
+          accept = "<C-l>",
+          accept_word = "<M-w>",
+          accept_line = "<M-l>",
+          next = "<M-]>",
+          prev = "<M-[>",
+        },
       },
+      filetypes = { markdown = true },
     },
     config = function(_, opts)
       local cmp = require("cmp")
@@ -226,12 +229,12 @@ require("lazy").setup({
       end
 
       -- Hide suggestions when the completion menu is open.
-      cmp.event:on("menu_opened", function()
-        if copilot.is_visible() then
-          copilot.dismiss()
-        end
-        set_trigger(false)
-      end)
+      -- cmp.event:on("menu_opened", function()
+      --   if copilot.is_visible() then
+      --     copilot.dismiss()
+      --   end
+      --   set_trigger(false)
+      -- end)
 
       -- Disable suggestions when inside a snippet.
       cmp.event:on("menu_closed", function()
@@ -742,7 +745,18 @@ require("lazy").setup({
             end
           end, { "i", "s" }),
           ["<S-Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
+            local copilot = require("copilot.suggestion")
+
+            local function set_trigger(trigger)
+              vim.b.copilot_suggestion_auto_trigger = trigger
+              vim.b.copilot_suggestion_hidden = not trigger
+            end
+
+            if copilot.is_visible() and cmp.visible() then
+              copilot.dismiss()
+              set_trigger(false)
+              cmp.select_next_item()
+            elseif cmp.visible() then
               cmp.select_prev_item()
             elseif luasnip.expand_or_locally_jumpable(-1) then
               luasnip.jump(-1)
