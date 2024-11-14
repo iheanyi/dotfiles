@@ -33,6 +33,9 @@ set -gx NVM_DIR "$HOME/.nvim"
 # Starship prompt
 starship init fish | source
 
+# Atuin search
+atuin init fish --disable-up-arrow | source
+
 # Disable Spring rails
 set -gx DISABLE_SPRING 1
 
