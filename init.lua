@@ -176,14 +176,18 @@ require("lazy").setup({
   {
     "vim-test/vim-test",
     keys = {
-      { "<leader>tn", ":TestNearest --verbose<CR>", { noremap = true, silent = true }, desc = "Test Nearest" },
-      { "<leader>tf", ":TestFile --verbose<CR>", { noremap = true, silent = true }, desc = "Test File" },
-      { "<leader>ta", ":TestSuite --verbose<CR>", { noremap = true, silent = true }, desc = "Test Suite" },
-      { "<leader>tl", ":TestLast --verbose<CR>", { noremap = true, silent = true }, desc = "Test Last" },
+      { "<leader>tn", ":TestNearest<CR>", { noremap = true, silent = true }, desc = "Test Nearest" },
+      { "<leader>tf", ":TestFile<CR>", { noremap = true, silent = true }, desc = "Test File" },
+      { "<leader>ta", ":TestSuite<CR>", { noremap = true, silent = true }, desc = "Test Suite" },
+      { "<leader>tl", ":TestLast<CR>", { noremap = true, silent = true }, desc = "Test Last" },
     },
     config = function()
       vim.g["test#strategy"] = "neovim"
       vim.g["test#neovim#start_normal"] = "1"
+      vim.g["test#ruby#rails#options"] = "--verbose"
+      vim.g["test#ruby#minitest#options"] = "--verbose"
+      vim.g["test#javascript#jest#options"] = "--verbose"
+      vim.g["test#go#gotest#options"] = "-v"
     end,
   },
 
