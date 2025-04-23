@@ -519,7 +519,7 @@ require("lazy").setup({
         end,
       })
 
-      require("lspconfig").bufls.setup({
+      require("lspconfig").buf_ls.setup({
         capabilities = capabilities,
       })
 
