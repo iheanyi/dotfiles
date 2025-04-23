@@ -555,6 +555,15 @@ require("lazy").setup({
     },
     build = ":TSUpdate",
     config = function()
+      local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+      parser_config.blade = {
+        install_info = {
+          url = "https://github.com/EmranMR/tree-sitter-blade",
+          files = { "src/parser.c" },
+          branch = "main",
+        },
+        filetype = "blade",
+      }
       require("nvim-treesitter.configs").setup({
         endwise = {
           enable = true,
@@ -583,6 +592,8 @@ require("lazy").setup({
           "bash",
           "tsx",
           "dockerfile",
+          "php_only",
+          "blade",
         },
         indent = { enable = true },
         incremental_selection = {
@@ -662,6 +673,12 @@ require("lazy").setup({
               ["<leader>wp"] = "@parameter.inner",
             },
           },
+        },
+      })
+
+      vim.filetype.add({
+        pattern = {
+          [".*%.blade%.php"] = "blade",
         },
       })
     end,
