@@ -115,6 +115,12 @@ require("lazy").setup({
         return { lsp_fallback = true }
       end,
 
+      formatters = {
+        rubocop = {
+          prepend_args = { "--force-exclusion" },
+        },
+      },
+
       formatters_by_ft = {
         lua = { "stylua" },
         python = { "black" },
