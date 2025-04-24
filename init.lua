@@ -115,6 +115,12 @@ require("lazy").setup({
         return { lsp_fallback = true }
       end,
 
+      formatters = {
+        rubocop = {
+          prepend_args = { "--force-exclusion" },
+        },
+      },
+
       formatters_by_ft = {
         lua = { "stylua" },
         python = { "black" },
@@ -170,14 +176,18 @@ require("lazy").setup({
   {
     "vim-test/vim-test",
     keys = {
-      { "<leader>tn", ":TestNearest --verbose<CR>", { noremap = true, silent = true }, desc = "Test Nearest" },
-      { "<leader>tf", ":TestFile --verbose<CR>", { noremap = true, silent = true }, desc = "Test File" },
-      { "<leader>ta", ":TestSuite --verbose<CR>", { noremap = true, silent = true }, desc = "Test Suite" },
-      { "<leader>tl", ":TestLast --verbose<CR>", { noremap = true, silent = true }, desc = "Test Last" },
+      { "<leader>tn", ":TestNearest<CR>", { noremap = true, silent = true }, desc = "Test Nearest" },
+      { "<leader>tf", ":TestFile<CR>", { noremap = true, silent = true }, desc = "Test File" },
+      { "<leader>ta", ":TestSuite<CR>", { noremap = true, silent = true }, desc = "Test Suite" },
+      { "<leader>tl", ":TestLast<CR>", { noremap = true, silent = true }, desc = "Test Last" },
     },
     config = function()
       vim.g["test#strategy"] = "neovim"
       vim.g["test#neovim#start_normal"] = "1"
+      vim.g["test#ruby#rails#options"] = "--verbose"
+      vim.g["test#ruby#minitest#options"] = "--verbose"
+      vim.g["test#javascript#jest#options"] = "--verbose"
+      vim.g["test#go#gotest#options"] = "-v"
     end,
   },
 
@@ -509,7 +519,7 @@ require("lazy").setup({
         end,
       })
 
-      require("lspconfig").bufls.setup({
+      require("lspconfig").buf_ls.setup({
         capabilities = capabilities,
       })
 
@@ -545,6 +555,15 @@ require("lazy").setup({
     },
     build = ":TSUpdate",
     config = function()
+      local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+      parser_config.blade = {
+        install_info = {
+          url = "https://github.com/EmranMR/tree-sitter-blade",
+          files = { "src/parser.c" },
+          branch = "main",
+        },
+        filetype = "blade",
+      }
       require("nvim-treesitter.configs").setup({
         endwise = {
           enable = true,
@@ -573,6 +592,8 @@ require("lazy").setup({
           "bash",
           "tsx",
           "dockerfile",
+          "php_only",
+          "blade",
         },
         indent = { enable = true },
         incremental_selection = {
@@ -652,6 +673,12 @@ require("lazy").setup({
               ["<leader>wp"] = "@parameter.inner",
             },
           },
+        },
+      })
+
+      vim.filetype.add({
+        pattern = {
+          [".*%.blade%.php"] = "blade",
         },
       })
     end,
@@ -796,6 +823,7 @@ require("lazy").setup({
       "TmuxNavigateUp",
       "TmuxNavigateRight",
       "TmuxNavigatePrevious",
+      "TmuxNavigatorProcessList",
     },
     keys = {
       { "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
@@ -927,12 +955,12 @@ vim.keymap.set("t", "<leader>q", "<C-\\><C-n>:q<cr>")
 vim.keymap.set("t", "<ESC>", "<C-\\><C-n>")
 
 -- Open terminal in vertical and horizontal split
-vim.keymap.set("n", "<leader>tv", "<cmd>vnew term://zsh<CR>", { noremap = true })
-vim.keymap.set("n", "<leader>ts", "<cmd>split term://zsh<CR>", { noremap = true })
+vim.keymap.set("n", "<leader>tv", "<cmd>vnew term://fish<CR>", { noremap = true })
+vim.keymap.set("n", "<leader>ts", "<cmd>split term://fish<CR>", { noremap = true })
 
 -- Open terminal in vertical and horizontal split, inside the terminal
-vim.keymap.set("t", "<leader>tv", "<c-w><cmd>vnew term://zsh<CR>", { noremap = true })
-vim.keymap.set("t", "<leader>ts", "<c-w><cmd>split term://zsh<CR>", { noremap = true })
+vim.keymap.set("t", "<leader>tv", "<c-w><cmd>vnew term://fish<CR>", { noremap = true })
+vim.keymap.set("t", "<leader>ts", "<c-w><cmd>split term://fish<CR>", { noremap = true })
 
 -- mappings to move out from terminal to other views
 vim.keymap.set("t", "<C-h>", "<C-\\><C-n><C-w>h")
@@ -950,7 +978,7 @@ vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "TermOpen" }, {
   callback = function(args)
     -- we don't use vim.startswith() and look for test:// because of vim-test
     -- vim-test starts tests in a terminal, which we want to keep in normal mode
-    if vim.endswith(vim.api.nvim_buf_get_name(args.buf), "zsh") then
+    if vim.endswith(vim.api.nvim_buf_get_name(args.buf), "fish") then
       vim.cmd("startinsert")
     end
   end,

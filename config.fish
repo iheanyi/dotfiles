@@ -3,28 +3,19 @@ if status is-interactive
     # source (jump shell fish | psub)
 end
 
-if test -d /home/linuxbrew/.linuxbrew # Linux
-	set -gx HOMEBREW_PREFIX "/home/linuxbrew/.linuxbrew"
-	set -gx HOMEBREW_CELLAR "$HOMEBREW_PREFIX/Cellar"
-	set -gx HOMEBREW_REPOSITORY "$HOMEBREW_PREFIX/Homebrew"
-else if test -d /opt/homebrew # MacOS
-	set -gx HOMEBREW_PREFIX "/opt/homebrew"
-	set -gx HOMEBREW_CELLAR "$HOMEBREW_PREFIX/Cellar"
-	set -gx HOMEBREW_REPOSITORY "$HOMEBREW_PREFIX/homebrew"
+
+if test -z "$GHOSTTY_RESOURCES_DIR"
+  set -gxp GHOSTTY_RESOURCES_DIR /Applications/Ghostty.app/Contents/Resources/ghostty
 end
 
-fish_add_path -gP "$HOMEBREW_PREFIX/bin" "$HOMEBREW_PREFIX/sbin";
-
-! set -q MANPATH; and set MANPATH ''; set -gx MANPATH "$HOMEBREW_PREFIX/share/man" $MANPATH;
-! set -q INFOPATH; and set INFOPATH ''; set -gx INFOPATH "$HOMEBREW_PREFIX/share/info" $INFOPATH;
-
 # Globals
-set -gxp PATH $HOME/development/go/bin /opt/homebrew/bin /opt/homebrew/opt/openjdk/bin
+set -gxp PATH $HOME/development/go/bin /opt/homebrew/bin /opt/homebrew/opt/openjdk/bin /Applications/Ghostty.app/Contents/MacOS
 set -gx GOBIN $HOME/development/go/bin
+set -gx PSCALE_DISABLE_DEV_WARNING 1
 
 set -gx EDITOR nvim
-set -gx TERM tmux-256color
-set -gx COLORTERM truecolor
+# set -gx TERM screen-256color
+# set -gx COLORTERM truecolor
 set -gx FZF_DEFAULT_OPTS '--color=bg+:#3B4252,bg:#2E3440,spinner:#81A1C1,hl:#616E88,fg:#D8DEE9,header:#616E88,info:#81A1C1,pointer:#81A1C1,marker:#81A1C1,fg+:#D8DEE9,prompt:#81A1C1,hl+:#81A1C1'
 set -gx BAT_THEME "base16"
 set -gx FZF_DEFAULT_COMMAND 'ag --hidden --ignore .git -g ""'
@@ -44,12 +35,13 @@ set fish_greeting ""
 # Sensitive functions taht are not pushed to GitHub, usually work-related.
 source ~/.private.fish
 
-alias python="python3"
+# alias python="python3"
 # alias cat="bat"
 # alias ss="bundle exec spring stop"
 # alias cowork="npx @koddsson/coworking-with"
 # alias close-right-tmux-windows="for win_id in $(tmux list-windows -F '#{window_active} #{window_id}' | awk '/^1/ { active=1; next } active { print $2 }'); do tmux kill-window -t "$win_id"; done"
 # alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+alias rubo="bundle exec rubocop -a --cache true --server"
 
 # Autocompletions
 if test -d (brew --prefix)"/share/fish/completions"
@@ -76,4 +68,14 @@ end
 
 # Autojump
 test -e {$HOME}/.iterm2_shell_integration.fish ; and source {$HOME}/.iterm2_shell_integration.fish
-[ -f (brew --prefix)/share/autojump/autojump.fish ]; and source (brew --prefix)/share/autojump/autojump.fish
+[ -f /opt/homebrew/share/autojump/autojump.fish ]; and source /opt/homebrew/share/autojump/autojump.fish
+
+# Created by `pipx` on 2024-04-01 21:48:03
+set PATH $PATH /Users/iheanyi/.local/bin
+
+source {$GHOSTTY_RESOURCES_DIR}/shell-integration/fish/vendor_conf.d/ghostty-shell-integration.fish
+
+pyenv init - | source
+fish_add_path /Users/iheanyi/.humanlog/bin
+fish_add_path /opt/homebrew/sbin
+# source /Users/iheanyi/.config/op/plugins.sh
