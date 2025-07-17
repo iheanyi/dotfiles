@@ -66,10 +66,16 @@ require("lazy").setup({
   },
 
   -- LSP
-  {
-    "williamboman/mason.nvim",
-    "williamboman/mason-lspconfig.nvim",
-  },
+  -- {
+  --   "mason-org/mason-lspconfig.nvim",
+  --   opts = {
+  --     ensure_installed = {},
+  --   },
+  --   dependencies = {
+  --     { "mason-org/mason.nvim", opts = {} },
+  --     "neovim/nvim-lspconfig",
+  --   },
+  -- },
 
   -- statusline
   {
@@ -436,10 +442,16 @@ require("lazy").setup({
 
   -- lsp-config
   {
-    "neovim/nvim-lspconfig",
+    "mason-org/mason-lspconfig.nvim",
+    opts = {
+      ensure_installed = {},
+    },
+    dependencies = {
+      { "mason-org/mason.nvim", opts = {} },
+      "neovim/nvim-lspconfig",
+      "hrsh7th/cmp-nvim-lsp",
+    },
     config = function()
-      require("mason").setup()
-      require("mason-lspconfig").setup()
       local util = require("lspconfig/util")
 
       local capabilities = require("cmp_nvim_lsp").default_capabilities(util.capabilities)
@@ -758,6 +770,7 @@ require("lazy").setup({
           ["<C-d>"] = cmp.mapping.scroll_docs(-4),
           ["<C-f>"] = cmp.mapping.scroll_docs(4),
           ["<CR>"] = cmp.mapping.confirm({ select = true }),
+
           ["<Tab>"] = cmp.mapping(function(fallback)
             local copilot = require("copilot.suggestion")
 
