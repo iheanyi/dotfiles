@@ -65,18 +65,6 @@ require("lazy").setup({
     },
   },
 
-  -- LSP
-  -- {
-  --   "mason-org/mason-lspconfig.nvim",
-  --   opts = {
-  --     ensure_installed = {},
-  --   },
-  --   dependencies = {
-  --     { "mason-org/mason.nvim", opts = {} },
-  --     "neovim/nvim-lspconfig",
-  --   },
-  -- },
-
   -- statusline
   {
     "nvim-lualine/lualine.nvim",
@@ -233,7 +221,6 @@ require("lazy").setup({
       filetypes = { markdown = true },
     },
     config = function(_, opts)
-      local cmp = require("cmp")
       local copilot = require("copilot.suggestion")
       local luasnip = require("luasnip")
 
@@ -244,18 +231,7 @@ require("lazy").setup({
         vim.b.copilot_suggestion_hidden = not trigger
       end
 
-      -- Hide suggestions when the completion menu is open.
-      -- cmp.event:on("menu_opened", function()
-      --   if copilot.is_visible() then
-      --     copilot.dismiss()
-      --   end
-      --   set_trigger(false)
-      -- end)
-
       -- Disable suggestions when inside a snippet.
-      cmp.event:on("menu_closed", function()
-        set_trigger(not luasnip.expand_or_locally_jumpable())
-      end)
       vim.api.nvim_create_autocmd("User", {
         pattern = { "LuasnipInsertNodeEnter", "LuasnipInsertNodeLeave" },
         callback = function()
@@ -449,12 +425,13 @@ require("lazy").setup({
     dependencies = {
       { "mason-org/mason.nvim", opts = {} },
       "neovim/nvim-lspconfig",
-      "hrsh7th/cmp-nvim-lsp",
+      -- nvim-cmp LSP capabilities removed for blink-cmp
     },
     config = function()
       local util = require("lspconfig/util")
 
-      local capabilities = require("cmp_nvim_lsp").default_capabilities(util.capabilities)
+      -- Use default capabilities for blink-cmp (no cmp_nvim_lsp)
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities.textDocument.completion.completionItem.snippetSupport = true
 
       require("lspconfig").gopls.setup({
@@ -713,117 +690,32 @@ require("lazy").setup({
     end,
   },
 
-  -- autocompletion
+  -- autocompletion (blink-cmp replaces nvim-cmp)
   {
-    "hrsh7th/nvim-cmp",
+    "Saghen/blink.cmp",
+    event = "InsertEnter",
     dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
-      "hrsh7th/cmp-buffer",
       "L3MON4D3/LuaSnip",
-      "saadparwaiz1/cmp_luasnip",
-      "onsails/lspkind-nvim",
+      "rafamadriz/friendly-snippets",
     },
-    enabled = function()
-      -- disable completion in comments
-      local context = require("cmp.config.context")
-      -- keep command mode completion enabled when cursor is in a comment
-      if vim.api.nvim_get_mode().mode == "c" then
-        return true
-      else
-        return not context.in_treesitter_capture("comment") and not context.in_syntax_group("Comment")
-      end
-    end,
     config = function()
-      local cmp = require("cmp")
-      local luasnip = require("luasnip")
-      local lspkind = require("lspkind")
-      local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-
-      cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
-
-      luasnip.config.setup({
-        history = true,
-        region_check_events = "InsertEnter",
-        delete_check_events = "TextChanged,InsertLeave",
-      })
-
-      require("cmp").setup({
-        snippet = {
-          expand = function(args)
-            luasnip.lsp_expand(args.body)
-          end,
-        },
-        formatting = {
-          format = lspkind.cmp_format({
-            with_text = true,
-            menu = {
-              path = "[Path]",
-              buffer = "[Buffer]",
-              nvim_lsp = "[LSP]",
-              nvim_lua = "[Lua]",
-            },
-          }),
-        },
-        mapping = cmp.mapping.preset.insert({
-          ["<C-n>"] = cmp.mapping.select_next_item(),
-          ["<C-p>"] = cmp.mapping.select_prev_item(),
-          ["<C-d>"] = cmp.mapping.scroll_docs(-4),
-          ["<C-f>"] = cmp.mapping.scroll_docs(4),
-          ["<CR>"] = cmp.mapping.confirm({ select = true }),
-
-          ["<Tab>"] = cmp.mapping(function(fallback)
-            local copilot = require("copilot.suggestion")
-
-            if copilot.is_visible() then
-              copilot.accept()
-            elseif cmp.visible() then
-              cmp.select_next_item()
-            elseif luasnip.expand_or_locally_jumpable() then
-              luasnip.expand_or_jump()
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-          ["<S-Tab>"] = cmp.mapping(function(fallback)
-            local copilot = require("copilot.suggestion")
-
-            local function set_trigger(trigger)
-              vim.b.copilot_suggestion_auto_trigger = trigger
-              vim.b.copilot_suggestion_hidden = not trigger
-            end
-
-            if copilot.is_visible() and cmp.visible() then
-              copilot.dismiss()
-              set_trigger(false)
-              cmp.select_next_item()
-            elseif cmp.visible() then
-              cmp.select_prev_item()
-            elseif luasnip.expand_or_locally_jumpable(-1) then
-              luasnip.jump(-1)
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-        }),
-
-        -- don't auto select item
-        preselect = cmp.PreselectMode.None,
-        window = {
-          documentation = cmp.config.window.bordered(),
-        },
-        view = {
-          entries = {
-            name = "custom",
-            selection_order = "near_cursor",
-          },
-        },
-        confirm_opts = {
-          behavior = cmp.ConfirmBehavior.Insert,
-        },
+      require("luasnip.loaders.from_vscode").lazy_load()
+      require("blink.cmp").setup({
         sources = {
-          { name = "nvim_lsp" },
-          { name = "luasnip", keyword_length = 2 },
-          { name = "buffer", keyword_length = 5 },
+          { name = "lsp" },
+          { name = "luasnip" },
+          { name = "buffer" },
+        },
+        snippets = {
+          preset = "luasnip",
+        },
+        keymaps = {
+          accept = "<CR>",
+          next = "<Tab>",
+          prev = "<S-Tab>",
+          close = "<C-e>",
+          scroll_docs_up = "<C-d>",
+          scroll_docs_down = "<C-f>",
         },
       })
     end,
