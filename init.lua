@@ -903,6 +903,12 @@ vim.keymap.set("n", "<leader>ch", fzf.command_history, { desc = "FzfLua Command 
 
 vim.keymap.set("n", "<leader>F", ":FzfLua files<CR>")
 
+-- Go to next tab
+vim.keymap.set("n", "<leader>]", ":tabnext<CR>", { noremap = true, silent = true, desc = "Next Tab" })
+
+-- Go to previous tab
+vim.keymap.set("n", "<leader>[", ":tabprevious<CR>", { noremap = true, silent = true, desc = "Previous Tab" })
+
 -- vim-go
 vim.keymap.set("n", "<leader>b", build_go_files)
 
