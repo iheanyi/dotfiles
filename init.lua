@@ -971,10 +971,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
     local opts = { buffer = ev.buf }
 
     vim.keymap.set("n", "<leader>v", function()
-      fzf.lsp_definitions({ jump_to_single_result = false, winopts = { split = "vsplit" } })
+      fzf.lsp_definitions({ jump_to_single = false, winopts = { split = "vsplit" } })
     end, opts)
     vim.keymap.set("n", "<leader>h", function()
-      fzf.lsp_definitions({ jump_to_single_result = false, winopts = { split = "split" } })
+      fzf.lsp_definitions({ jump_to_single = false, winopts = { split = "split" } })
     end, opts)
     vim.keymap.set("n", "gd", fzf.lsp_definitions, opts)
     vim.keymap.set("n", "gT", fzf.lsp_typedefs, opts)
