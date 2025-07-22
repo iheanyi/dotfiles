@@ -143,9 +143,15 @@ require("lazy").setup({
     },
   },
 
+  -- fzf-lua: Fuzzy finder and picker
   {
-    "junegunn/fzf.vim",
-    dependencies = { "junegunn/fzf" },
+    "ibhagwan/fzf-lua",
+    dependencies = { "nvim-tree/nvim-web-devicons" }, -- optional for icon support
+    config = function()
+      require("fzf-lua").setup({
+        -- Customize your fzf-lua setup here if needed
+      })
+    end,
   },
 
   -- vim-go setup
@@ -282,43 +288,7 @@ require("lazy").setup({
     "AndrewRadev/splitjoin.vim",
   },
 
-  -- fzf extension for telescope with better speed
-  {
-    "nvim-telescope/telescope-fzf-native.nvim",
-    build = "make",
-  },
-
-  { "nvim-telescope/telescope-ui-select.nvim" },
-
-  -- fuzzy finder framework
-  {
-    "nvim-telescope/telescope.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-treesitter/nvim-treesitter",
-      "nvim-tree/nvim-web-devicons",
-    },
-    config = function()
-      require("telescope").setup({
-        extensions = {
-          fzf = {
-            fuzzy = true, -- false will only do exact matching
-            override_generic_sorter = true, -- override the generic sorter
-            override_file_sorter = true, -- override the file sorter
-            case_mode = "smart_case", -- or "ignore_case" or "respect_case" the default case_mode is "smart_case"
-          },
-        },
-      })
-
-      -- To get ui-select loaded and working with telescope, you need to call
-      -- load_extension, somewhere after setup function:
-      require("telescope").load_extension("ui-select")
-
-      -- To get fzf loaded and working with telescope, you need to call
-      -- load_extension, somewhere after setup function:
-      require("telescope").load_extension("fzf")
-    end,
-  },
+  -- ripgrep and rooter
   {
     "jremmen/vim-ripgrep",
   },
@@ -916,27 +886,20 @@ vim.api.nvim_create_user_command("Gblame", 'lua require("git.blame").blame()<CR>
 vim.keymap.set("n", "<leader>n", ":NvimTreeToggle<CR>", { noremap = true })
 vim.keymap.set("n", "<leader>e", ":NvimTreeFindFile<CR>f", { noremap = true })
 
--- File search
-vim.keymap.set("n", "<leader>F", ":FZF<CR>")
-local builtin = require("telescope.builtin")
-vim.keymap.set("n", "<leader>ff", builtin.find_files, {})
-vim.keymap.set("n", "<leader>fg", builtin.live_grep, {})
-vim.keymap.set("n", "<leader>fb", builtin.buffers, {})
-vim.keymap.set("n", "<leader>fh", builtin.help_tags, {})
+-- === FZF-LUA KEYMAPS ===
+local fzf = require("fzf-lua")
+vim.keymap.set("n", "<leader>ff", fzf.files, { desc = "FzfLua Files" })
+vim.keymap.set("n", "<leader>fg", fzf.live_grep, { desc = "FzfLua Live Grep" })
+vim.keymap.set("n", "<leader>fb", fzf.buffers, { desc = "FzfLua Buffers" })
+vim.keymap.set("n", "<leader>fh", fzf.help_tags, { desc = "FzfLua Help Tags" })
+vim.keymap.set("n", "<C-p>", fzf.git_files, { desc = "FzfLua Git Files" })
+vim.keymap.set("n", "<C-b>", fzf.files, { desc = "FzfLua Files" })
+vim.keymap.set("n", "<C-g>", fzf.lsp_document_symbols, { desc = "FzfLua LSP Document Symbols" })
+vim.keymap.set("n", "<leader>td", fzf.diagnostics_document, { desc = "FzfLua Diagnostics (Document)" })
+vim.keymap.set("n", "<leader>gs", fzf.grep_cword, { desc = "FzfLua Grep Word Under Cursor" })
+vim.keymap.set("n", "<leader>gg", fzf.live_grep, { desc = "FzfLua Live Grep" })
 
--- telescope
-vim.keymap.set("n", "<C-p>", builtin.git_files, {})
-vim.keymap.set("n", "<C-b>", builtin.find_files, {})
-vim.keymap.set("n", "<C-g>", builtin.lsp_document_symbols, {})
-vim.keymap.set("n", "<leader>td", builtin.diagnostics, {})
-vim.keymap.set("n", "<leader>gs", builtin.grep_string, {})
-vim.keymap.set("n", "<leader>gg", builtin.live_grep, {})
-
--- diagnostics
-vim.keymap.set("n", "<leader>do", vim.diagnostic.open_float)
-vim.keymap.set("n", "<leader>dp", vim.diagnostic.goto_prev)
-vim.keymap.set("n", "<leader>dn", vim.diagnostic.goto_next)
-vim.keymap.set("n", "<leader>ds", vim.diagnostic.setqflist)
+vim.keymap.set("n", "<leader>F", ":FzfLua files<CR>")
 
 -- vim-go
 vim.keymap.set("n", "<leader>b", build_go_files)
@@ -999,20 +962,14 @@ vim.api.nvim_create_autocmd("LspAttach", {
     -- See `:help vim.lsp.*` for documentation on any of the below functions
     local opts = { buffer = ev.buf }
 
-    vim.keymap.set("n", "<leader>v", "<cmd>vsplit | lua require('telescope.builtin').lsp_definitions()<CR>", opts)
-    vim.keymap.set(
-      "n",
-      "<leader>h",
-      "<cmd>belowright split| lua require('telescope.builtin').lsp_definitions()<CR>",
-      opts
-    )
-
-    vim.keymap.set("n", "gd", builtin.lsp_definitions, opts)
-    vim.keymap.set("n", "gT", builtin.lsp_type_definitions, opts)
-    vim.keymap.set("n", "gr", builtin.lsp_references, opts)
+    vim.keymap.set("n", "<leader>v", function() fzf.lsp_definitions({ jump_to_single_result = false, winopts = { split = "vsplit" } }) end, opts)
+    vim.keymap.set("n", "<leader>h", function() fzf.lsp_definitions({ jump_to_single_result = false, winopts = { split = "split" } }) end, opts)
+    vim.keymap.set("n", "gd", fzf.lsp_definitions, opts)
+    vim.keymap.set("n", "gT", fzf.lsp_typedefs, opts)
+    vim.keymap.set("n", "gr", fzf.lsp_references, opts)
     vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
     vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-    vim.keymap.set("n", "gi", builtin.lsp_implementations, opts)
+    vim.keymap.set("n", "gi", fzf.lsp_implementations, opts)
 
     vim.keymap.set("n", "<leader>cl", vim.lsp.codelens.run, opts)
     vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
