@@ -119,7 +119,7 @@ require("lazy").setup({
       },
 
       formatters_by_ft = {
-        lua = { "stylua", opts = {} },
+        lua = { "stylua" },
         python = { "black" },
         ruby = { "rubocop" },
         go = { "gofumpt", "gofmt" },
@@ -898,6 +898,8 @@ vim.keymap.set("n", "<C-g>", fzf.lsp_document_symbols, { desc = "FzfLua LSP Docu
 vim.keymap.set("n", "<leader>td", fzf.diagnostics_document, { desc = "FzfLua Diagnostics (Document)" })
 vim.keymap.set("n", "<leader>gs", fzf.grep_cword, { desc = "FzfLua Grep Word Under Cursor" })
 vim.keymap.set("n", "<leader>gg", fzf.live_grep, { desc = "FzfLua Live Grep" })
+vim.keymap.set("n", "<leader>fp", fzf.oldfiles, { desc = "FzfLua OldFiles" })
+vim.keymap.set("n", "<leader>ch", fzf.command_history, { desc = "FzfLua Command History" })
 
 vim.keymap.set("n", "<leader>F", ":FzfLua files<CR>")
 
@@ -962,8 +964,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
     -- See `:help vim.lsp.*` for documentation on any of the below functions
     local opts = { buffer = ev.buf }
 
-    vim.keymap.set("n", "<leader>v", function() fzf.lsp_definitions({ jump_to_single_result = false, winopts = { split = "vsplit" } }) end, opts)
-    vim.keymap.set("n", "<leader>h", function() fzf.lsp_definitions({ jump_to_single_result = false, winopts = { split = "split" } }) end, opts)
+    vim.keymap.set("n", "<leader>v", function()
+      fzf.lsp_definitions({ jump_to_single_result = false, winopts = { split = "vsplit" } })
+    end, opts)
+    vim.keymap.set("n", "<leader>h", function()
+      fzf.lsp_definitions({ jump_to_single_result = false, winopts = { split = "split" } })
+    end, opts)
     vim.keymap.set("n", "gd", fzf.lsp_definitions, opts)
     vim.keymap.set("n", "gT", fzf.lsp_typedefs, opts)
     vim.keymap.set("n", "gr", fzf.lsp_references, opts)
