@@ -110,13 +110,16 @@ require("lazy").setup({
       end,
 
       formatters = {
+        stylua = {
+          prepend_args = { "--indent-width", 2, "--indent-type", "Spaces" },
+        },
         rubocop = {
           prepend_args = { "--force-exclusion" },
         },
       },
 
       formatters_by_ft = {
-        lua = { "stylua" },
+        lua = { "stylua", opts = {} },
         python = { "black" },
         ruby = { "rubocop" },
         go = { "gofumpt", "gofmt" },
@@ -414,7 +417,7 @@ require("lazy").setup({
   {
     "mason-org/mason-lspconfig.nvim",
     opts = {
-      ensure_installed = {},
+      ensure_installed = { "lua_ls", "ts_ls", "ruby_lsp", "gopls", "buf_ls", "eslint" },
     },
     dependencies = {
       { "mason-org/mason.nvim", opts = {} },
