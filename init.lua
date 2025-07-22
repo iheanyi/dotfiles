@@ -240,12 +240,6 @@ require("lazy").setup({
       })
     end,
   },
-  {
-    "zbirenbaum/copilot-cmp",
-    config = function()
-      require("copilot_cmp").setup()
-    end,
-  },
 
   -- file explorer
   {
@@ -693,6 +687,7 @@ require("lazy").setup({
   -- autocompletion (blink-cmp replaces nvim-cmp)
   {
     "Saghen/blink.cmp",
+    version = "1.*", -- Use a stable release with prebuilt binaries
     event = "InsertEnter",
     dependencies = {
       "L3MON4D3/LuaSnip",
@@ -702,20 +697,19 @@ require("lazy").setup({
       require("luasnip.loaders.from_vscode").lazy_load()
       require("blink.cmp").setup({
         sources = {
-          { name = "lsp" },
-          { name = "luasnip" },
-          { name = "buffer" },
+          default = { "lsp", "path", "snippets", "buffer" },
         },
         snippets = {
           preset = "luasnip",
         },
-        keymaps = {
-          accept = "<CR>",
-          next = "<Tab>",
-          prev = "<S-Tab>",
-          close = "<C-e>",
-          scroll_docs_up = "<C-d>",
-          scroll_docs_down = "<C-f>",
+        keymap = {
+          preset = "default",
+          ["<CR>"] = { "accept", "fallback" }, -- Accept and enter, or fallback if not applicable
+          ["<Tab>"] = { "select_next", "fallback" }, -- Next item, or fallback
+          ["<S-Tab>"] = { "select_prev", "fallback" }, -- Previous item, or fallback
+          ["<C-e>"] = { "cancel", "fallback" }, -- Cancel completion, or fallback
+          ["<C-d>"] = { "scroll_documentation_up", "fallback" },
+          ["<C-f>"] = { "scroll_documentation_down", "fallback" },
         },
       })
     end,
