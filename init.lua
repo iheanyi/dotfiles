@@ -65,18 +65,6 @@ require("lazy").setup({
     },
   },
 
-  -- LSP
-  -- {
-  --   "mason-org/mason-lspconfig.nvim",
-  --   opts = {
-  --     ensure_installed = {},
-  --   },
-  --   dependencies = {
-  --     { "mason-org/mason.nvim", opts = {} },
-  --     "neovim/nvim-lspconfig",
-  --   },
-  -- },
-
   -- statusline
   {
     "nvim-lualine/lualine.nvim",
@@ -122,6 +110,9 @@ require("lazy").setup({
       end,
 
       formatters = {
+        stylua = {
+          prepend_args = { "--indent-width", 2, "--indent-type", "Spaces" },
+        },
         rubocop = {
           prepend_args = { "--force-exclusion" },
         },
@@ -152,9 +143,15 @@ require("lazy").setup({
     },
   },
 
+  -- fzf-lua: Fuzzy finder and picker
   {
-    "junegunn/fzf.vim",
-    dependencies = { "junegunn/fzf" },
+    "ibhagwan/fzf-lua",
+    dependencies = { "nvim-tree/nvim-web-devicons" }, -- optional for icon support
+    config = function()
+      require("fzf-lua").setup({
+        -- Customize your fzf-lua setup here if needed
+      })
+    end,
   },
 
   -- vim-go setup
@@ -233,7 +230,6 @@ require("lazy").setup({
       filetypes = { markdown = true },
     },
     config = function(_, opts)
-      local cmp = require("cmp")
       local copilot = require("copilot.suggestion")
       local luasnip = require("luasnip")
 
@@ -244,30 +240,13 @@ require("lazy").setup({
         vim.b.copilot_suggestion_hidden = not trigger
       end
 
-      -- Hide suggestions when the completion menu is open.
-      -- cmp.event:on("menu_opened", function()
-      --   if copilot.is_visible() then
-      --     copilot.dismiss()
-      --   end
-      --   set_trigger(false)
-      -- end)
-
       -- Disable suggestions when inside a snippet.
-      cmp.event:on("menu_closed", function()
-        set_trigger(not luasnip.expand_or_locally_jumpable())
-      end)
       vim.api.nvim_create_autocmd("User", {
         pattern = { "LuasnipInsertNodeEnter", "LuasnipInsertNodeLeave" },
         callback = function()
           set_trigger(not luasnip.expand_or_locally_jumpable())
         end,
       })
-    end,
-  },
-  {
-    "zbirenbaum/copilot-cmp",
-    config = function()
-      require("copilot_cmp").setup()
     end,
   },
 
@@ -309,43 +288,7 @@ require("lazy").setup({
     "AndrewRadev/splitjoin.vim",
   },
 
-  -- fzf extension for telescope with better speed
-  {
-    "nvim-telescope/telescope-fzf-native.nvim",
-    build = "make",
-  },
-
-  { "nvim-telescope/telescope-ui-select.nvim" },
-
-  -- fuzzy finder framework
-  {
-    "nvim-telescope/telescope.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-treesitter/nvim-treesitter",
-      "nvim-tree/nvim-web-devicons",
-    },
-    config = function()
-      require("telescope").setup({
-        extensions = {
-          fzf = {
-            fuzzy = true, -- false will only do exact matching
-            override_generic_sorter = true, -- override the generic sorter
-            override_file_sorter = true, -- override the file sorter
-            case_mode = "smart_case", -- or "ignore_case" or "respect_case" the default case_mode is "smart_case"
-          },
-        },
-      })
-
-      -- To get ui-select loaded and working with telescope, you need to call
-      -- load_extension, somewhere after setup function:
-      require("telescope").load_extension("ui-select")
-
-      -- To get fzf loaded and working with telescope, you need to call
-      -- load_extension, somewhere after setup function:
-      require("telescope").load_extension("fzf")
-    end,
-  },
+  -- ripgrep and rooter
   {
     "jremmen/vim-ripgrep",
   },
@@ -444,17 +387,18 @@ require("lazy").setup({
   {
     "mason-org/mason-lspconfig.nvim",
     opts = {
-      ensure_installed = {},
+      ensure_installed = { "lua_ls", "ts_ls", "ruby_lsp", "gopls", "buf_ls", "eslint" },
     },
     dependencies = {
       { "mason-org/mason.nvim", opts = {} },
       "neovim/nvim-lspconfig",
-      "hrsh7th/cmp-nvim-lsp",
+      -- nvim-cmp LSP capabilities removed for blink-cmp
     },
     config = function()
       local util = require("lspconfig/util")
 
-      local capabilities = require("cmp_nvim_lsp").default_capabilities(util.capabilities)
+      -- Use default capabilities for blink-cmp (no cmp_nvim_lsp)
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities.textDocument.completion.completionItem.snippetSupport = true
 
       require("lspconfig").gopls.setup({
@@ -713,117 +657,32 @@ require("lazy").setup({
     end,
   },
 
-  -- autocompletion
+  -- autocompletion (blink-cmp replaces nvim-cmp)
   {
-    "hrsh7th/nvim-cmp",
+    "Saghen/blink.cmp",
+    version = "1.*", -- Use a stable release with prebuilt binaries
+    event = "InsertEnter",
     dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
-      "hrsh7th/cmp-buffer",
       "L3MON4D3/LuaSnip",
-      "saadparwaiz1/cmp_luasnip",
-      "onsails/lspkind-nvim",
+      "rafamadriz/friendly-snippets",
     },
-    enabled = function()
-      -- disable completion in comments
-      local context = require("cmp.config.context")
-      -- keep command mode completion enabled when cursor is in a comment
-      if vim.api.nvim_get_mode().mode == "c" then
-        return true
-      else
-        return not context.in_treesitter_capture("comment") and not context.in_syntax_group("Comment")
-      end
-    end,
     config = function()
-      local cmp = require("cmp")
-      local luasnip = require("luasnip")
-      local lspkind = require("lspkind")
-      local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-
-      cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
-
-      luasnip.config.setup({
-        history = true,
-        region_check_events = "InsertEnter",
-        delete_check_events = "TextChanged,InsertLeave",
-      })
-
-      require("cmp").setup({
-        snippet = {
-          expand = function(args)
-            luasnip.lsp_expand(args.body)
-          end,
-        },
-        formatting = {
-          format = lspkind.cmp_format({
-            with_text = true,
-            menu = {
-              path = "[Path]",
-              buffer = "[Buffer]",
-              nvim_lsp = "[LSP]",
-              nvim_lua = "[Lua]",
-            },
-          }),
-        },
-        mapping = cmp.mapping.preset.insert({
-          ["<C-n>"] = cmp.mapping.select_next_item(),
-          ["<C-p>"] = cmp.mapping.select_prev_item(),
-          ["<C-d>"] = cmp.mapping.scroll_docs(-4),
-          ["<C-f>"] = cmp.mapping.scroll_docs(4),
-          ["<CR>"] = cmp.mapping.confirm({ select = true }),
-
-          ["<Tab>"] = cmp.mapping(function(fallback)
-            local copilot = require("copilot.suggestion")
-
-            if copilot.is_visible() then
-              copilot.accept()
-            elseif cmp.visible() then
-              cmp.select_next_item()
-            elseif luasnip.expand_or_locally_jumpable() then
-              luasnip.expand_or_jump()
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-          ["<S-Tab>"] = cmp.mapping(function(fallback)
-            local copilot = require("copilot.suggestion")
-
-            local function set_trigger(trigger)
-              vim.b.copilot_suggestion_auto_trigger = trigger
-              vim.b.copilot_suggestion_hidden = not trigger
-            end
-
-            if copilot.is_visible() and cmp.visible() then
-              copilot.dismiss()
-              set_trigger(false)
-              cmp.select_next_item()
-            elseif cmp.visible() then
-              cmp.select_prev_item()
-            elseif luasnip.expand_or_locally_jumpable(-1) then
-              luasnip.jump(-1)
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-        }),
-
-        -- don't auto select item
-        preselect = cmp.PreselectMode.None,
-        window = {
-          documentation = cmp.config.window.bordered(),
-        },
-        view = {
-          entries = {
-            name = "custom",
-            selection_order = "near_cursor",
-          },
-        },
-        confirm_opts = {
-          behavior = cmp.ConfirmBehavior.Insert,
-        },
+      require("luasnip.loaders.from_vscode").lazy_load()
+      require("blink.cmp").setup({
         sources = {
-          { name = "nvim_lsp" },
-          { name = "luasnip", keyword_length = 2 },
-          { name = "buffer", keyword_length = 5 },
+          default = { "lsp", "path", "snippets", "buffer" },
+        },
+        snippets = {
+          preset = "luasnip",
+        },
+        keymap = {
+          preset = "default",
+          ["<CR>"] = { "accept", "fallback" }, -- Accept and enter, or fallback if not applicable
+          ["<Tab>"] = { "select_next", "fallback" }, -- Next item, or fallback
+          ["<S-Tab>"] = { "select_prev", "fallback" }, -- Previous item, or fallback
+          ["<C-e>"] = { "cancel", "fallback" }, -- Cancel completion, or fallback
+          ["<C-d>"] = { "scroll_documentation_up", "fallback" },
+          ["<C-f>"] = { "scroll_documentation_down", "fallback" },
         },
       })
     end,
@@ -1027,27 +886,28 @@ vim.api.nvim_create_user_command("Gblame", 'lua require("git.blame").blame()<CR>
 vim.keymap.set("n", "<leader>n", ":NvimTreeToggle<CR>", { noremap = true })
 vim.keymap.set("n", "<leader>e", ":NvimTreeFindFile<CR>f", { noremap = true })
 
--- File search
-vim.keymap.set("n", "<leader>F", ":FZF<CR>")
-local builtin = require("telescope.builtin")
-vim.keymap.set("n", "<leader>ff", builtin.find_files, {})
-vim.keymap.set("n", "<leader>fg", builtin.live_grep, {})
-vim.keymap.set("n", "<leader>fb", builtin.buffers, {})
-vim.keymap.set("n", "<leader>fh", builtin.help_tags, {})
+-- === FZF-LUA KEYMAPS ===
+local fzf = require("fzf-lua")
+vim.keymap.set("n", "<leader>ff", fzf.files, { desc = "FzfLua Files" })
+vim.keymap.set("n", "<leader>fg", fzf.live_grep, { desc = "FzfLua Live Grep" })
+vim.keymap.set("n", "<leader>fb", fzf.buffers, { desc = "FzfLua Buffers" })
+vim.keymap.set("n", "<leader>fh", fzf.help_tags, { desc = "FzfLua Help Tags" })
+vim.keymap.set("n", "<C-p>", fzf.git_files, { desc = "FzfLua Git Files" })
+vim.keymap.set("n", "<C-b>", fzf.files, { desc = "FzfLua Files" })
+vim.keymap.set("n", "<C-g>", fzf.lsp_document_symbols, { desc = "FzfLua LSP Document Symbols" })
+vim.keymap.set("n", "<leader>td", fzf.diagnostics_document, { desc = "FzfLua Diagnostics (Document)" })
+vim.keymap.set("n", "<leader>gs", fzf.grep_cword, { desc = "FzfLua Grep Word Under Cursor" })
+vim.keymap.set("n", "<leader>gg", fzf.live_grep, { desc = "FzfLua Live Grep" })
+vim.keymap.set("n", "<leader>fp", fzf.oldfiles, { desc = "FzfLua OldFiles" })
+vim.keymap.set("n", "<leader>ch", fzf.command_history, { desc = "FzfLua Command History" })
 
--- telescope
-vim.keymap.set("n", "<C-p>", builtin.git_files, {})
-vim.keymap.set("n", "<C-b>", builtin.find_files, {})
-vim.keymap.set("n", "<C-g>", builtin.lsp_document_symbols, {})
-vim.keymap.set("n", "<leader>td", builtin.diagnostics, {})
-vim.keymap.set("n", "<leader>gs", builtin.grep_string, {})
-vim.keymap.set("n", "<leader>gg", builtin.live_grep, {})
+vim.keymap.set("n", "<leader>F", ":FzfLua files<CR>")
 
--- diagnostics
-vim.keymap.set("n", "<leader>do", vim.diagnostic.open_float)
-vim.keymap.set("n", "<leader>dp", vim.diagnostic.goto_prev)
-vim.keymap.set("n", "<leader>dn", vim.diagnostic.goto_next)
-vim.keymap.set("n", "<leader>ds", vim.diagnostic.setqflist)
+-- Go to next tab
+vim.keymap.set("n", "<leader>]", ":tabnext<CR>", { noremap = true, silent = true, desc = "Next Tab" })
+
+-- Go to previous tab
+vim.keymap.set("n", "<leader>[", ":tabprevious<CR>", { noremap = true, silent = true, desc = "Previous Tab" })
 
 -- vim-go
 vim.keymap.set("n", "<leader>b", build_go_files)
@@ -1110,20 +970,18 @@ vim.api.nvim_create_autocmd("LspAttach", {
     -- See `:help vim.lsp.*` for documentation on any of the below functions
     local opts = { buffer = ev.buf }
 
-    vim.keymap.set("n", "<leader>v", "<cmd>vsplit | lua require('telescope.builtin').lsp_definitions()<CR>", opts)
-    vim.keymap.set(
-      "n",
-      "<leader>h",
-      "<cmd>belowright split| lua require('telescope.builtin').lsp_definitions()<CR>",
-      opts
-    )
-
-    vim.keymap.set("n", "gd", builtin.lsp_definitions, opts)
-    vim.keymap.set("n", "gT", builtin.lsp_type_definitions, opts)
-    vim.keymap.set("n", "gr", builtin.lsp_references, opts)
+    vim.keymap.set("n", "<leader>v", function()
+      fzf.lsp_definitions({ jump_to_single = false, winopts = { split = "vsplit" } })
+    end, opts)
+    vim.keymap.set("n", "<leader>h", function()
+      fzf.lsp_definitions({ jump_to_single = false, winopts = { split = "split" } })
+    end, opts)
+    vim.keymap.set("n", "gd", fzf.lsp_definitions, opts)
+    vim.keymap.set("n", "gT", fzf.lsp_typedefs, opts)
+    vim.keymap.set("n", "gr", fzf.lsp_references, opts)
     vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
     vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-    vim.keymap.set("n", "gi", builtin.lsp_implementations, opts)
+    vim.keymap.set("n", "gi", fzf.lsp_implementations, opts)
 
     vim.keymap.set("n", "<leader>cl", vim.lsp.codelens.run, opts)
     vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
