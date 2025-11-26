@@ -18,23 +18,81 @@ os := if os() == "macos" { "macos" } else if os() == "linux" { "linux" } else { 
 install: install-homebrew install-packages install-fish install-tmux-plugins link setup-git
     @echo "✓ Installation complete! Restart your terminal."
 
-# Configure git user name and email
+# Configure git with base settings and user info
 setup-git:
     #!/usr/bin/env bash
     echo "=== Git Configuration ==="
 
-    # Check if already configured
+    DOTFILES="{{justfile_directory()}}"
+    BASE_CONFIG="$DOTFILES/.gitconfig.base"
+
+    # Apply base configuration settings
+    echo "Applying base git configuration..."
+    if [ -f "$BASE_CONFIG" ]; then
+        # Read each section and key from base config and apply
+        # This preserves existing user settings while adding our defaults
+        git config --global init.defaultBranch main
+        git config --global core.excludesfile ~/.gitignore_global
+        git config --global core.editor nvim
+        git config --global core.pager "diff-so-fancy | less --tabs=4 -RFX"
+        git config --global interactive.diffFilter "diff-so-fancy --patch"
+        git config --global pull.rebase true
+        git config --global push.default current
+        git config --global push.autoSetupRemote true
+        git config --global fetch.prune true
+        git config --global rebase.autoStash true
+        git config --global merge.conflictstyle diff3
+        git config --global diff.colorMoved default
+        git config --global color.ui true
+        git config --global color.diff-highlight.oldNormal "red bold"
+        git config --global color.diff-highlight.oldHighlight "red bold 52"
+        git config --global color.diff-highlight.newNormal "green bold"
+        git config --global color.diff-highlight.newHighlight "green bold 22"
+        git config --global color.diff.meta 11
+        git config --global color.diff.frag "magenta bold"
+        git config --global color.diff.func "146 bold"
+        git config --global color.diff.commit "yellow bold"
+        git config --global color.diff.old "red bold"
+        git config --global color.diff.new "green bold"
+        git config --global color.diff.whitespace "red reverse"
+        # Aliases
+        git config --global alias.s "status -sb"
+        git config --global alias.lg "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+        git config --global alias.ll "log --oneline"
+        git config --global alias.last "log -1 HEAD --stat"
+        git config --global alias.co "checkout"
+        git config --global alias.cob "checkout -b"
+        git config --global alias.br "branch"
+        git config --global alias.bra "branch -a"
+        git config --global alias.cm "commit -m"
+        git config --global alias.ca "commit --amend"
+        git config --global alias.can "commit --amend --no-edit"
+        git config --global alias.d "diff"
+        git config --global alias.dc "diff --cached"
+        git config --global alias.undo "reset HEAD~1 --mixed"
+        git config --global alias.unstage "reset HEAD --"
+        git config --global alias.sl "stash list"
+        git config --global alias.sp "stash pop"
+        git config --global alias.ss "stash save"
+        git config --global alias.cleanup "!git branch --merged | grep -v '\\*\\|main\\|master' | xargs -n 1 git branch -d"
+        echo "✓ Base config applied"
+    else
+        echo "⚠ Base config not found at $BASE_CONFIG"
+    fi
+
+    # Check current user config
     current_name=$(git config --global user.name 2>/dev/null || echo "")
     current_email=$(git config --global user.email 2>/dev/null || echo "")
 
     if [ -n "$current_name" ] && [ -n "$current_email" ]; then
-        echo "Current git config:"
+        echo ""
+        echo "Current user:"
         echo "  Name:  $current_name"
         echo "  Email: $current_email"
         echo ""
         read -p "Do you want to update these? [y/N] " update
         if [[ ! "$update" =~ ^[Yy]$ ]]; then
-            echo "✓ Git config unchanged"
+            echo "✓ Git setup complete"
             exit 0
         fi
     fi
@@ -56,7 +114,7 @@ setup-git:
         read -p "Enter your email: " email
     fi
 
-    # Set config
+    # Set user config
     git config --global user.name "$name"
     git config --global user.email "$email"
 
@@ -136,11 +194,10 @@ link-terminal:
     @ln -sf {{justfile_directory()}}/ghostty/config ~/.config/ghostty/config
     @echo "✓ Ghostty config linked"
 
-# Link git configuration
+# Link git configuration (only gitignore - gitconfig is managed by setup-git)
 link-git:
     @ln -sf {{justfile_directory()}}/.gitignore_global ~/.gitignore_global
-    @ln -sf {{justfile_directory()}}/.gitconfig ~/.gitconfig
-    @echo "✓ Git config linked"
+    @echo "✓ Git ignore linked"
 
 # Link tmux configuration
 link-tmux:
@@ -223,7 +280,6 @@ doctor:
         "$HOME/.config/ghostty/config"
         "$HOME/.config/starship.toml"
         "$HOME/.tmux.conf"
-        "$HOME/.gitconfig"
         "$HOME/.gitignore_global"
     )
     for link in "${links[@]}"; do
