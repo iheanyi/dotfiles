@@ -2,16 +2,17 @@ palette = "poimandres-storm"
 
 format = """
 [](bright-mint)\
-[ ](bg:bright-mint fg:bg)\
+${custom.dirty}\
+${custom.clean}\
 [](bg:lower-mint fg:bright-mint)\
 $directory\
 [](bg:blueish-green fg:lower-mint)\
 $git_branch\
-$git_status\
 $git_state\
 [](bg:focus fg:blueish-green)\
 $git_metrics\
-[ ](fg:focus)\n$character
+$git_status\
+$character
 """
 
 [palettes.poimandres-storm]
@@ -36,9 +37,9 @@ bg = "#252b37"
 black = "#101010"
 
 [character]
-success_symbol = "[❯](purple)"
-error_symbol = "[❯](red)"
-vimcmd_symbol = "[❮](green)"
+success_symbol = "\n[❯](purple)"
+error_symbol = "\n[❯](red)"
+vimcmd_symbol = "\n[❮](green)"
 
 [battery]
 disabled = true
@@ -50,29 +51,43 @@ format = "[$duration](gray)"
 format = "[ $path ](bg:lower-mint fg:black)"
 
 [git_branch]
-format = "[ $branch](bg:blueish-green fg:off-white)"
+format = "[ $branch ](bg:blueish-green fg:off-white)"
 truncation_length = 30
 truncation_symbol = "…"
+
+[custom.dirty]
+command = "echo '•'"
+when = "git status --porcelain 2>/dev/null | head -1 | grep -q ."
+format = "[$output](bg:bright-mint fg:black)"
+shell = ["bash", "--noprofile", "--norc"]
+
+[custom.clean]
+command = "echo ' '"
+when = "git rev-parse --git-dir 2>/dev/null && test -z \"$(git status --porcelain 2>/dev/null)\""
+format = "[$output](bg:bright-mint)"
+shell = ["bash", "--noprofile", "--norc"]
 
 [git_state]
 format = "[ $state( $progress_current/$progress_total)](bg:blueish-green fg:bright-yellow)"
 
 [git_status]
-format = "[($all_status)](bg:blueish-green fg:pink)[ ](bg:blueish-green)"
-conflicted = "*"
-untracked = "*"
-modified = "*"
-staged = "*"
-renamed = "*"
-deleted = "*"
-ahead = ""
-behind = ""
-diverged = ""
+# Ahead/behind after git_metrics, in neutral gray
+format = "[($ahead_behind )](darker-gray)"
+modified = ""
+staged = ""
+untracked = ""
+renamed = ""
+deleted = ""
+conflicted = ""
+typechanged = ""
 stashed = ""
+ahead = "⇡$count"
+behind = "⇣$count"
+diverged = "⇡$ahead_count⇣$behind_count"
 
 [git_metrics]
 disabled = false
-format = "([ +$added ](bg:focus fg:bright-mint))([ -$deleted ](bg:focus fg:hot-red))"
+format = "([ +$added ](bg:focus fg:bright-mint))([ -$deleted ](bg:focus fg:hot-red))[ ](fg:focus)"
 
 [nodejs]
 disabled = true
