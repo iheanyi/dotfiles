@@ -15,7 +15,7 @@ os := if os() == "macos" { "macos" } else if os() == "linux" { "linux" } else { 
 # ============================================================================
 
 # Full installation (run this on a new machine)
-install: install-homebrew install-packages install-fish link
+install: install-homebrew install-packages install-fish install-tmux-plugins link
     @echo "✓ Installation complete! Restart your terminal."
 
 # Install Homebrew (macOS/Linux)
@@ -45,12 +45,25 @@ install-fish:
     fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
     fish -c "fisher update"
 
+# Install tmux plugin manager (TPM)
+install-tmux-plugins:
+    #!/usr/bin/env bash
+    if [ ! -d ~/.tmux/plugins/tpm ]; then
+        echo "Installing TPM..."
+        git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+    else
+        echo "TPM already installed"
+    fi
+    # Install plugins
+    ~/.tmux/plugins/tpm/bin/install_plugins || true
+
 # ============================================================================
 # Symlink Management
 # ============================================================================
 
 # Link all dotfiles to home directory
 link: link-fish link-neovim link-terminal link-git link-tmux link-starship
+    @echo "✓ All configs linked"
 
 # Link fish configuration
 link-fish:
@@ -79,7 +92,7 @@ link-terminal:
 # Link git configuration
 link-git:
     @ln -sf {{justfile_directory()}}/.gitignore_global ~/.gitignore_global
-    @git config --global core.excludesfile ~/.gitignore_global
+    @ln -sf {{justfile_directory()}}/.gitconfig ~/.gitconfig
     @echo "✓ Git config linked"
 
 # Link tmux configuration
@@ -98,7 +111,7 @@ link-starship:
 # ============================================================================
 
 # Update all packages and plugins
-update: update-brew update-fish update-neovim
+update: update-brew update-fish update-neovim update-tmux
     @echo "✓ All updates complete"
 
 # Update Homebrew packages
@@ -112,6 +125,10 @@ update-fish:
 # Update Neovim plugins
 update-neovim:
     nvim --headless "+Lazy! sync" +qa
+
+# Update tmux plugins
+update-tmux:
+    ~/.tmux/plugins/tpm/bin/update_plugins all || true
 
 # Clean up old/unused files
 clean:
@@ -128,14 +145,14 @@ backup-brew:
     @echo "✓ Brewfile updated"
 
 # ============================================================================
-# Utilities
+# Diagnostics
 # ============================================================================
 
 # Check if all tools are installed
 check:
     #!/usr/bin/env bash
     echo "Checking installed tools..."
-    tools=("fish" "nvim" "starship" "fzf" "git" "tmux" "ghostty")
+    tools=("fish" "nvim" "starship" "fzf" "git" "tmux" "ghostty" "bat" "fd" "rg" "zoxide" "direnv")
     for tool in "${tools[@]}"; do
         if command -v $tool &> /dev/null; then
             echo "✓ $tool"
@@ -143,6 +160,71 @@ check:
             echo "✗ $tool (not installed)"
         fi
     done
+
+# Diagnose common issues
+doctor:
+    #!/usr/bin/env bash
+    echo "Running diagnostics..."
+    echo ""
+    errors=0
+
+    # Check symlinks
+    echo "=== Symlinks ==="
+    links=(
+        "$HOME/.config/fish/config.fish"
+        "$HOME/.config/nvim/init.lua"
+        "$HOME/.config/ghostty/config"
+        "$HOME/.config/starship.toml"
+        "$HOME/.tmux.conf"
+        "$HOME/.gitconfig"
+        "$HOME/.gitignore_global"
+    )
+    for link in "${links[@]}"; do
+        if [ -L "$link" ]; then
+            echo "✓ $link"
+        elif [ -f "$link" ]; then
+            echo "⚠ $link (exists but not a symlink)"
+            ((errors++))
+        else
+            echo "✗ $link (missing)"
+            ((errors++))
+        fi
+    done
+    echo ""
+
+    # Check plugin managers
+    echo "=== Plugin Managers ==="
+    if [ -d "$HOME/.tmux/plugins/tpm" ]; then
+        echo "✓ TPM (tmux)"
+    else
+        echo "✗ TPM not installed (run: just install-tmux-plugins)"
+        ((errors++))
+    fi
+
+    if fish -c "type -q fisher" 2>/dev/null; then
+        echo "✓ Fisher (fish)"
+    else
+        echo "✗ Fisher not installed (run: just install-fish)"
+        ((errors++))
+    fi
+    echo ""
+
+    # Check shell
+    echo "=== Shell ==="
+    if [ "$SHELL" = "$(which fish)" ]; then
+        echo "✓ Default shell is fish"
+    else
+        echo "⚠ Default shell is $SHELL (not fish)"
+    fi
+    echo ""
+
+    # Summary
+    if [ $errors -eq 0 ]; then
+        echo "✓ All checks passed!"
+    else
+        echo "✗ Found $errors issue(s)"
+        exit 1
+    fi
 
 # Show current OS
 info:

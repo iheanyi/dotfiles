@@ -17,11 +17,22 @@ set -gx GOBIN $HOME/development/go/bin
 set -gx EDITOR nvim
 
 # FZF configuration
-set -gx FZF_DEFAULT_OPTS '--color=bg+:#3B4252,bg:#2E3440,spinner:#81A1C1,hl:#616E88,fg:#D8DEE9,header:#616E88,info:#81A1C1,pointer:#81A1C1,marker:#81A1C1,fg+:#D8DEE9,prompt:#81A1C1,hl+:#81A1C1'
-set -gx FZF_DEFAULT_COMMAND 'ag --hidden --ignore .git -g ""'
+# Colors match Nord theme
+set -gx FZF_DEFAULT_OPTS '--color=bg+:#3B4252,bg:#2E3440,spinner:#81A1C1,hl:#616E88,fg:#D8DEE9,header:#616E88,info:#81A1C1,pointer:#81A1C1,marker:#81A1C1,fg+:#D8DEE9,prompt:#81A1C1,hl+:#81A1C1 --height=40% --layout=reverse --border'
 
-# Bat theme
+# File finder (used by fzf default and Ctrl+T)
+set -gx FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git --exclude node_modules --exclude vendor --exclude .cache'
+set -gx FZF_CTRL_T_COMMAND "$FZF_DEFAULT_COMMAND"
+set -gx FZF_CTRL_T_OPTS '--preview "bat --color=always --style=numbers --line-range=:500 {}" --preview-window=right:60%'
+
+# Directory finder (Alt+C)
+set -gx FZF_ALT_C_COMMAND 'fd --type d --hidden --follow --exclude .git --exclude node_modules --exclude vendor'
+set -gx FZF_ALT_C_OPTS '--preview "eza --tree --level=2 --color=always {}"'
+
+# Bat configuration (used for cat replacement and man pager)
 set -gx BAT_THEME "base16"
+set -gx MANPAGER "sh -c 'col -bx | bat -l man -p'"
+set -gx MANROFFOPT "-c"
 
 # NVM directory
 set -gx NVM_DIR "$HOME/.nvm"

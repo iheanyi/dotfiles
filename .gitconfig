@@ -1,0 +1,92 @@
+[user]
+    # Set these in ~/.gitconfig.local
+    # name = Your Name
+    # email = your@email.com
+
+[init]
+    defaultBranch = main
+
+[core]
+    excludesfile = ~/.gitignore_global
+    editor = nvim
+    pager = diff-so-fancy | less --tabs=4 -RFX
+
+[interactive]
+    diffFilter = diff-so-fancy --patch
+
+[pull]
+    rebase = true
+
+[push]
+    default = current
+    autoSetupRemote = true
+
+[fetch]
+    prune = true
+
+[rebase]
+    autoStash = true
+
+[merge]
+    conflictstyle = diff3
+
+[diff]
+    colorMoved = default
+
+[color]
+    ui = true
+
+[color "diff-highlight"]
+    oldNormal = red bold
+    oldHighlight = red bold 52
+    newNormal = green bold
+    newHighlight = green bold 22
+
+[color "diff"]
+    meta = 11
+    frag = magenta bold
+    func = 146 bold
+    commit = yellow bold
+    old = red bold
+    new = green bold
+    whitespace = red reverse
+
+[alias]
+    # Status
+    s = status -sb
+
+    # Logging
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    ll = log --oneline
+    last = log -1 HEAD --stat
+
+    # Branches
+    co = checkout
+    cob = checkout -b
+    br = branch
+    bra = branch -a
+
+    # Commits
+    cm = commit -m
+    ca = commit --amend
+    can = commit --amend --no-edit
+
+    # Diff
+    d = diff
+    dc = diff --cached
+
+    # Undo
+    undo = reset HEAD~1 --mixed
+    unstage = reset HEAD --
+
+    # Stash
+    sl = stash list
+    sp = stash pop
+    ss = stash save
+
+    # Clean
+    cleanup = "!git branch --merged | grep -v '\\*\\|main\\|master' | xargs -n 1 git branch -d"
+
+[include]
+    # Local/private config (not in dotfiles repo)
+    path = ~/.gitconfig.local

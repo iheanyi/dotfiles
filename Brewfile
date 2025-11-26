@@ -17,6 +17,15 @@ brew "gh"
 brew "wget"
 brew "curl"
 
+# Modern CLI replacements (https://remysharp.com/2018/08/23/cli-improved)
+brew "htop"           # better top
+brew "prettyping"     # better ping
+brew "diff-so-fancy"  # better git diff
+brew "ncdu"           # better du (disk usage)
+brew "tldr"           # better man (simplified examples)
+brew "entr"           # run commands on file changes
+brew "zoxide"         # better cd/autojump
+
 # Development tools
 brew "go"
 brew "ruby"
@@ -26,7 +35,6 @@ brew "node"
 
 # Shell utilities
 brew "atuin"
-brew "autojump"
 brew "direnv"
 
 # Code formatting

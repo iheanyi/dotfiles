@@ -1,0 +1,53 @@
+# SSH Client Configuration
+# Copy to ~/.ssh/config and customize
+#
+# See: man ssh_config
+
+# Global defaults
+Host *
+    # Keep connections alive
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+
+    # Connection sharing (multiplexing) - reuse connections
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h-%p
+    ControlPersist 600
+
+    # Security
+    IdentitiesOnly yes
+    AddKeysToAgent yes
+
+    # macOS keychain integration
+    # UseKeychain yes
+
+# Example: Personal GitHub
+# Host github.com
+#     HostName github.com
+#     User git
+#     IdentityFile ~/.ssh/id_ed25519
+
+# Example: Work GitHub (if using different account)
+# Host github-work
+#     HostName github.com
+#     User git
+#     IdentityFile ~/.ssh/id_ed25519_work
+
+# Example: Jump host / bastion
+# Host bastion
+#     HostName bastion.example.com
+#     User admin
+#     IdentityFile ~/.ssh/id_ed25519
+#
+# Host internal-server
+#     HostName 10.0.0.5
+#     User deploy
+#     ProxyJump bastion
+
+# Example: Development server
+# Host dev
+#     HostName dev.example.com
+#     User deploy
+#     IdentityFile ~/.ssh/id_ed25519
+#     LocalForward 3000 localhost:3000
+#     LocalForward 5432 localhost:5432

@@ -25,6 +25,12 @@ if status is-interactive
     # Python version manager
     command -q pyenv; and pyenv init - | source
 
+    # Direnv (auto-load .envrc files)
+    command -q direnv; and direnv hook fish | source
+
+    # Zoxide (smarter cd)
+    command -q zoxide; and zoxide init fish | source
+
     # Homebrew completions (use cached HOMEBREW_PREFIX)
     if set -q HOMEBREW_PREFIX
         if test -d "$HOMEBREW_PREFIX/share/fish/completions"
@@ -33,11 +39,6 @@ if status is-interactive
         if test -d "$HOMEBREW_PREFIX/share/fish/vendor_completions.d"
             set -p fish_complete_path $HOMEBREW_PREFIX/share/fish/vendor_completions.d
         end
-    end
-
-    # Autojump (cross-platform)
-    for autojump_path in /opt/homebrew/share/autojump/autojump.fish /usr/local/share/autojump/autojump.fish /usr/share/autojump/autojump.fish
-        test -f $autojump_path; and source $autojump_path; and break
     end
 
     # Ghostty shell integration
