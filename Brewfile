@@ -1,5 +1,5 @@
-# Taps
-tap "homebrew/bundle"
+# Homebrew Bundle
+# Run: brew bundle install
 
 # Core CLI tools
 brew "fish"
@@ -26,29 +26,33 @@ brew "tldr"           # better man (simplified examples)
 brew "entr"           # run commands on file changes
 brew "zoxide"         # better cd/autojump
 
-# Development tools
-brew "go"
-brew "ruby"
+# Language version managers
 brew "rbenv"
+brew "ruby-build"     # required for rbenv to install Ruby versions
 brew "pyenv"
+
+# Languages (system-level, version managers preferred for projects)
+brew "go"
 brew "node"
 
 # Shell utilities
 brew "atuin"
 brew "direnv"
 
-# Code formatting
-brew "stylua"
-brew "prettier"
-brew "shellcheck"
-brew "black"              # Python formatter (for neovim)
-brew "gofumpt"            # Go formatter (for neovim)
+# Code formatting (for Neovim)
+brew "stylua"         # Lua
+brew "prettier"       # JS/TS/CSS/HTML/JSON
+brew "shellcheck"     # Shell scripts
+brew "black"          # Python
+brew "gofumpt"        # Go
 
-# Applications (macOS only)
+# macOS Applications
 cask "ghostty"
 cask "1password"
 cask "docker"
 cask "slack"
 cask "spotify"
 cask "raycast"
-cask "font-berkeley-mono" if system("test -d /Applications")
+
+# Fonts
+cask "font-berkeley-mono"

@@ -12,9 +12,13 @@ end
 
 # Go
 set -gx GOBIN $HOME/development/go/bin
+set -gx GOPATH $HOME/development/go
 
 # Editor
 set -gx EDITOR nvim
+
+# Python version manager (pyenv)
+set -gx PYENV_ROOT $HOME/.pyenv
 
 # FZF configuration
 # Colors match Nord theme
