@@ -1,100 +1,99 @@
-format = """
-$username\
-$hostname\
-$directory\
-$git_branch\
-$git_state\
-$git_status\
-$nodejs\
-$ruby\
-$golang\
-$rust\
-$python\
-$cmd_duration\
-$line_break\
-$character"""
+palette = "poimandres-storm"
 
-[directory]
-style = "blue"
-truncation_length = 4
-truncate_to_repo = true
+format = """
+[](bright-mint)\
+[ ](bg:bright-mint fg:bg)\
+[](bg:lower-mint fg:bright-mint)\
+$directory\
+[](bg:blueish-green fg:lower-mint)\
+$git_branch\
+$git_status\
+$git_state\
+[](bg:focus fg:blueish-green)\
+$git_metrics\
+[ ](fg:focus)\n$character
+"""
+
+[palettes.poimandres-storm]
+bright-yellow = "#fffac2"
+bright-mint = "#5de4c7"
+lower-mint = "#5fb3a1"
+blueish-green = "#42675a"
+lower-blue = "#89ddff"
+light-blue = "#add7ff"
+desaturated-blue = "#91b4d5"
+bluishGray-brighter = "#7390aa"
+hot-red = "#d0679d"
+pink = "#f087bd"
+gray = "#a6accd"
+white = "#ffffff"
+off-white = "#e4f0fb"
+darker-gray = "#868cad"
+bluish-gray = "#607487"
+selection = "#33394a"
+focus = "#404350"
+bg = "#252b37"
+black = "#101010"
 
 [character]
 success_symbol = "[❯](purple)"
 error_symbol = "[❯](red)"
 vimcmd_symbol = "[❮](green)"
 
-[git_branch]
-format = "[$branch]($style)"
-style = "bright-black"
-
-[git_status]
-format = "[[(*$conflicted$untracked$modified$staged$renamed$deleted)](218) ($ahead_behind$stashed)]($style)"
-style = "cyan"
-conflicted = "​"
-untracked = "​"
-modified = "​"
-staged = "​"
-renamed = "​"
-deleted = "​"
-stashed = "≡"
-
-[git_state]
-format = '\([$state( $progress_current/$progress_total)]($style)\) '
-style = "bright-black"
+[battery]
+disabled = true
 
 [cmd_duration]
-format = "[$duration]($style) "
-style = "yellow"
-min_time = 2_000
+format = "[$duration](gray)"
 
-# Language version indicators (only show in project directories)
+[directory]
+format = "[ $path ](bg:lower-mint fg:black)"
+
+[git_branch]
+format = "[ $branch](bg:blueish-green fg:off-white)"
+truncation_length = 30
+truncation_symbol = "…"
+
+[git_state]
+format = "[ $state( $progress_current/$progress_total)](bg:blueish-green fg:bright-yellow)"
+
+[git_status]
+format = "[($all_status)](bg:blueish-green fg:pink)[ ](bg:blueish-green)"
+conflicted = "*"
+untracked = "*"
+modified = "*"
+staged = "*"
+renamed = "*"
+deleted = "*"
+ahead = ""
+behind = ""
+diverged = ""
+stashed = ""
+
+[git_metrics]
+disabled = false
+format = "([ +$added ](bg:focus fg:bright-mint))([ -$deleted ](bg:focus fg:hot-red))"
+
 [nodejs]
-format = "[$symbol($version)]($style) "
-symbol = "⬢ "
-style = "green"
-detect_files = ["package.json", ".node-version", ".nvmrc"]
-detect_extensions = []
-detect_folders = []
+disabled = true
+
+[package]
+disabled = true
 
 [ruby]
-format = "[$symbol($version)]($style) "
-symbol = "💎 "
-style = "red"
-detect_files = ["Gemfile", ".ruby-version"]
-detect_extensions = []
-detect_folders = []
-detect_variables = []
+disabled = true
+
+[lua]
+disabled = true
 
 [golang]
-format = "[$symbol($version)]($style) "
-symbol = "🐹 "
-style = "cyan"
-detect_files = ["go.mod", "go.sum"]
-detect_extensions = []
-detect_folders = []
+disabled = true
 
 [rust]
-format = "[$symbol($version)]($style) "
-symbol = "🦀 "
-style = "red"
-detect_files = ["Cargo.toml"]
-detect_extensions = []
-detect_folders = []
+disabled = true
 
 [python]
-format = "[$symbol$virtualenv]($style) "
-symbol = "🐍 "
-style = "yellow"
-detect_files = ["requirements.txt", "pyproject.toml", ".python-version", "Pipfile"]
-detect_extensions = []
-detect_folders = []
-detect_variables = []
+disabled = true
 
 [elixir]
-format = "[$symbol($version)]($style) "
-symbol = "💧 "
-style = "purple"
-detect_files = ["mix.exs"]
-detect_extensions = []
-detect_folders = []
+disabled = true
