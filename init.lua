@@ -4,6 +4,11 @@
 -- i.e: <leader>w saves the current file
 vim.g.mapleader = ","
 
+-- Load config files
+require("config.options")
+require("config.keymaps")
+require("config.autocmds")
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -99,14 +104,14 @@ require("lazy").setup({
           end
         end
 
-        return { timeout_ms = 200, lsp_fallback = true }, on_format
+        return { timeout_ms = 200, lsp_format = "fallback" }, on_format
       end,
 
       format_after_save = function(bufnr)
         if not slow_format_filetypes[vim.bo[bufnr].filetype] then
           return
         end
-        return { lsp_fallback = true }
+        return { lsp_format = "fallback" }
       end,
 
       formatters = {
@@ -124,9 +129,9 @@ require("lazy").setup({
         ruby = { "rubocop" },
         go = { "gofumpt", "gofmt" },
         ["javascript"] = { "prettier" },
-        ["javascriptreact"] = { "prettier", "eslint" },
-        ["typescript"] = { "prettier", "eslint" },
-        ["typescriptreact"] = { "prettier", "eslint" },
+        ["javascriptreact"] = { "prettier" },
+        ["typescript"] = { "prettier" },
+        ["typescriptreact"] = { "prettier" },
         ["vue"] = { "prettier" },
         ["css"] = { "prettier" },
         ["scss"] = { "prettier" },
@@ -288,17 +293,8 @@ require("lazy").setup({
     "AndrewRadev/splitjoin.vim",
   },
 
-  -- ripgrep and rooter
-  {
-    "jremmen/vim-ripgrep",
-  },
+  -- rooter (vim-ripgrep and ack.vim removed - fzf-lua provides grep functionality)
   { "airblade/vim-rooter" },
-  {
-    "mileszs/ack.vim",
-    config = function()
-      vim.g["ackprg"] = "ag --vimgrep"
-    end,
-  },
 
   -- save my last cursor position
   {
@@ -377,10 +373,13 @@ require("lazy").setup({
   },
 
   {
-    "folke/neodev.nvim",
-    config = function()
-      require("neodev").setup()
-    end,
+    "folke/lazydev.nvim",
+    ft = "lua",
+    opts = {
+      library = {
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+      },
+    },
   },
 
   -- lsp-config
@@ -397,9 +396,8 @@ require("lazy").setup({
     config = function()
       local util = require("lspconfig/util")
 
-      -- Use default capabilities for blink-cmp (no cmp_nvim_lsp)
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities.textDocument.completion.completionItem.snippetSupport = true
+      -- Use blink.cmp capabilities for better completion support
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
 
       require("lspconfig").gopls.setup({
         capabilities = capabilities,
@@ -445,6 +443,7 @@ require("lazy").setup({
       require("lspconfig").ruby_lsp.setup({
         capabilities = capabilities,
         mason = false,
+        pattern = { "*.rb", "Gemfile", "*.rake", "Rakefile", "*.gemspec" },
         cmd = { vim.fn.expand("~/.rbenv/shims/ruby-lsp") },
       })
 
@@ -461,7 +460,7 @@ require("lazy").setup({
           -- Remove unused imports on save
           vim.api.nvim_create_autocmd({ "BufWritePre" }, {
             group = vim.api.nvim_create_augroup("ts_imports", { clear = true }),
-            pattern = { "*.tsx,*.ts" },
+            pattern = { "*.tsx", "*.ts" },
             callback = function()
               vim.lsp.buf.code_action({
                 apply = true,
@@ -477,6 +476,12 @@ require("lazy").setup({
 
       require("lspconfig").buf_ls.setup({
         capabilities = capabilities,
+      })
+
+      require("lspconfig").astro.setup({
+        capabilities = capabilities,
+        filetypes = { "astro" },
+        root_dir = util.root_pattern("astro.config.mjs", "astro.config.js", "astro.config.ts"),
       })
 
       require("lspconfig").eslint.setup({
@@ -550,6 +555,7 @@ require("lazy").setup({
           "dockerfile",
           "php_only",
           "blade",
+          "svelte",
         },
         indent = { enable = true },
         incremental_selection = {
@@ -719,172 +725,24 @@ require("lazy").setup({
       -- refer to the configuration section below
     },
   },
+
+  -- trouble.nvim for better diagnostics UI
+  {
+    "folke/trouble.nvim",
+    cmd = "Trouble",
+    keys = {
+      { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics (Trouble)" },
+      { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Buffer Diagnostics (Trouble)" },
+      { "<leader>xs", "<cmd>Trouble symbols toggle focus=false<cr>", desc = "Symbols (Trouble)" },
+      { "<leader>xq", "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix List (Trouble)" },
+    },
+    opts = {},
+  },
 })
 
-----------------
---- SETTINGS ---
-----------------
-
--- disable netrw at the very start of our init.lua, because we use nvim-tree
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
-
--- Disable Perl Provider for mason.nvim
-vim.g.loaded_perl_provider = 0
-
-vim.opt.termguicolors = true -- Enable 24-bit RGB colors
-vim.opt.number = true -- Show line numbers
-vim.opt.showmatch = true -- Highlight matching parenthesis
-vim.opt.splitright = true -- Split windows right to the current windows
-vim.opt.splitbelow = true -- Split windows below to the current windows
-vim.opt.autowrite = true -- Automatically save before :next, :make etc.
--- vim.opt.autochdir = true -- Change CWD when I open a file
-
-vim.opt.mouse = "a" -- Enable mouse support
-vim.opt.clipboard = "unnamedplus" -- Copy/paste to system clipboard
-vim.opt.swapfile = false -- Don't use swapfile
-vim.opt.ignorecase = true -- Search case insensitive...
-vim.opt.smartcase = true -- ... but not if begins with upper case
-vim.opt.completeopt = "menuone,noinsert,noselect" -- Autocomplete options
-vim.opt.textwidth = 120
-vim.opt.colorcolumn = "80"
-vim.opt.relativenumber = false
-
--- Indent Settings
--- I'm in the Spaces camp (sorry Tabs folks), so I'm using a combination of
--- settings to insert spaces all the time.
-vim.opt.expandtab = true -- expand tabs into spaces
-vim.opt.shiftwidth = 2 -- number of spaces to use for each step of indent.
-vim.opt.tabstop = 2 -- number of spaces a TAB counts for
-vim.opt.autoindent = true -- copy indent from current line when starting a new line
-vim.opt.wrap = true
-
--- Fast saving
-vim.keymap.set("n", "<Leader>s", ":write!<CR>")
-vim.keymap.set("n", "<Leader>q", ":q!<CR>", { silent = true })
-
--- Some useful quickfix shortcuts for quickfix
-vim.keymap.set("n", "<C-n>", "<cmd>cnext<CR>zz")
-vim.keymap.set("n", "<C-m>", "<cmd>cprev<CR>zz")
-vim.keymap.set("n", "<leader>a", "<cmd>cclose<CR>")
-
--- Exit on jj and jk
-vim.keymap.set("n", "j", "gj")
-vim.keymap.set("n", "k", "gk")
-
--- Exit on jj and jk
-vim.keymap.set("i", "jj", "<ESC>")
-vim.keymap.set("i", "jk", "<ESC>")
-
--- Remove search highlight
-vim.keymap.set("n", "<Leader><space>", ":nohlsearch<CR>")
-
--- Don't jump forward if I higlight and search for a word
-local function stay_star()
-  local sview = vim.fn.winsaveview()
-  local args = string.format("keepjumps keeppatterns execute %q", "sil normal! *")
-  vim.api.nvim_command(args)
-  vim.fn.winrestview(sview)
-end
-vim.keymap.set("n", "*", stay_star, { noremap = true, silent = true })
-
--- Search mappings: These will make it so that going to the next one in a
--- search will center on the line it's found in.
-vim.keymap.set("n", "n", "nzzzv", { noremap = true })
-vim.keymap.set("n", "N", "Nzzzv", { noremap = true })
-
--- We don't need this keymap, but here we are. If I do a ctrl-v and select
--- lines vertically, insert stuff, they get lost for all lines if we use
--- ctrl-c, but not if we use ESC. So just let's assume Ctrl-c is ESC.
-vim.keymap.set("i", "<C-c>", "<ESC>")
-
--- If I visually select words and paste from clipboard, don't replace my
--- clipboard with the selected word, instead keep my old word in the
--- clipboard
-vim.keymap.set("x", "p", '"_dP')
-
--- rename the word under the cursor
-vim.keymap.set("n", "<leader>rw", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
-
--- Better split switching
--- vim.keymap.set("", "<C-j>", "<C-W>j")
--- vim.keymap.set("", "<C-k>", "<C-W>k")
--- vim.keymap.set("", "<C-h>", "<C-W>h")
--- vim.keymap.set("", "<C-l>", "<C-W>l")
-
--- Visual linewise up and down by default (and use gj gk to go quicker)
-vim.keymap.set("n", "<Up>", "gk")
-vim.keymap.set("n", "<Down>", "gj")
-
--- Yanking a line should act like D and C
--- vim.keymap.set("n", "Y", "y$")
-
--- Terminal
--- Close terminal window, even if we are in insert mode
-vim.keymap.set("t", "<leader>q", "<C-\\><C-n>:q<cr>")
-
--- switch to normal mode with esc
-vim.keymap.set("t", "<ESC>", "<C-\\><C-n>")
-
--- Open terminal in vertical and horizontal split
-vim.keymap.set("n", "<leader>tv", "<cmd>vnew term://fish<CR>", { noremap = true })
-vim.keymap.set("n", "<leader>ts", "<cmd>split term://fish<CR>", { noremap = true })
-
--- Open terminal in vertical and horizontal split, inside the terminal
-vim.keymap.set("t", "<leader>tv", "<c-w><cmd>vnew term://fish<CR>", { noremap = true })
-vim.keymap.set("t", "<leader>ts", "<c-w><cmd>split term://fish<CR>", { noremap = true })
-
--- mappings to move out from terminal to other views
-vim.keymap.set("t", "<C-h>", "<C-\\><C-n><C-w>h")
-vim.keymap.set("t", "<C-j>", "<C-\\><C-n><C-w>j")
-vim.keymap.set("t", "<C-k>", "<C-\\><C-n><C-w>k")
-vim.keymap.set("t", "<C-l>", "<C-\\><C-n><C-w>l")
-
--- we don't use netrw (because of nvim-tree), hence re-implement gx to open
--- links in browser
-vim.keymap.set("n", "gx", '<Cmd>call jobstart(["open", expand("<cfile>")], {"detach": v:true})<CR>')
-
--- automatically switch to insert mode when entering a Term buffer
-vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "TermOpen" }, {
-  group = vim.api.nvim_create_augroup("openTermInsert", {}),
-  callback = function(args)
-    -- we don't use vim.startswith() and look for test:// because of vim-test
-    -- vim-test starts tests in a terminal, which we want to keep in normal mode
-    if vim.endswith(vim.api.nvim_buf_get_name(args.buf), "fish") then
-      vim.cmd("startinsert")
-    end
-  end,
-})
-
--- Open help window in a vertical split to the right.
-vim.api.nvim_create_autocmd("BufWinEnter", {
-  group = vim.api.nvim_create_augroup("help_window_right", {}),
-  pattern = { "*.txt" },
-  callback = function()
-    if vim.o.filetype == "help" then
-      vim.cmd.wincmd("L")
-    end
-  end,
-})
-
--- git.nvim
-vim.keymap.set("n", "<leader>gb", '<CMD>lua require("git.blame").blame()<CR>')
-vim.keymap.set("n", "<leader>go", "<CMD>lua require('git.browse').open(false)<CR>")
-vim.keymap.set("x", "<leader>go", ":<C-u> lua require('git.browse').open(true)<CR>")
-
--- old habits
-vim.api.nvim_create_user_command("GBrowse", 'lua require("git.browse").open(true)<CR>', {
-  range = true,
-  bang = true,
-  nargs = "*",
-})
-
-vim.api.nvim_create_user_command("GBlame", 'lua require("git.blame").blame()<CR>', {})
-vim.api.nvim_create_user_command("Gblame", 'lua require("git.blame").blame()<CR>', {})
-
--- File-tree mappings
-vim.keymap.set("n", "<leader>n", ":NvimTreeToggle<CR>", { noremap = true })
-vim.keymap.set("n", "<leader>e", ":NvimTreeFindFile<CR>f", { noremap = true })
+------------------
+--- POST-SETUP ---
+------------------
 
 -- === FZF-LUA KEYMAPS ===
 local fzf = require("fzf-lua")
@@ -903,61 +761,8 @@ vim.keymap.set("n", "<leader>ch", fzf.command_history, { desc = "FzfLua Command 
 
 vim.keymap.set("n", "<leader>F", ":FzfLua files<CR>")
 
--- Go to next tab
-vim.keymap.set("n", "<leader>]", ":tabnext<CR>", { noremap = true, silent = true, desc = "Next Tab" })
-
--- Go to previous tab
-vim.keymap.set("n", "<leader>[", ":tabprevious<CR>", { noremap = true, silent = true, desc = "Previous Tab" })
-
 -- vim-go
 vim.keymap.set("n", "<leader>b", build_go_files)
-
--- disable diagnostics, I didn't like them
--- vim.lsp.handlers["textDocument/publishDiagnostics"] = function() end
-
--- Go uses gofmt, which uses tabs for indentation and spaces for aligment.
--- Hence override our indentation rules.
-vim.api.nvim_create_autocmd("Filetype", {
-  group = vim.api.nvim_create_augroup("setIndent", { clear = true }),
-  pattern = { "go" },
-  command = "setlocal noexpandtab tabstop=4 shiftwidth=4",
-})
-
--- Update configuration for Markdown
-vim.api.nvim_create_autocmd("Filetype", {
-  group = vim.api.nvim_create_augroup("setIndent", { clear = true }),
-  pattern = { "md" },
-  command = "setlocal expandtab tabstop=2 shiftwidth=2",
-})
-
--- Run gofmt/gofmpt, import packages automatically on save
-vim.api.nvim_create_autocmd("BufWritePre", {
-  group = vim.api.nvim_create_augroup("setGoFormatting", { clear = true }),
-  pattern = "*.go",
-  callback = function()
-    local params = vim.lsp.util.make_range_params()
-    params.context = { only = { "source.organizeImports" } }
-    local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 2000)
-    for _, res in pairs(result or {}) do
-      for _, r in pairs(res.result or {}) do
-        if r.edit then
-          vim.lsp.util.apply_workspace_edit(r.edit, "utf-16")
-        else
-          vim.lsp.buf.execute_command(r.command)
-        end
-      end
-    end
-
-    vim.lsp.buf.format()
-  end,
-})
-
-vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = "*.rb",
-  callback = function()
-    vim.lsp.buf.format()
-  end,
-})
 
 -- Use LspAttach autocommand to only map the following keys
 -- after the language server attaches to the current buffer
@@ -988,42 +793,3 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
   end,
 })
-
--- automatically resize all vim buffers if I resize the terminal window
-vim.api.nvim_command("autocmd VimResized * wincmd =")
-
--- https://github.com/neovim/neovim/issues/21771
-local exitgroup = vim.api.nvim_create_augroup("setDir", { clear = true })
-vim.api.nvim_create_autocmd("DirChanged", {
-  group = exitgroup,
-  pattern = { "*" },
-  command = [[call chansend(v:stderr, printf("\033]7;file://%s\033\\", v:event.cwd))]],
-})
-
-vim.api.nvim_create_autocmd("VimLeave", {
-  group = exitgroup,
-  pattern = { "*" },
-  command = [[call chansend(v:stderr, "\033]7;\033\\")]],
-})
-
--- put quickfix window always to the bottom
-local qfgroup = vim.api.nvim_create_augroup("changeQuickfix", { clear = true })
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "qf",
-  group = qfgroup,
-  command = "wincmd J",
-})
-
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "qf",
-  group = qfgroup,
-  command = "setlocal wrap",
-})
-
--- highlight yanked text for 200ms using the "Visual" highlight group
-vim.cmd([[
-augroup highlight_yank
-autocmd!
-au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=200})
-augroup END
-]])
