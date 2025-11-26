@@ -382,24 +382,48 @@ require("lazy").setup({
     },
   },
 
-  -- lsp-config
+  -- Mason for installing LSP servers
+  {
+    "mason-org/mason.nvim",
+    opts = {},
+  },
   {
     "mason-org/mason-lspconfig.nvim",
     opts = {
       ensure_installed = { "lua_ls", "ts_ls", "ruby_lsp", "gopls", "buf_ls", "eslint" },
     },
     dependencies = {
-      { "mason-org/mason.nvim", opts = {} },
-      "neovim/nvim-lspconfig",
-      -- nvim-cmp LSP capabilities removed for blink-cmp
+      "mason-org/mason.nvim",
     },
-    config = function()
-      local util = require("lspconfig/util")
+  },
 
+  -- LSP configuration using Neovim 0.11+ native API (vim.lsp.config)
+  {
+    "Saghen/blink.cmp", -- Just to ensure blink.cmp loads first for capabilities
+    optional = true,
+  },
+  {
+    "neovim/nvim-lspconfig", -- Still needed for filetype detection and root_dir utilities
+    event = { "BufReadPre", "BufNewFile" },
+    config = function()
       -- Use blink.cmp capabilities for better completion support
       local capabilities = require("blink.cmp").get_lsp_capabilities()
 
-      require("lspconfig").gopls.setup({
+      -- Helper to get root directory patterns
+      local function root_pattern(...)
+        local patterns = { ... }
+        return function(fname)
+          for _, pattern in ipairs(patterns) do
+            local match = vim.fs.find(pattern, { path = fname, upward = true })[1]
+            if match then
+              return vim.fn.fnamemodify(match, ":h")
+            end
+          end
+        end
+      end
+
+      -- Configure LSP servers using Neovim 0.11 native API
+      vim.lsp.config("gopls", {
         capabilities = capabilities,
         flags = { debounce_text_changes = 200 },
         settings = {
@@ -440,14 +464,13 @@ require("lazy").setup({
         },
       })
 
-      require("lspconfig").ruby_lsp.setup({
+      vim.lsp.config("ruby_lsp", {
         capabilities = capabilities,
-        mason = false,
-        pattern = { "*.rb", "Gemfile", "*.rake", "Rakefile", "*.gemspec" },
         cmd = { vim.fn.expand("~/.rbenv/shims/ruby-lsp") },
+        filetypes = { "ruby", "eruby" },
       })
 
-      require("lspconfig").ts_ls.setup({
+      vim.lsp.config("ts_ls", {
         capabilities = capabilities,
         init_options = {
           hostInfo = "neovim",
@@ -456,45 +479,24 @@ require("lazy").setup({
           },
         },
         single_file_support = false,
-        on_attach = function()
-          -- Remove unused imports on save
-          vim.api.nvim_create_autocmd({ "BufWritePre" }, {
-            group = vim.api.nvim_create_augroup("ts_imports", { clear = true }),
-            pattern = { "*.tsx", "*.ts" },
-            callback = function()
-              vim.lsp.buf.code_action({
-                apply = true,
-                context = {
-                  only = { "source.removeUnused.ts" },
-                  diagnostics = {},
-                },
-              })
-            end,
-          })
-        end,
       })
 
-      require("lspconfig").buf_ls.setup({
+      vim.lsp.config("buf_ls", {
         capabilities = capabilities,
       })
 
-      require("lspconfig").astro.setup({
+      vim.lsp.config("astro", {
         capabilities = capabilities,
         filetypes = { "astro" },
-        root_dir = util.root_pattern("astro.config.mjs", "astro.config.js", "astro.config.ts"),
+        root_dir = root_pattern("astro.config.mjs", "astro.config.js", "astro.config.ts"),
       })
 
-      require("lspconfig").eslint.setup({
+      vim.lsp.config("eslint", {
         capabilities = capabilities,
-        on_attach = function(_, bufnr)
-          vim.api.nvim_create_autocmd("BufWritePre", {
-            buffer = bufnr,
-            command = "EslintFixAll",
-          })
-        end,
       })
 
-      require("lspconfig").lua_ls.setup({
+      vim.lsp.config("lua_ls", {
+        capabilities = capabilities,
         settings = {
           Lua = {
             diagnostics = {
@@ -502,6 +504,35 @@ require("lazy").setup({
             },
           },
         },
+      })
+
+      -- Enable all configured LSP servers
+      vim.lsp.enable({ "gopls", "ruby_lsp", "ts_ls", "buf_ls", "astro", "eslint", "lua_ls" })
+
+      -- ESLint fix on save
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        pattern = { "*.js", "*.jsx", "*.ts", "*.tsx" },
+        callback = function(args)
+          local clients = vim.lsp.get_clients({ bufnr = args.buf, name = "eslint" })
+          if #clients > 0 then
+            vim.cmd("EslintFixAll")
+          end
+        end,
+      })
+
+      -- TypeScript remove unused imports on save
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        group = vim.api.nvim_create_augroup("ts_imports", { clear = true }),
+        pattern = { "*.tsx", "*.ts" },
+        callback = function()
+          vim.lsp.buf.code_action({
+            apply = true,
+            context = {
+              only = { "source.removeUnused.ts" },
+              diagnostics = {},
+            },
+          })
+        end,
       })
     end,
   },
