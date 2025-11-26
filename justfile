@@ -15,8 +15,55 @@ os := if os() == "macos" { "macos" } else if os() == "linux" { "linux" } else { 
 # ============================================================================
 
 # Full installation (run this on a new machine)
-install: install-homebrew install-packages install-fish install-tmux-plugins link
+install: install-homebrew install-packages install-fish install-tmux-plugins link setup-git
     @echo "✓ Installation complete! Restart your terminal."
+
+# Configure git user name and email
+setup-git:
+    #!/usr/bin/env bash
+    echo "=== Git Configuration ==="
+
+    # Check if already configured
+    current_name=$(git config --global user.name 2>/dev/null || echo "")
+    current_email=$(git config --global user.email 2>/dev/null || echo "")
+
+    if [ -n "$current_name" ] && [ -n "$current_email" ]; then
+        echo "Current git config:"
+        echo "  Name:  $current_name"
+        echo "  Email: $current_email"
+        echo ""
+        read -p "Do you want to update these? [y/N] " update
+        if [[ ! "$update" =~ ^[Yy]$ ]]; then
+            echo "✓ Git config unchanged"
+            exit 0
+        fi
+    fi
+
+    # Prompt for name
+    echo ""
+    if [ -n "$current_name" ]; then
+        read -p "Enter your name [$current_name]: " name
+        name=${name:-$current_name}
+    else
+        read -p "Enter your name: " name
+    fi
+
+    # Prompt for email
+    if [ -n "$current_email" ]; then
+        read -p "Enter your email [$current_email]: " email
+        email=${email:-$current_email}
+    else
+        read -p "Enter your email: " email
+    fi
+
+    # Set config
+    git config --global user.name "$name"
+    git config --global user.email "$email"
+
+    echo ""
+    echo "✓ Git configured:"
+    echo "  Name:  $(git config --global user.name)"
+    echo "  Email: $(git config --global user.email)"
 
 # Install Homebrew (macOS/Linux)
 install-homebrew:
