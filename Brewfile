@@ -41,6 +41,8 @@ brew "direnv"
 brew "stylua"
 brew "prettier"
 brew "shellcheck"
+brew "black"              # Python formatter (for neovim)
+brew "gofumpt"            # Go formatter (for neovim)
 
 # Applications (macOS only)
 cask "ghostty"
