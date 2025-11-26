@@ -49,10 +49,9 @@ brew "gofumpt"        # Go
 # macOS Applications
 cask "ghostty"
 cask "1password"
-cask "docker"
+cask "orbstack"          # Docker alternative (lighter, faster)
 cask "slack"
 cask "spotify"
 cask "raycast"
 
-# Fonts
-cask "font-berkeley-mono"
+# Fonts (install manually: Berkeley Mono is a paid font from berkeleygraphics.com)
