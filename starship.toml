@@ -45,7 +45,7 @@ disabled = true
 format = "[$duration](gray)"
 
 [directory]
-format = "[ $path ](bg:lower-mint fg:black)"
+format = "[](bright-mint)[ ](bg:bright-mint)[](bg:lower-mint fg:bright-mint)[ $path ](bg:lower-mint fg:black)"
 
 [git_branch]
 format = "[ $branch ](bg:blueish-green fg:off-white)"
