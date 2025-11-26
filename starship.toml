@@ -1,16 +1,13 @@
 palette = "poimandres-storm"
 
 format = """
-[](bright-mint)\
-${custom.dirty}\
-${custom.clean}\
-[](bg:lower-mint fg:bright-mint)\
 $directory\
 [](bg:blueish-green fg:lower-mint)\
 $git_branch\
 $git_state\
 [](bg:focus fg:blueish-green)\
 $git_metrics\
+${custom.git_dirty}\
 $git_status\
 $character
 """
@@ -55,16 +52,11 @@ format = "[ $branch ](bg:blueish-green fg:off-white)"
 truncation_length = 30
 truncation_symbol = "…"
 
-[custom.dirty]
-command = "echo '•'"
-when = "git status --porcelain 2>/dev/null | head -1 | grep -q ."
-format = "[$output](bg:bright-mint fg:black)"
-shell = ["bash", "--noprofile", "--norc"]
-
-[custom.clean]
-command = "echo ' '"
-when = "git rev-parse --git-dir 2>/dev/null && test -z \"$(git status --porcelain 2>/dev/null)\""
-format = "[$output](bg:bright-mint)"
+[custom.git_dirty]
+# Shows * after git_metrics when there are uncommitted changes
+command = "echo '*'"
+when = "git status --porcelain 2>/dev/null | grep -q ."
+format = "[](hot-red)[$output](bg:hot-red fg:black)[](fg:hot-red)"
 shell = ["bash", "--noprofile", "--norc"]
 
 [git_state]
@@ -87,7 +79,7 @@ diverged = "⇡$ahead_count⇣$behind_count"
 
 [git_metrics]
 disabled = false
-format = "([ +$added ](bg:focus fg:bright-mint))([ -$deleted ](bg:focus fg:hot-red))[ ](fg:focus)"
+format = "([ +$added ](bg:focus fg:bright-mint))([ -$deleted ](bg:focus fg:hot-red))[](fg:focus)"
 
 [nodejs]
 disabled = true
