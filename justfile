@@ -226,6 +226,96 @@ doctor:
         exit 1
     fi
 
+# Validate all configuration files
+lint:
+    #!/usr/bin/env bash
+    echo "Validating configuration files..."
+    errors=0
+
+    # Fish configs
+    echo ""
+    echo "=== Fish Shell ==="
+    for f in {{justfile_directory()}}/config.fish {{justfile_directory()}}/fish/conf.d/*.fish; do
+        if fish -n "$f" 2>/dev/null; then
+            echo "✓ $(basename $f)"
+        else
+            echo "✗ $(basename $f)"
+            fish -n "$f"
+            ((errors++))
+        fi
+    done
+
+    # Neovim config
+    echo ""
+    echo "=== Neovim ==="
+    if nvim --headless -c "lua print('ok')" -c "qa" 2>&1 | grep -q "ok"; then
+        echo "✓ init.lua"
+    else
+        echo "✗ init.lua"
+        nvim --headless -c "qa" 2>&1 | head -5
+        ((errors++))
+    fi
+
+    # Starship
+    echo ""
+    echo "=== Starship ==="
+    if STARSHIP_LOG=error starship prompt 2>&1 | grep -qi "error"; then
+        echo "✗ starship.toml has errors"
+        ((errors++))
+    else
+        echo "✓ starship.toml"
+    fi
+
+    # Tmux (use separate socket to avoid killing active sessions)
+    echo ""
+    echo "=== Tmux ==="
+    if tmux -L lint-test -f {{justfile_directory()}}/.tmux.conf start-server \; kill-server 2>&1 | grep -qi "error\|invalid\|unknown"; then
+        echo "✗ .tmux.conf has errors"
+        tmux -L lint-test -f {{justfile_directory()}}/.tmux.conf start-server \; kill-server 2>&1 | head -5
+        ((errors++))
+    else
+        echo "✓ .tmux.conf"
+    fi
+
+    # Brewfile
+    echo ""
+    echo "=== Brewfile ==="
+    if brew bundle check --file={{justfile_directory()}}/Brewfile 2>&1 | grep -q "satisfied"; then
+        echo "✓ Brewfile (all dependencies satisfied)"
+    else
+        echo "⚠ Brewfile (some dependencies not installed)"
+    fi
+
+    # Shell scripts
+    echo ""
+    echo "=== Shell Scripts ==="
+    if command -v shellcheck &> /dev/null; then
+        # Only check if there are shell scripts
+        if ls {{justfile_directory()}}/*.sh 2>/dev/null; then
+            for f in {{justfile_directory()}}/*.sh; do
+                if shellcheck "$f" 2>/dev/null; then
+                    echo "✓ $(basename $f)"
+                else
+                    echo "✗ $(basename $f)"
+                    ((errors++))
+                fi
+            done
+        else
+            echo "✓ No shell scripts to check"
+        fi
+    else
+        echo "⚠ shellcheck not installed (skipping)"
+    fi
+
+    # Summary
+    echo ""
+    if [ $errors -eq 0 ]; then
+        echo "✓ All configs valid!"
+    else
+        echo "✗ Found $errors error(s)"
+        exit 1
+    fi
+
 # Show current OS
 info:
     @echo "OS: {{os}}"
