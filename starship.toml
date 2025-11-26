@@ -48,39 +48,53 @@ format = "[$duration]($style) "
 style = "yellow"
 min_time = 2_000
 
-# Language version indicators (only show when relevant files detected)
+# Language version indicators (only show in project directories)
 [nodejs]
 format = "[$symbol($version)]($style) "
 symbol = "⬢ "
 style = "green"
 detect_files = ["package.json", ".node-version", ".nvmrc"]
+detect_extensions = []
+detect_folders = []
 
 [ruby]
 format = "[$symbol($version)]($style) "
 symbol = "💎 "
 style = "red"
 detect_files = ["Gemfile", ".ruby-version"]
+detect_extensions = []
+detect_folders = []
+detect_variables = []
 
 [golang]
 format = "[$symbol($version)]($style) "
 symbol = "🐹 "
 style = "cyan"
 detect_files = ["go.mod", "go.sum"]
+detect_extensions = []
+detect_folders = []
 
 [rust]
 format = "[$symbol($version)]($style) "
 symbol = "🦀 "
 style = "red"
 detect_files = ["Cargo.toml"]
+detect_extensions = []
+detect_folders = []
 
 [python]
 format = "[$symbol$virtualenv]($style) "
 symbol = "🐍 "
 style = "yellow"
 detect_files = ["requirements.txt", "pyproject.toml", ".python-version", "Pipfile"]
+detect_extensions = []
+detect_folders = []
+detect_variables = []
 
 [elixir]
 format = "[$symbol($version)]($style) "
 symbol = "💧 "
 style = "purple"
 detect_files = ["mix.exs"]
+detect_extensions = []
+detect_folders = []
