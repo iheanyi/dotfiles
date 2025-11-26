@@ -1,0 +1,23 @@
+# Private fish configuration - copy to ~/.private.fish
+# This file is sourced by config.fish if it exists
+# Add machine-specific or sensitive configuration here
+
+# API tokens and secrets
+# set -gx GITHUB_TOKEN "your-github-token"
+# set -gx OPENAI_API_KEY "your-openai-key"
+# set -gx ANTHROPIC_API_KEY "your-anthropic-key"
+
+# Work-specific paths
+# set -gx WORK_DIR ~/work
+# fish_add_path $WORK_DIR/bin
+
+# Machine-specific aliases
+# alias work="cd $WORK_DIR"
+
+# Custom prompt modifications
+# set -gx STARSHIP_CONFIG ~/.config/starship-work.toml
+
+# Proxy settings (if needed)
+# set -gx HTTP_PROXY "http://proxy.company.com:8080"
+# set -gx HTTPS_PROXY "http://proxy.company.com:8080"
+# set -gx NO_PROXY "localhost,127.0.0.1,.company.com"

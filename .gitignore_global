@@ -1,5 +1,66 @@
+# Editors
 *.swp
 *.swo
+*~
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# OS generated
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Temp files
 tmp/
+temp/
+*.tmp
+*.temp
+
+# Dependencies
 node_modules/
 bower_components/
+vendor/
+.bundle/
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.envrc
+
+# Secrets (never commit these)
+*.pem
+*.key
+credentials.json
+secrets.yaml
+secrets.yml
+
+# Coverage reports
+coverage/
+.coverage
+htmlcov/
+.nyc_output/
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

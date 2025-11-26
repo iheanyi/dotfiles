@@ -35,8 +35,10 @@ if status is-interactive
         end
     end
 
-    # Autojump
-    test -f /opt/homebrew/share/autojump/autojump.fish; and source /opt/homebrew/share/autojump/autojump.fish
+    # Autojump (cross-platform)
+    for autojump_path in /opt/homebrew/share/autojump/autojump.fish /usr/local/share/autojump/autojump.fish /usr/share/autojump/autojump.fish
+        test -f $autojump_path; and source $autojump_path; and break
+    end
 
     # Ghostty shell integration
     if set -q GHOSTTY_RESOURCES_DIR

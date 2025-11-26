@@ -1,8 +1,13 @@
 # Environment variables
 
-# Ghostty resources
+# Ghostty resources (cross-platform)
 if test -z "$GHOSTTY_RESOURCES_DIR"
-    set -gx GHOSTTY_RESOURCES_DIR /Applications/Ghostty.app/Contents/Resources/ghostty
+    switch (uname)
+        case Darwin
+            set -gx GHOSTTY_RESOURCES_DIR /Applications/Ghostty.app/Contents/Resources/ghostty
+        case Linux
+            test -d /usr/share/ghostty; and set -gx GHOSTTY_RESOURCES_DIR /usr/share/ghostty
+    end
 end
 
 # Go

@@ -1,0 +1,36 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Shell scripts
+*.sh text eol=lf
+*.fish text eol=lf
+
+# Config files
+*.conf text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+
+# Lua
+*.lua text eol=lf diff=lua
+
+# Documentation
+*.md text eol=lf diff=markdown
+
+# Lock files - treat as binary
+*.lock binary
+package-lock.json binary
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+
+# Fonts
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
