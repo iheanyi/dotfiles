@@ -29,7 +29,7 @@ if status is-interactive
     command -q direnv; and direnv hook fish | source
 
     # Zoxide (smarter cd)
-    command -q zoxide; and zoxide init fish | source
+    command -q zoxide; and zoxide init fish --cmd j | source
 
     # Homebrew completions (use cached HOMEBREW_PREFIX)
     if set -q HOMEBREW_PREFIX
