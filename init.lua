@@ -9,6 +9,12 @@ require("config.options")
 require("config.keymaps")
 require("config.autocmds")
 
+-- Load private/work-specific config if available (gitignored)
+local private_ok, private = pcall(require, "private")
+if not private_ok then
+  private = {}
+end
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -35,8 +41,8 @@ end
 
 local slow_format_filetypes = {}
 
--- Plugins
-require("lazy").setup({
+-- Build plugin list
+local plugins = {
   {
     "JoosepAlviste/nvim-ts-context-commentstring",
     config = function()
@@ -78,6 +84,12 @@ require("lazy").setup({
     "nvim-lualine/lualine.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
+      -- Build lualine_x section with optional status
+      local lualine_x = { "filetype" }
+      if private.lualine_x then
+        lualine_x = vim.list_extend(vim.deepcopy(private.lualine_x), lualine_x)
+      end
+
       require("lualine").setup({
         options = { theme = "auto" },
         sections = {
@@ -88,6 +100,7 @@ require("lazy").setup({
               path = 2, -- 0 = just filename, 1 = relative path, 2 = absolute path
             },
           },
+          lualine_x = lualine_x,
         },
       })
     end,
@@ -96,59 +109,98 @@ require("lazy").setup({
   -- formatter
   {
     "stevearc/conform.nvim",
-    opts = {
-      format_on_save = function(bufnr)
-        if slow_format_filetypes[vim.bo[bufnr].filetype] then
-          return
-        end
-        local function on_format(err)
-          if err and err:match("timeout$") then
-            slow_format_filetypes[vim.bo[bufnr].filetype] = true
-          end
-        end
-
-        return { timeout_ms = 200, lsp_format = "fallback" }, on_format
-      end,
-
-      format_after_save = function(bufnr)
-        if not slow_format_filetypes[vim.bo[bufnr].filetype] then
-          return
-        end
-        return { lsp_format = "fallback" }
-      end,
-
-      formatters = {
-        stylua = {
-          prepend_args = { "--indent-width", 2, "--indent-type", "Spaces" },
-        },
-        rubocop = {
-          prepend_args = { "--force-exclusion" },
-        },
-      },
-
-      formatters_by_ft = {
+    config = function()
+      -- Base formatters_by_ft
+      local formatters_by_ft = {
         lua = { "stylua" },
         python = { "black" },
         ruby = { "rubocop" },
         go = { "gofumpt", "gofmt" },
-        ["javascript"] = { "prettier" },
-        ["javascriptreact"] = { "prettier" },
-        ["typescript"] = { "prettier" },
-        ["typescriptreact"] = { "prettier" },
-        ["vue"] = { "prettier" },
-        ["css"] = { "prettier" },
-        ["scss"] = { "prettier" },
-        ["less"] = { "prettier" },
-        ["html"] = { "prettier" },
-        ["json"] = { "prettier" },
-        ["jsonc"] = { "prettier" },
-        ["yaml"] = { "prettier" },
-        ["markdown"] = { "prettier" },
+        javascript = { "prettier" },
+        javascriptreact = { "prettier" },
+        typescript = { "prettier" },
+        typescriptreact = { "prettier" },
+        vue = { "prettier" },
+        css = { "prettier" },
+        scss = { "prettier" },
+        less = { "prettier" },
+        html = { "prettier" },
+        json = { "prettier" },
+        jsonc = { "prettier" },
+        yaml = { "prettier" },
+        markdown = { "prettier" },
         ["markdown.mdx"] = { "prettier" },
-        ["graphql"] = { "prettier" },
-        ["handlebars"] = { "prettier" },
-      },
-    },
+        graphql = { "prettier" },
+        handlebars = { "prettier" },
+      }
+
+      -- Merge private/work formatters if available
+      if private.formatters_by_ft then
+        formatters_by_ft = vim.tbl_extend("force", formatters_by_ft, private.formatters_by_ft)
+      end
+
+      require("conform").setup({
+        format_on_save = function(bufnr)
+          if slow_format_filetypes[vim.bo[bufnr].filetype] then
+            return
+          end
+          local function on_format(err)
+            if err and err:match("timeout$") then
+              slow_format_filetypes[vim.bo[bufnr].filetype] = true
+            end
+          end
+
+          return { timeout_ms = 200, lsp_format = "fallback" }, on_format
+        end,
+
+        format_after_save = function(bufnr)
+          if not slow_format_filetypes[vim.bo[bufnr].filetype] then
+            return
+          end
+          return { lsp_format = "fallback" }
+        end,
+
+        formatters = {
+          stylua = {
+            prepend_args = { "--indent-width", 2, "--indent-type", "Spaces" },
+          },
+          rubocop = {
+            prepend_args = { "--force-exclusion" },
+          },
+        },
+
+        formatters_by_ft = formatters_by_ft,
+      })
+    end,
+  },
+
+  -- linter
+  {
+    "mfussenegger/nvim-lint",
+    config = function()
+      local lint = require("lint")
+
+      -- Base linters_by_ft
+      lint.linters_by_ft = {
+        -- Add your default linters here
+      }
+
+      -- Merge private/work linters if available
+      if private.linters_by_ft then
+        lint.linters_by_ft = vim.tbl_extend("force", lint.linters_by_ft, private.linters_by_ft)
+      end
+
+      -- Setup lint autocmds (use private config if available, otherwise basic)
+      if private.setup_lint then
+        private.setup_lint()
+      else
+        vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost" }, {
+          callback = function()
+            lint.try_lint()
+          end,
+        })
+      end
+    end,
   },
 
   -- fzf-lua: Fuzzy finder and picker
@@ -183,22 +235,105 @@ require("lazy").setup({
   -- search selection via *
   { "bronson/vim-visual-star-search" },
 
-  -- testing framework
+  -- testing framework (neotest)
   {
-    "vim-test/vim-test",
+    "nvim-neotest/neotest",
+    dependencies = {
+      "nvim-neotest/nvim-nio",
+      "nvim-lua/plenary.nvim",
+      "nvim-treesitter/nvim-treesitter",
+      "antoinemadec/FixCursorHold.nvim",
+      -- Language adapters
+      "nvim-neotest/neotest-go",
+      "olimorris/neotest-rspec",
+      "nvim-neotest/neotest-jest",
+      "stevearc/overseer.nvim",
+    },
     keys = {
-      { "<leader>tn", ":TestNearest<CR>", { noremap = true, silent = true }, desc = "Test Nearest" },
-      { "<leader>tf", ":TestFile<CR>", { noremap = true, silent = true }, desc = "Test File" },
-      { "<leader>ta", ":TestSuite<CR>", { noremap = true, silent = true }, desc = "Test Suite" },
-      { "<leader>tl", ":TestLast<CR>", { noremap = true, silent = true }, desc = "Test Last" },
+      {
+        "<leader>tn",
+        function()
+          require("neotest").run.run()
+        end,
+        desc = "Test Nearest",
+      },
+      {
+        "<leader>tf",
+        function()
+          require("neotest").run.run(vim.fn.expand("%"))
+        end,
+        desc = "Test File",
+      },
+      {
+        "<leader>tl",
+        function()
+          require("neotest").run.run_last()
+        end,
+        desc = "Test Last",
+      },
+      {
+        "<leader>ta",
+        function()
+          require("neotest").summary.toggle()
+        end,
+        desc = "Test All (Summary)",
+      },
+      {
+        "<leader>to",
+        function()
+          require("neotest").output.open({ enter = true })
+        end,
+        desc = "Test Output",
+      },
+      {
+        "<leader>tO",
+        function()
+          require("neotest").output_panel.toggle()
+        end,
+        desc = "Test Output Panel",
+      },
+      {
+        "<leader>tS",
+        function()
+          require("neotest").run.stop()
+        end,
+        desc = "Test Stop",
+      },
     },
     config = function()
-      vim.g["test#strategy"] = "neovim"
-      vim.g["test#neovim#start_normal"] = "1"
-      vim.g["test#ruby#rails#options"] = "--verbose"
-      vim.g["test#ruby#minitest#options"] = "--verbose"
-      vim.g["test#javascript#jest#options"] = "--verbose"
-      vim.g["test#go#gotest#options"] = "-v"
+      -- Build adapters list
+      local adapters = {
+        require("neotest-go"),
+        require("neotest-rspec"),
+        require("neotest-jest")({
+          jestCommand = "npm test --",
+          cwd = function()
+            return vim.fn.getcwd()
+          end,
+        }),
+      }
+
+      -- Add private/work adapters if available
+      if private.get_neotest_adapters then
+        local private_adapters = private.get_neotest_adapters()
+        for _, adapter in ipairs(private_adapters) do
+          table.insert(adapters, adapter)
+        end
+      end
+
+      require("neotest").setup({
+        adapters = adapters,
+        status = { virtual_text = true },
+        output = { open_on_run = false },
+        quickfix = {
+          open = function()
+            vim.cmd("copen")
+          end,
+        },
+        consumers = {
+          overseer = require("neotest.consumers.overseer"),
+        },
+      })
     end,
   },
 
@@ -510,7 +645,23 @@ require("lazy").setup({
       })
 
       -- Enable all configured LSP servers
-      vim.lsp.enable({ "gopls", "ruby_lsp", "ts_ls", "buf_ls", "astro", "eslint", "lua_ls" })
+      -- Note: When private config is loaded, it may provide custom LSP wrappers
+      -- that replace the base servers for better monorepo support
+      local base_servers = { "gopls", "ruby_lsp", "ts_ls", "buf_ls", "astro", "eslint", "lua_ls" }
+
+      if private.setup_lsp then
+        -- Private config may have its own gopls and ruby wrappers, so exclude the base ones
+        base_servers = vim.tbl_filter(function(server)
+          return server ~= "gopls" and server ~= "ruby_lsp"
+        end, base_servers)
+      end
+
+      vim.lsp.enable(base_servers)
+
+      -- Enable private/work LSP servers if available
+      if private.setup_lsp then
+        private.setup_lsp()
+      end
 
       -- ESLint fix on save
       vim.api.nvim_create_autocmd("BufWritePre", {
@@ -772,7 +923,43 @@ require("lazy").setup({
     },
     opts = {},
   },
-})
+
+  -- Git commands
+  {
+    "tpope/vim-fugitive",
+    dependencies = { "tpope/vim-rhubarb" },
+    init = function()
+      -- Support GitHub enterprise (configured in private config if needed)
+      if private.github_enterprise_urls then
+        vim.g.github_enterprise_urls = private.github_enterprise_urls
+      end
+    end,
+  },
+
+  -- Task runner
+  {
+    "stevearc/overseer.nvim",
+    opts = {
+      templates = { "builtin" },
+    },
+    config = function(_, opts)
+      require("overseer").setup(opts)
+      vim.keymap.set("n", "<leader>ot", "<cmd>OverseerToggle<CR>", { desc = "[O]verseer [T]oggle" })
+      vim.keymap.set("n", "<leader>or", "<cmd>OverseerRun<CR>", { desc = "[O]verseer [R]un" })
+      vim.keymap.set("n", "<leader>oq", "<cmd>OverseerQuickAction<CR>", { desc = "[O]verseer [Q]uick action" })
+      vim.keymap.set("n", "<leader>oa", "<cmd>OverseerTaskAction<CR>", { desc = "[O]verseer task [A]ction" })
+    end,
+  },
+}
+
+-- Merge private/work plugins if available
+if private.plugins then
+  for _, plugin in ipairs(private.plugins) do
+    table.insert(plugins, plugin)
+  end
+end
+
+require("lazy").setup(plugins)
 
 ------------------
 --- POST-SETUP ---
