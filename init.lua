@@ -174,35 +174,6 @@ local plugins = {
     end,
   },
 
-  -- linter
-  {
-    "mfussenegger/nvim-lint",
-    config = function()
-      local lint = require("lint")
-
-      -- Base linters_by_ft
-      lint.linters_by_ft = {
-        -- Add your default linters here
-      }
-
-      -- Merge private/work linters if available
-      if private.linters_by_ft then
-        lint.linters_by_ft = vim.tbl_extend("force", lint.linters_by_ft, private.linters_by_ft)
-      end
-
-      -- Setup lint autocmds (use private config if available, otherwise basic)
-      if private.setup_lint then
-        private.setup_lint()
-      else
-        vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost" }, {
-          callback = function()
-            lint.try_lint()
-          end,
-        })
-      end
-    end,
-  },
-
   -- fzf-lua: Fuzzy finder and picker
   {
     "ibhagwan/fzf-lua",
