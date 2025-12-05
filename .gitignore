@@ -3,3 +3,4 @@
 
 # Private Settings
 .private.fish
+lua/private/
