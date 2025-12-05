@@ -1,2 +1,5 @@
 # Local Claude Code settings
 .claude/
+
+# Private Settings
+.private.fish
