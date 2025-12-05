@@ -21,6 +21,9 @@ vim.opt.rtp:prepend(vim.env.LAZY or lazypath)
 -- Always keep a black background
 vim.o.background = "dark"
 
+-- Save undo history
+vim.o.undofile = true
+
 -- run :GoBuild or :GoTestCompile based on the go file
 local function build_go_files()
   if vim.endswith(vim.api.nvim_buf_get_name(0), "_test.go") then
