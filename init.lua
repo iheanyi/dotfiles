@@ -106,6 +106,25 @@ local plugins = {
     end,
   },
 
+  -- better UI for code actions
+  {
+    "folke/snacks.nvim",
+    priority = 1000,
+    lazy = false,
+    opts = {
+      -- Better input prompts (vim.ui.input)
+      input = { enabled = true },
+      -- Better select menus (vim.ui.select) - used by code actions
+      picker = {
+        ui_select = true,
+      },
+      -- Notification system
+      notifier = {
+        enabled = true,
+        top_down = false,
+      },
+    },
+  },
   -- formatter
   {
     "stevearc/conform.nvim",
