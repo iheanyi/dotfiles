@@ -17,4 +17,8 @@ if status is-interactive
     abbr -a lt "eza --tree --level=2"
     abbr -a .. "cd .."
     abbr -a ... "cd ../.."
+
+    # Homebrew - always upgrade everything to avoid dependency mismatches
+    abbr -a bu "brew upgrade"
+    abbr -a buc "brew upgrade && brew cleanup"
 end
