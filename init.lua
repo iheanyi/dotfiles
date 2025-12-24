@@ -994,5 +994,14 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.keymap.set("n", "<leader>cl", vim.lsp.codelens.run, opts)
     vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
     vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
+
+    -- Inlay hints (Neovim 0.10+)
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if client and client.supports_method("textDocument/inlayHint") then
+      vim.lsp.inlay_hint.enable(true, { bufnr = ev.buf })
+      vim.keymap.set("n", "<leader>ih", function()
+        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }), { bufnr = ev.buf })
+      end, { buffer = ev.buf, desc = "Toggle inlay hints" })
+    end
   end,
 })

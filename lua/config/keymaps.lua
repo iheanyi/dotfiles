@@ -83,6 +83,9 @@ end, { desc = "Open file/URL under cursor" })
 vim.keymap.set("n", "<leader>gb", '<CMD>lua require("git.blame").blame()<CR>')
 vim.keymap.set("n", "<leader>go", "<CMD>lua require('git.browse').open(false)<CR>")
 vim.keymap.set("x", "<leader>go", ":<C-u> lua require('git.browse').open(true)<CR>")
+-- Copy git URL to clipboard (fugitive) - useful when browser open fails
+vim.keymap.set("n", "<leader>gy", "<CMD>GBrowse!<CR>", { desc = "Copy git URL to clipboard" })
+vim.keymap.set("x", "<leader>gy", ":'<,'>GBrowse!<CR>", { desc = "Copy git URL to clipboard (selection)" })
 
 -- File explorer (oil.nvim)
 -- Note: `-` opens parent dir (set in init.lua), these are extras
