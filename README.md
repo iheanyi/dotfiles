@@ -25,7 +25,7 @@ These dotfiles include configuration for modern CLI replacements ([reference](ht
 | `htop` | top | Interactive process viewer |
 | `ncdu` | du | Interactive disk usage |
 | `tldr` | man | Simplified man pages |
-| `diff-so-fancy` | diff | Better git diffs |
+| `delta` | diff | Better git diffs (side-by-side, syntax highlighting) |
 
 ## Quick Start
 
@@ -97,7 +97,7 @@ See `.private.fish.example` for a template.
 
 ### Git Configuration
 
-The `.gitconfig` uses `diff-so-fancy` for better diffs. Personal settings (name, email) should go in `~/.gitconfig.local`:
+The `.gitconfig` uses `delta` for better diffs (side-by-side view, syntax highlighting). Personal settings (name, email) should go in `~/.gitconfig.local`:
 
 ```gitconfig
 # ~/.gitconfig.local

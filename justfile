@@ -34,8 +34,11 @@ setup-git:
         git config --global init.defaultBranch main
         git config --global core.excludesfile ~/.gitignore_global
         git config --global core.editor nvim
-        git config --global core.pager "diff-so-fancy | less --tabs=4 -RFX"
-        git config --global interactive.diffFilter "diff-so-fancy --patch"
+        git config --global core.pager delta
+        git config --global interactive.diffFilter "delta --color-only"
+        git config --global delta.navigate true
+        git config --global delta.side-by-side true
+        git config --global delta.line-numbers true
         git config --global pull.rebase true
         git config --global push.default current
         git config --global push.autoSetupRemote true
@@ -44,17 +47,9 @@ setup-git:
         git config --global merge.conflictstyle diff3
         git config --global diff.colorMoved default
         git config --global color.ui true
-        git config --global color.diff-highlight.oldNormal "red bold"
-        git config --global color.diff-highlight.oldHighlight "red bold 52"
-        git config --global color.diff-highlight.newNormal "green bold"
-        git config --global color.diff-highlight.newHighlight "green bold 22"
-        git config --global color.diff.meta 11
-        git config --global color.diff.frag "magenta bold"
-        git config --global color.diff.func "146 bold"
-        git config --global color.diff.commit "yellow bold"
-        git config --global color.diff.old "red bold"
-        git config --global color.diff.new "green bold"
-        git config --global color.diff.whitespace "red reverse"
+        git config --global rerere.enabled true
+        git config --global branch.sort -committerdate
+        git config --global column.ui auto
         # Aliases
         git config --global alias.s "status -sb"
         git config --global alias.lg "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
