@@ -5,7 +5,7 @@
 --- SETTINGS ---
 ----------------
 
--- disable netrw at the very start of our init.lua, because we use nvim-tree
+-- disable netrw at the very start of our init.lua, because we use oil.nvim
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 

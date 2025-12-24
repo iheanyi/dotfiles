@@ -150,14 +150,23 @@ The fish configuration automatically detects the OS and adjusts paths accordingl
 - Leader: `,`
 - `<leader>ff` - Find files
 - `<leader>fg` - Live grep
-- `<leader>e` - File explorer
+- `<leader>e` / `-` - File explorer (oil.nvim - edit filesystem like a buffer)
+
+### Ghostty
+- `Cmd+`` ` - Quick terminal toggle (quake-style dropdown)
+- `Cmd+D` - Split down
+- `Cmd+Shift+D` - Split right
+- `Cmd+Shift+Arrow` - Navigate splits
+- `Cmd+Shift+Enter` - Zoom split
 
 ### Tmux
 - Prefix: `Ctrl+a`
 - `<prefix>"` - Split horizontal
 - `<prefix>%` - Split vertical
-- `h/j/k/l` - Pane navigation
+- `<prefix>h/j/k/l` - Pane navigation
+- `<prefix>r` - Reload config
 - `Shift+Left/Right` - Switch windows
+- `<prefix>[` then `v` to select, `y` to yank (vi copy mode)
 
 ### Git Aliases (from .gitconfig)
 - `git s` - Short status
@@ -165,3 +174,4 @@ The fish configuration automatically detects the OS and adjusts paths accordingl
 - `git co` - Checkout
 - `git cm "msg"` - Commit with message
 - `git undo` - Undo last commit
+- `n`/`N` in diffs - Jump between sections (delta)

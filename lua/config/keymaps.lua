@@ -73,7 +73,7 @@ vim.keymap.set("t", "<C-j>", "<C-\\><C-n><C-w>j")
 vim.keymap.set("t", "<C-k>", "<C-\\><C-n><C-w>k")
 vim.keymap.set("t", "<C-l>", "<C-\\><C-n><C-w>l")
 
--- we don't use netrw (because of nvim-tree), hence re-implement gx to open
+-- we don't use netrw (because of oil.nvim), hence re-implement gx to open
 -- links in browser
 vim.keymap.set("n", "gx", function()
   vim.ui.open(vim.fn.expand("<cfile>"))
@@ -84,9 +84,9 @@ vim.keymap.set("n", "<leader>gb", '<CMD>lua require("git.blame").blame()<CR>')
 vim.keymap.set("n", "<leader>go", "<CMD>lua require('git.browse').open(false)<CR>")
 vim.keymap.set("x", "<leader>go", ":<C-u> lua require('git.browse').open(true)<CR>")
 
--- File-tree mappings
-vim.keymap.set("n", "<leader>n", ":NvimTreeToggle<CR>", { noremap = true })
-vim.keymap.set("n", "<leader>e", ":NvimTreeFindFile<CR>f", { noremap = true })
+-- File explorer (oil.nvim)
+-- Note: `-` opens parent dir (set in init.lua), these are extras
+vim.keymap.set("n", "<leader>e", "<CMD>Oil<CR>", { noremap = true, desc = "Open file explorer" })
 
 -- Copy current filepath to system clipboard (git-relative, fallback to absolute)
 vim.keymap.set("n", "<leader>yp", function()

@@ -222,9 +222,6 @@ local plugins = {
     end,
   },
 
-  -- search selection via *
-  { "bronson/vim-visual-star-search" },
-
   -- testing framework (neotest)
   {
     "nvim-neotest/neotest",
@@ -232,7 +229,6 @@ local plugins = {
       "nvim-neotest/nvim-nio",
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
-      "antoinemadec/FixCursorHold.nvim",
       -- Language adapters
       "nvim-neotest/neotest-go",
       "olimorris/neotest-rspec",
@@ -383,46 +379,42 @@ local plugins = {
     end,
   },
 
-  -- file explorer
+  -- file explorer (oil.nvim - edit filesystem like a buffer)
   {
-    "nvim-tree/nvim-tree.lua",
-    version = "*",
+    "stevearc/oil.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
-      require("nvim-tree").setup({
-        sort_by = "case_sensitive",
-        filters = {
-          dotfiles = true,
+      require("oil").setup({
+        default_file_explorer = true,
+        columns = { "icon" },
+        view_options = {
+          show_hidden = true,
         },
-        on_attach = function(bufnr)
-          local api = require("nvim-tree.api")
-
-          local function opts(desc)
-            return {
-              desc = "nvim-tree: " .. desc,
-              buffer = bufnr,
-              noremap = true,
-              silent = true,
-              nowait = true,
-            }
-          end
-
-          api.config.mappings.default_on_attach(bufnr)
-
-          vim.keymap.set("n", "s", api.node.open.vertical, opts("Open: Vertical Split"))
-          vim.keymap.set("n", "i", api.node.open.horizontal, opts("Open: Horizontal Split"))
-          vim.keymap.set("n", "u", api.tree.change_root_to_parent, opts("Up"))
-        end,
+        keymaps = {
+          ["g?"] = "actions.show_help",
+          ["<CR>"] = "actions.select",
+          ["<C-v>"] = "actions.select_vsplit",
+          ["<C-s>"] = "actions.select_split",
+          ["<C-t>"] = "actions.select_tab",
+          ["<C-p>"] = "actions.preview",
+          ["<C-c>"] = "actions.close",
+          ["<C-r>"] = "actions.refresh",
+          ["-"] = "actions.parent",
+          ["_"] = "actions.open_cwd",
+          ["`"] = "actions.cd",
+          ["~"] = "actions.tcd",
+          ["gs"] = "actions.change_sort",
+          ["gx"] = "actions.open_external",
+          ["g."] = "actions.toggle_hidden",
+        },
       })
+      vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
     end,
   },
 
   {
     "AndrewRadev/splitjoin.vim",
   },
-
-  -- rooter (vim-ripgrep and ack.vim removed - fzf-lua provides grep functionality)
-  { "airblade/vim-rooter" },
 
   -- save my last cursor position
   {
