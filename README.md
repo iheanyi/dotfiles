@@ -6,11 +6,11 @@ Personal dotfiles for macOS and Linux, managed with [just](https://github.com/ca
 
 | Tool | Description |
 |------|-------------|
-| **Fish** | Primary shell with modular conf.d structure |
-| **Neovim** | Editor with lazy.nvim plugin manager |
-| **Ghostty** | Primary terminal emulator |
-| **Starship** | Cross-shell prompt with language indicators |
-| **Tmux** | Terminal multiplexer with TPM |
+| **Fish** | Primary shell with modular conf.d structure, git abbreviations |
+| **Neovim** | Editor with lazy.nvim, LSP, oil.nvim, fzf-lua, treesitter |
+| **Ghostty** | Terminal with quick-toggle, splits, Poimandres theme |
+| **Starship** | Cross-shell prompt with Poimandres theme |
+| **Tmux** | Multiplexer with Ghostty integration, session persistence |
 
 ### Modern CLI Tools
 
@@ -97,7 +97,13 @@ See `.private.fish.example` for a template.
 
 ### Git Configuration
 
-The `.gitconfig` uses `delta` for better diffs (side-by-side view, syntax highlighting). Personal settings (name, email) should go in `~/.gitconfig.local`:
+The `.gitconfig` includes modern defaults:
+- **delta** - Side-by-side diffs with syntax highlighting (`n`/`N` to navigate)
+- **rerere** - Remembers conflict resolutions, auto-applies next time
+- **branch.sort** - Shows most recent branches first
+- **column.ui** - Nicer column formatting for branch lists
+
+Personal settings (name, email) should go in `~/.gitconfig.local`:
 
 ```gitconfig
 # ~/.gitconfig.local
@@ -144,6 +150,7 @@ The fish configuration automatically detects the OS and adjusts paths accordingl
 - `Ctrl+R` - Fuzzy search history (via atuin/fzf)
 - `Ctrl+T` - Fuzzy find files
 - `z <dir>` - Smart directory jump (zoxide)
+- `bu` / `buc` - Brew upgrade (all packages) / upgrade + cleanup
 - Git abbreviations: `gs` (status), `gc` (commit), `gp` (push), etc.
 
 ### Neovim
@@ -166,7 +173,15 @@ The fish configuration automatically detects the OS and adjusts paths accordingl
 - `<prefix>h/j/k/l` - Pane navigation
 - `<prefix>r` - Reload config
 - `Shift+Left/Right` - Switch windows
-- `<prefix>[` then `v` to select, `y` to yank (vi copy mode)
+- `<prefix>[` then `v` to select, `y` to yank (vi copy mode, copies to system clipboard)
+
+**Modern features:**
+- Ghostty passthrough (images, graphics protocols)
+- Title sync (tmux window name → Ghostty tab)
+- Smart status bar (hides shell names, shows command indicators)
+- Undercurl support (LSP diagnostics in Neovim)
+- Extended keys (Ctrl+Shift combos work in apps)
+- tmux-resurrect/continuum for session persistence
 
 ### Git Aliases (from .gitconfig)
 - `git s` - Short status
@@ -174,4 +189,3 @@ The fish configuration automatically detects the OS and adjusts paths accordingl
 - `git co` - Checkout
 - `git cm "msg"` - Commit with message
 - `git undo` - Undo last commit
-- `n`/`N` in diffs - Jump between sections (delta)
