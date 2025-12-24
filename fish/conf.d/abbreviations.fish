@@ -10,9 +10,11 @@ if status is-interactive
     abbr -a rc "bundle exec rails console"
     abbr -a rs "bundle exec rails server"
 
-    # Common commands
-    abbr -a ll "ls -la"
-    abbr -a la "ls -a"
+    # Common commands - eza as ls replacement
+    abbr -a ls eza
+    abbr -a ll "eza -la --git"
+    abbr -a la "eza -a"
+    abbr -a lt "eza --tree --level=2"
     abbr -a .. "cd .."
     abbr -a ... "cd ../.."
 end

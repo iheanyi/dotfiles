@@ -31,6 +31,10 @@ function extract --description "Extract common archive formats"
             unrar x $argv[1]
         case '*.7z'
             7z x $argv[1]
+        case '*.zst'
+            unzstd $argv[1]
+        case '*.tar.zst'
+            tar --zstd -xf $argv[1]
         case '*'
             echo "Error: Unknown archive format '$argv[1]'"
             return 1
