@@ -1,7 +1,7 @@
 font-family = Berkeley Mono
 font-style = Regular
 font-size = 14
-font-feature = "-calt" 
+font-feature = "-calt"
 
 # shell-integration-features = sudo
 shell-integration = fish
@@ -10,10 +10,10 @@ shell-integration = fish
 adjust-cell-height = 15%
 
 macos-option-as-alt = true
-macos-titlebar-style = tabs 
+macos-titlebar-style = tabs
 window-colorspace = display-p3
-window-padding-x = 12 
-window-padding-y = 2 
+window-padding-x = 12
+window-padding-y = 2
 
 cursor-color = #607487
 background = #252b37
@@ -62,4 +62,5 @@ palette = 15=#ffffff
 # Window variables
 window-save-state = always
 
+# Claude Code shift+enter support
 keybind = shift+enter=text:\n
