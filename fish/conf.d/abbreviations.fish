@@ -21,4 +21,7 @@ if status is-interactive
     # Homebrew - always upgrade everything to avoid dependency mismatches
     abbr -a bu "brew upgrade"
     abbr -a buc "brew upgrade && brew cleanup"
+
+    # LazyGit
+    abbr -a lg lazygit
 end
