@@ -88,6 +88,19 @@ vim.keymap.set("x", "<leader>go", ":<C-u> lua require('git.browse').open(true)<C
 vim.keymap.set("n", "<leader>n", ":NvimTreeToggle<CR>", { noremap = true })
 vim.keymap.set("n", "<leader>e", ":NvimTreeFindFile<CR>f", { noremap = true })
 
+-- Copy current filepath to system clipboard (git-relative, fallback to absolute)
+vim.keymap.set("n", "<leader>yp", function()
+  local git_prefix = vim.fn.system("git rev-parse --show-prefix"):gsub("\n", "")
+  local path
+  if vim.v.shell_error == 0 then
+    path = git_prefix .. vim.fn.expand("%")
+  else
+    path = vim.fn.expand("%:p")
+  end
+  vim.fn.setreg("+", path)
+  print("Copied: " .. path)
+end, { silent = true, desc = "Copy filepath to clipboard" })
+
 -- Go to next tab
 vim.keymap.set("n", "<leader>]", ":tabnext<CR>", { noremap = true, silent = true, desc = "Next Tab" })
 
