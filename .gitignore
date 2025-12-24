@@ -4,3 +4,4 @@
 # Private Settings
 .private.fish
 lua/private/
+scripts/uninstall-on-private.sh
