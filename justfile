@@ -46,8 +46,15 @@ setup-git:
         git config --global rebase.autoStash true
         git config --global merge.conflictstyle diff3
         git config --global diff.colorMoved default
+        git config --global diff.tool difftastic
+        git config --global difftool.prompt false
+        git config --global difftool.difftastic.cmd 'difft "$LOCAL" "$REMOTE"'
+        git config --global pager.difftool true
         git config --global color.ui true
         git config --global rerere.enabled true
+        # Mergiraf structural merge driver
+        git config --global merge.mergiraf.name mergiraf
+        git config --global merge.mergiraf.driver 'mergiraf merge --git %O %A %B -s %S -x %X -y %Y -p %P -l %L'
         git config --global branch.sort -committerdate
         git config --global column.ui auto
         # Aliases
@@ -189,10 +196,12 @@ link-terminal:
     @ln -sf {{justfile_directory()}}/ghostty/config ~/.config/ghostty/config
     @echo "✓ Ghostty config linked"
 
-# Link git configuration (only gitignore - gitconfig is managed by setup-git)
+# Link git configuration (gitignore and attributes - gitconfig is managed by setup-git)
 link-git:
     @ln -sf {{justfile_directory()}}/.gitignore_global ~/.gitignore_global
-    @echo "✓ Git ignore linked"
+    @mkdir -p ~/.config/git
+    @ln -sf {{justfile_directory()}}/git/attributes ~/.config/git/attributes
+    @echo "✓ Git config linked"
 
 # Link tmux configuration
 link-tmux:
@@ -251,7 +260,7 @@ backup-brew:
 check:
     #!/usr/bin/env bash
     echo "Checking installed tools..."
-    tools=("fish" "nvim" "starship" "fzf" "git" "tmux" "ghostty" "bat" "fd" "rg" "zoxide" "direnv")
+    tools=("fish" "nvim" "starship" "fzf" "git" "tmux" "ghostty" "bat" "fd" "rg" "zoxide" "direnv" "difft" "mergiraf")
     for tool in "${tools[@]}"; do
         if command -v $tool &> /dev/null; then
             echo "✓ $tool"
@@ -276,6 +285,7 @@ doctor:
         "$HOME/.config/starship.toml"
         "$HOME/.tmux.conf"
         "$HOME/.gitignore_global"
+        "$HOME/.config/git/attributes"
     )
     for link in "${links[@]}"; do
         if [ -L "$link" ]; then

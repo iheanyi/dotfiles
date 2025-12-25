@@ -20,7 +20,9 @@ brew "curl"
 # Modern CLI replacements (https://remysharp.com/2018/08/23/cli-improved)
 brew "htop"           # better top
 brew "prettyping"     # better ping
-brew "git-delta"      # better git diff (replaces diff-so-fancy)
+brew "git-delta"      # better git diff pager
+brew "difftastic"     # structural diff (AST-aware)
+brew "mergiraf"       # structural merge driver
 brew "ncdu"           # better du (disk usage)
 brew "tldr"           # better man (simplified examples)
 brew "entr"           # run commands on file changes
