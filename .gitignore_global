@@ -64,5 +64,7 @@ htmlcov/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-/.claude/
+/.claude/settings.local*
 /.cursor/
+
+/.playwright-mcp/
