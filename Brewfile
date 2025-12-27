@@ -47,6 +47,7 @@ brew "stylua"         # Lua
 brew "prettier"       # JS/TS/CSS/HTML/JSON
 brew "shellcheck"     # Shell scripts
 brew "black"          # Python
+brew "ruff"           # Python (fast linter/formatter)
 brew "gofumpt"        # Go
 
 # macOS Applications

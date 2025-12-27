@@ -45,6 +45,7 @@ local slow_format_filetypes = {}
 local plugins = {
   {
     "JoosepAlviste/nvim-ts-context-commentstring",
+    lazy = true, -- loaded by treesitter or when needed
     config = function()
       require("ts_context_commentstring").setup({
         enable_autocmd = false,
@@ -66,6 +67,15 @@ local plugins = {
   {
     "echasnovski/mini.surround",
     version = false,
+    keys = {
+      { "gsa", mode = { "n", "v" }, desc = "Add surrounding" },
+      { "gsd", desc = "Delete surrounding" },
+      { "gsf", desc = "Find surrounding (right)" },
+      { "gsF", desc = "Find surrounding (left)" },
+      { "gsh", desc = "Highlight surrounding" },
+      { "gsr", desc = "Replace surrounding" },
+      { "gsn", desc = "Update n_lines" },
+    },
     opts = {
       mappings = {
         add = "gsa", -- Add surrounding in Normal and Visual modes
@@ -414,6 +424,10 @@ local plugins = {
 
   {
     "AndrewRadev/splitjoin.vim",
+    keys = {
+      { "gS", desc = "Split line" },
+      { "gJ", desc = "Join lines" },
+    },
   },
 
   -- save my last cursor position
@@ -431,6 +445,15 @@ local plugins = {
   -- Alternate between files, such as foo.go and foo_test.go
   {
     "rgroli/other.nvim",
+    cmd = { "Other", "OtherSplit", "OtherVSplit", "OtherTabNew", "OtherClear" },
+    keys = {
+      { "<leader>ll", "<cmd>Other<CR>", desc = "Other file" },
+      { "<leader>lh", "<cmd>OtherSplit<CR>", desc = "Other file (split)" },
+      { "<leader>lv", "<cmd>OtherVSplit<CR>", desc = "Other file (vsplit)" },
+      { "<leader>lc", "<cmd>OtherClear<CR>", desc = "Other clear" },
+      { "<leader>ln", "<cmd>OtherTabNew<CR>", desc = "Other file (tab)" },
+      { "<leader>lt", "<cmd>Other test<CR>", desc = "Other test file" },
+    },
     config = function()
       require("other-nvim").setup({
         mappings = {
@@ -466,15 +489,7 @@ local plugins = {
       vim.api.nvim_create_user_command("AT", function(opts)
         require("other-nvim").openTabNew(opts.fargs[1])
       end, { nargs = "*" })
-
-      vim.api.nvim_set_keymap("n", "<leader>ll", "<cmd>:Other<CR>", { noremap = true, silent = true })
-      vim.api.nvim_set_keymap("n", "<leader>lh", "<cmd>:OtherSplit<CR>", { noremap = true, silent = true })
-      vim.api.nvim_set_keymap("n", "<leader>lv", "<cmd>:OtherVSplit<CR>", { noremap = true, silent = true })
-      vim.api.nvim_set_keymap("n", "<leader>lc", "<cmd>:OtherClear<CR>", { noremap = true, silent = true })
-      vim.api.nvim_set_keymap("n", "<leader>ln", "<cmd>:OtherTabNew<CR>", { noremap = true, silent = true })
-
-      -- Context specific bindings
-      vim.api.nvim_set_keymap("n", "<leader>lt", "<cmd>:Other test<CR>", { noremap = true, silent = true })
+      -- Note: keymaps are defined in the `keys` spec above for lazy-loading
     end,
   },
 
@@ -749,7 +764,7 @@ local plugins = {
           -- Disable slow treesitter highlight for large files
           disable = function(_, buf)
             local max_filesize = 100 * 1024 -- 100 KB
-            local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+            local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
             if ok and stats and stats.size > max_filesize then
               return true
             end
@@ -814,6 +829,7 @@ local plugins = {
   },
   {
     "windwp/nvim-autopairs",
+    event = "InsertEnter",
     config = function()
       require("nvim-autopairs").setup({
         check_ts = true,
@@ -840,7 +856,7 @@ local plugins = {
       "rafamadriz/friendly-snippets",
     },
     config = function()
-      require("luasnip.loaders.from_vscode").lazy_load()
+      -- Note: LuaSnip is already loaded by its own plugin config, no need to call lazy_load() again
       require("blink.cmp").setup({
         sources = {
           default = { "lsp", "path", "snippets", "buffer" },

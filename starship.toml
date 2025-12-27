@@ -7,7 +7,6 @@ $git_branch\
 $git_state\
 [](bg:focus fg:blueish-green)\
 $git_metrics\
-${custom.git_dirty}\
 $git_status\
 $character
 """
@@ -52,20 +51,13 @@ format = "[ $branch ](bg:blueish-green fg:off-white)"
 truncation_length = 30
 truncation_symbol = "…"
 
-[custom.git_dirty]
-# Shows * after git_metrics when there are uncommitted changes
-command = "echo '*'"
-when = "git status --porcelain 2>/dev/null | grep -q ."
-format = "[](hot-red)[$output](bg:hot-red fg:black)[](fg:hot-red)"
-shell = ["bash", "--noprofile", "--norc"]
-
 [git_state]
 format = "[ $state( $progress_current/$progress_total)](bg:blueish-green fg:bright-yellow)"
 
 [git_status]
-# Ahead/behind after git_metrics, in neutral gray
-format = "[($ahead_behind )](darker-gray)"
-modified = ""
+# Show dirty indicator (styled box like before) and ahead/behind
+format = "([](hot-red)[$modified](bg:hot-red fg:black)[](fg:hot-red))[($ahead_behind )](darker-gray)"
+modified = "*"
 staged = ""
 untracked = ""
 renamed = ""
