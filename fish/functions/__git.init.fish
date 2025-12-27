@@ -7,10 +7,7 @@ function __git.init
     abbr -a -g $name $body
   end
 
-  # Provide a smooth transition from universal to global abbreviations by
-  # deleting the old univeral ones.  Can be removed after fish 3.6 is in
-  # wide-spread use, i.e. 2024.  __git.destroy should also be removed
-  # at the same time.
+  # Clean up any legacy universal abbreviations from older fish versions
   if set -q __git_plugin_initialized
     __git.destroy
   end

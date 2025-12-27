@@ -21,8 +21,8 @@ set -gx EDITOR nvim
 set -gx PYENV_ROOT $HOME/.pyenv
 
 # FZF configuration
-# Colors match Nord theme
-set -gx FZF_DEFAULT_OPTS '--color=bg+:#3B4252,bg:#2E3440,spinner:#81A1C1,hl:#616E88,fg:#D8DEE9,header:#616E88,info:#81A1C1,pointer:#81A1C1,marker:#81A1C1,fg+:#D8DEE9,prompt:#81A1C1,hl+:#81A1C1 --height=40% --layout=reverse --border'
+# Colors match Poimandres theme
+set -gx FZF_DEFAULT_OPTS '--color=bg+:#303340,bg:#252b37,spinner:#5de4c7,hl:#5fb3a1,fg:#a6accd,header:#5fb3a1,info:#89ddff,pointer:#5de4c7,marker:#fffac2,fg+:#e4f0fb,prompt:#5de4c7,hl+:#5de4c7 --height=40% --layout=reverse --border'
 
 # File finder (used by fzf default and Ctrl+T)
 set -gx FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git --exclude node_modules --exclude vendor --exclude .cache'
