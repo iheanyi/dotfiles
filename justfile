@@ -1,7 +1,8 @@
 # Dotfiles installation and management
 # Run `just` to see available recipes
 
-set shell := ["fish", "-c"]
+# Use bash for portability - fish may not be installed on fresh machines
+set shell := ["bash", "-c"]
 
 # Default recipe - show help
 default:
@@ -178,8 +179,8 @@ link-fish:
     @mkdir -p ~/.config/fish/functions
     @ln -sf {{justfile_directory()}}/config.fish ~/.config/fish/config.fish
     @ln -sf {{justfile_directory()}}/fish_plugins ~/.config/fish/fish_plugins
-    @for f in {{justfile_directory()}}/fish/conf.d/*.fish; ln -sf $f ~/.config/fish/conf.d/; end
-    @for f in {{justfile_directory()}}/fish/functions/*.fish; ln -sf $f ~/.config/fish/functions/; end
+    @for f in {{justfile_directory()}}/fish/conf.d/*.fish; do ln -sf "$$f" ~/.config/fish/conf.d/; done
+    @for f in {{justfile_directory()}}/fish/functions/*.fish; do ln -sf "$$f" ~/.config/fish/functions/; done
     @echo "✓ Fish config linked"
 
 # Link Neovim configuration
@@ -187,7 +188,7 @@ link-neovim:
     @mkdir -p ~/.config/nvim/lua/config
     @ln -sf {{justfile_directory()}}/init.lua ~/.config/nvim/init.lua
     @ln -sf {{justfile_directory()}}/.stylua.toml ~/.config/nvim/.stylua.toml
-    @for f in {{justfile_directory()}}/lua/config/*.lua; ln -sf $f ~/.config/nvim/lua/config/; end
+    @for f in {{justfile_directory()}}/lua/config/*.lua; do ln -sf "$$f" ~/.config/nvim/lua/config/; done
     @echo "✓ Neovim config linked"
 
 # Link terminal emulator configs
@@ -196,8 +197,9 @@ link-terminal:
     @ln -sf {{justfile_directory()}}/ghostty/config ~/.config/ghostty/config
     @echo "✓ Ghostty config linked"
 
-# Link git configuration (gitignore and attributes - gitconfig is managed by setup-git)
+# Link git configuration
 link-git:
+    @ln -sf {{justfile_directory()}}/.gitconfig ~/.gitconfig
     @ln -sf {{justfile_directory()}}/.gitignore_global ~/.gitignore_global
     @mkdir -p ~/.config/git
     @ln -sf {{justfile_directory()}}/git/attributes ~/.config/git/attributes
