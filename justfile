@@ -170,7 +170,7 @@ install-tmux-plugins:
 # ============================================================================
 
 # Link all dotfiles to home directory
-link: link-fish link-neovim link-terminal link-git link-tmux link-starship
+link: link-fish link-neovim link-terminal link-git link-tmux link-starship link-claude
     @echo "✓ All configs linked"
 
 # Link fish configuration
@@ -215,6 +215,13 @@ link-starship:
     @mkdir -p ~/.config
     @ln -sf {{justfile_directory()}}/starship.toml ~/.config/starship.toml
     @echo "✓ Starship config linked"
+
+# Link Claude Code configuration
+link-claude:
+    @mkdir -p ~/.claude
+    @ln -sf {{justfile_directory()}}/claude/settings.json ~/.claude/settings.json
+    @ln -sf {{justfile_directory()}}/claude/statusline-command.sh ~/.claude/statusline-command.sh
+    @echo "✓ Claude config linked"
 
 # ============================================================================
 # Maintenance
@@ -288,6 +295,8 @@ doctor:
         "$HOME/.tmux.conf"
         "$HOME/.gitignore_global"
         "$HOME/.config/git/attributes"
+        "$HOME/.claude/settings.json"
+        "$HOME/.claude/statusline-command.sh"
     )
     for link in "${links[@]}"; do
         if [ -L "$link" ]; then
