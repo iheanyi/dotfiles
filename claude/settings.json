@@ -38,12 +38,13 @@
     ]
   },
   "mcpServers": {
+    "tasuku": {
+      "args": ["serve"],
+      "command": "/Users/iheanyi/development/go/bin/tk"
+    },
     "context7": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@context7/mcp-server"
-      ]
+      "args": ["-y", "@context7/mcp-server"],
+      "command": "npx"
     },
     "figma": {
       "transport": "http",
@@ -54,28 +55,24 @@
       "url": "https://mcp.linear.app/mcp"
     },
     "playwright": {
-      "command": "npx",
-      "args": [
-        "@playwright/mcp@latest",
-        "--isolated"
-      ]
+      "args": ["@playwright/mcp@latest", "--isolated"],
+      "command": "npx"
     },
     "sentry": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@sentry/mcp-server"
-      ]
+      "args": ["-y", "@sentry/mcp-server"],
+      "command": "npx"
+    },
+    "tasuku": {
+      "args": ["serve"],
+      "command": "/Users/iheanyi/development/go/bin/tk"
     }
   },
   "permissions": {
-    "allow": [
-      "Skill(dev-browser:dev-browser)",
-      "Bash(npx tsx:*)"
-    ]
+    "allow": ["Skill(dev-browser:dev-browser)", "Bash(npx tsx:*)"]
   },
   "statusLine": {
-    "type": "command",
-    "command": "/bin/bash ~/.claude/statusline-command.sh"
+    "command": "/bin/bash ~/.claude/statusline-command.sh",
+    "type": "command"
   }
 }
+
