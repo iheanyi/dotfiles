@@ -1,0 +1,136 @@
+#!/bin/bash
+# Test script to verify tmux agentic workflow features
+# Run this in a tmux pane, then test the bindings
+
+cat << 'EOF'
+================================================================================
+TMUX AGENTIC WORKFLOW TEST
+================================================================================
+
+After running this script, test the following bindings:
+
+1. CODE BLOCK SEARCH (prefix + `)
+   - Press prefix + ` to enter copy-mode and search backward for ```
+   - Press n to find next occurrence, N for previous
+
+2. TMUX-FINGERS (prefix + F)
+   - Press prefix + F to highlight all file:line patterns
+   - Type the hint letters to copy/open that reference
+
+3. FZF FILE POPUP (prefix + f)
+   - Press prefix + f to open fzf popup with all file:line refs
+   - Select one to open in nvim (if nvim server running)
+
+================================================================================
+SAMPLE CODE BLOCKS (test prefix + ` search)
+================================================================================
+
+Here's some Go code:
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, World!")
+}
+```
+
+And some TypeScript:
+
+```typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+const getUser = async (id: number): Promise<User> => {
+  const response = await fetch(`/api/users/${id}`);
+  return response.json();
+};
+```
+
+A shell script example:
+
+```bash
+#!/bin/bash
+for file in *.txt; do
+    echo "Processing $file"
+    wc -l "$file"
+done
+```
+
+Python too:
+
+```python
+def fibonacci(n: int) -> int:
+    if n <= 1:
+        return n
+    return fibonacci(n - 1) + fibonacci(n - 2)
+
+print([fibonacci(i) for i in range(10)])
+```
+
+================================================================================
+SAMPLE FILE:LINE REFERENCES (test prefix + F and prefix + f)
+================================================================================
+
+Error in src/main.go:42 - undefined variable
+Warning at lib/utils.ts:100 - unused import
+Failed test: tests/user_test.go:156
+Syntax error in app/models/user.rb:23
+Exception at packages/api/src/handlers.ts:89
+Lint error: config/settings.py:12
+Type mismatch: frontend/components/Button.tsx:45
+Deprecation warning: internal/legacy/old.js:200
+
+Stack trace example:
+  at processRequest (server/api/routes.ts:234)
+  at handleAuth (server/middleware/auth.ts:56)
+  at validateInput (server/utils/validation.ts:78)
+  at Object.<anonymous> (server/index.ts:15)
+
+More references scattered in text:
+The bug was introduced in commit abc123, see changes to database/migrations/001_init.sql:45
+Also check the related fix in services/payment.go:167 and services/payment.go:203
+The frontend needs updating too: web/src/App.tsx:34 and web/src/pages/Home.tsx:89
+
+================================================================================
+MIXED CONTENT
+================================================================================
+
+Looking at the error in controllers/api.go:42:
+
+```go
+func (c *Controller) HandleRequest(w http.ResponseWriter, r *http.Request) {
+    // Line 42 is here - the problematic nil check
+    if c.service == nil {
+        panic("service not initialized")
+    }
+}
+```
+
+The fix should be applied to controllers/api.go:42 and also update the test
+at controllers/api_test.go:156 to cover this edge case.
+
+Similarly, the TypeScript issue at components/Modal.tsx:78:
+
+```typescript
+// components/Modal.tsx:78
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
+  // Missing null check here
+  return isOpen ? (
+    <div className="modal-overlay" onClick={onClose}>
+      {children}
+    </div>
+  ) : null;
+};
+```
+
+================================================================================
+TEST COMPLETE - Now try the bindings!
+================================================================================
+
+EOF
