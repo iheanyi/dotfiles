@@ -15,15 +15,26 @@ if [[ -z "$files" ]]; then
     exit 0
 fi
 
-# fzf select with preview (bat if available, else cat)
+# Preview script (must use bash explicitly since user shell may be fish)
+preview_cmd='bash -c '\''
+    file=$(echo "$1" | cut -d: -f1)
+    line=$(echo "$1" | cut -d: -f2)
+    if command -v bat >/dev/null; then
+        bat --color=always --highlight-line="$line" --line-range="$((line > 5 ? line - 5 : 1)):$((line + 15))" "$file" 2>/dev/null || echo "File not found: $file"
+    else
+        head -n "$((line + 15))" "$file" 2>/dev/null | tail -n 20 || echo "File not found: $file"
+    fi
+'\'' _ {}'
+
+# fzf select with preview
 selected=$(echo "$files" | \
     fzf-tmux -p 80%,80% \
-        --preview 'file=$(echo {} | cut -d: -f1); line=$(echo {} | cut -d: -f2); if command -v bat >/dev/null; then bat --color=always --highlight-line=$line --line-range=$((line > 5 ? line - 5 : 1)):$((line + 15)) "$file" 2>/dev/null || echo "File not found: $file"; else head -n $((line + 15)) "$file" 2>/dev/null | tail -n 20 || echo "File not found: $file"; fi' \
+        --preview "$preview_cmd" \
         --preview-window=right:60%:wrap \
         --header="Select file:line to open in nvim"
 )
 
 if [[ -n "$selected" ]]; then
     # Open in nvim via helper script
-    tmux-open-in-nvim "$selected"
+    "$HOME/.dotfiles/bin/tmux-open-in-nvim" "$selected"
 fi
