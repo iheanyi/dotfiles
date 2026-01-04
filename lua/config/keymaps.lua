@@ -60,8 +60,8 @@ vim.keymap.set("t", "<leader>q", "<C-\\><C-n>:q<cr>")
 vim.keymap.set("t", "<ESC>", "<C-\\><C-n>")
 
 -- Open terminal in vertical and horizontal split
-vim.keymap.set("n", "<leader>tv", "<cmd>vnew term://fish<CR>", { noremap = true })
-vim.keymap.set("n", "<leader>ts", "<cmd>split term://fish<CR>", { noremap = true })
+vim.keymap.set("n", "<leader>tv", "<cmd>vnew term://fish<CR>", { noremap = true, desc = "Terminal (vsplit)" })
+vim.keymap.set("n", "<leader>ts", "<cmd>split term://fish<CR>", { noremap = true, desc = "Terminal (split)" })
 
 -- Open terminal in vertical and horizontal split, inside the terminal
 vim.keymap.set("t", "<leader>tv", "<c-w><cmd>vnew term://fish<CR>", { noremap = true })
@@ -103,6 +103,66 @@ vim.keymap.set("n", "<leader>yp", function()
   vim.fn.setreg("+", path)
   print("Copied: " .. path)
 end, { silent = true, desc = "Copy filepath to clipboard" })
+
+-- Copy filepath:line to clipboard (great for referencing code to Claude)
+vim.keymap.set("n", "<leader>yl", function()
+  local git_prefix = vim.fn.system("git rev-parse --show-prefix"):gsub("\n", "")
+  local path
+  if vim.v.shell_error == 0 then
+    path = git_prefix .. vim.fn.expand("%")
+  else
+    path = vim.fn.expand("%")
+  end
+  local line = vim.fn.line(".")
+  local result = path .. ":" .. line
+  vim.fn.setreg("+", result)
+  print("Copied: " .. result)
+end, { desc = "Copy filepath:line to clipboard" })
+
+-- Copy diagnostic message under cursor to clipboard
+vim.keymap.set("n", "<leader>yd", function()
+  local diagnostics = vim.diagnostic.get(0, { lnum = vim.fn.line(".") - 1 })
+  if #diagnostics == 0 then
+    print("No diagnostics on current line")
+    return
+  end
+  local messages = {}
+  for _, diag in ipairs(diagnostics) do
+    table.insert(messages, diag.message)
+  end
+  local result = table.concat(messages, "\n")
+  vim.fn.setreg("+", result)
+  print("Copied " .. #diagnostics .. " diagnostic(s)")
+end, { desc = "Copy diagnostic to clipboard" })
+
+-- Copy visual selection with file context header
+vim.keymap.set("v", "<leader>yc", function()
+  -- Get visual selection range
+  local start_line = vim.fn.line("v")
+  local end_line = vim.fn.line(".")
+  if start_line > end_line then
+    start_line, end_line = end_line, start_line
+  end
+
+  -- Get file path
+  local git_prefix = vim.fn.system("git rev-parse --show-prefix"):gsub("\n", "")
+  local path
+  if vim.v.shell_error == 0 then
+    path = git_prefix .. vim.fn.expand("%")
+  else
+    path = vim.fn.expand("%")
+  end
+
+  -- Get selected text
+  vim.cmd('noautocmd normal! "xy')
+  local code = vim.fn.getreg("x")
+
+  -- Build result with context header
+  local header = "// " .. path .. ":" .. start_line .. "-" .. end_line
+  local result = header .. "\n" .. code
+  vim.fn.setreg("+", result)
+  print("Copied with context: " .. path)
+end, { desc = "Copy selection with file context" })
 
 -- Go to next tab
 vim.keymap.set("n", "<leader>]", ":tabnext<CR>", { noremap = true, silent = true, desc = "Next Tab" })
