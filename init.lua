@@ -161,6 +161,7 @@ local plugins = {
         ["markdown.mdx"] = { "prettier" },
         graphql = { "prettier" },
         handlebars = { "prettier" },
+        astro = { "prettier" },
       }
 
       -- Merge private/work formatters if available
@@ -525,7 +526,7 @@ local plugins = {
   {
     "mason-org/mason-lspconfig.nvim",
     opts = {
-      ensure_installed = { "lua_ls", "ts_ls", "ruby_lsp", "gopls", "buf_ls", "eslint" },
+      ensure_installed = { "lua_ls", "ts_ls", "ruby_lsp", "gopls", "buf_ls", "eslint", "astro" },
     },
     dependencies = {
       "mason-org/mason.nvim",
@@ -738,6 +739,7 @@ local plugins = {
           "php_only",
           "blade",
           "svelte",
+          "astro",
         },
         indent = { enable = true },
         incremental_selection = {
