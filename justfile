@@ -170,7 +170,7 @@ install-tmux-plugins:
 # ============================================================================
 
 # Link all dotfiles to home directory
-link: link-fish link-neovim link-terminal link-git link-tmux link-starship link-claude
+link: link-fish link-neovim link-terminal link-git link-tmux link-starship link-claude link-bin
     @echo "✓ All configs linked"
 
 # Link fish configuration
@@ -222,6 +222,12 @@ link-claude:
     @ln -sf {{justfile_directory()}}/claude/settings.json ~/.claude/settings.json
     @ln -sf {{justfile_directory()}}/claude/statusline-command.sh ~/.claude/statusline-command.sh
     @echo "✓ Claude config linked"
+
+# Link helper scripts (tmux-open-in-nvim, tmux-fzf-files, etc.)
+link-bin:
+    @mkdir -p ~/.dotfiles/bin
+    @for f in {{justfile_directory()}}/bin/*; do ln -sf "$$f" ~/.dotfiles/bin/; done
+    @echo "✓ Helper scripts linked"
 
 # ============================================================================
 # Maintenance

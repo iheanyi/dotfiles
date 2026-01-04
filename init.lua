@@ -641,6 +641,13 @@ local plugins = {
 
       vim.lsp.config("eslint", {
         capabilities = capabilities,
+        settings = {
+          -- Fix all fixable issues on save (handled by server, no race condition)
+          codeActionOnSave = {
+            enable = true,
+            mode = "all",
+          },
+        },
       })
 
       vim.lsp.config("lua_ls", {
@@ -673,29 +680,23 @@ local plugins = {
         private.setup_lsp()
       end
 
-      -- ESLint fix on save
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        pattern = { "*.js", "*.jsx", "*.ts", "*.tsx" },
-        callback = function(args)
-          local clients = vim.lsp.get_clients({ bufnr = args.buf, name = "eslint" })
-          if #clients > 0 then
-            vim.cmd("EslintFixAll")
-          end
-        end,
-      })
-
-      -- TypeScript remove unused imports on save
+      -- TypeScript remove unused imports on save (synchronous to complete before write)
       vim.api.nvim_create_autocmd("BufWritePre", {
         group = vim.api.nvim_create_augroup("ts_imports", { clear = true }),
         pattern = { "*.tsx", "*.ts" },
         callback = function()
-          vim.lsp.buf.code_action({
-            apply = true,
-            context = {
-              only = { "source.removeUnused.ts" },
-              diagnostics = {},
-            },
-          })
+          local params = vim.lsp.util.make_range_params()
+          params.context = { only = { "source.removeUnused.ts" }, diagnostics = {} }
+          local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 1000)
+          for _, res in pairs(result or {}) do
+            for _, r in pairs(res.result or {}) do
+              if r.edit then
+                vim.lsp.util.apply_workspace_edit(r.edit, "utf-16")
+              elseif r.command then
+                vim.lsp.buf.execute_command(r.command)
+              end
+            end
+          end
         end,
       })
     end,

@@ -41,6 +41,7 @@ brew "node"
 # Shell utilities
 brew "atuin"
 brew "direnv"
+brew "terminal-notifier"  # macOS notifications from CLI (used by claude-notify)
 
 # Code formatting (for Neovim)
 brew "stylua"         # Lua
