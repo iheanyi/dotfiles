@@ -673,12 +673,12 @@ local plugins = {
         private.setup_lsp()
       end
 
-      -- ESLint fix on save
+      -- ESLint fix on save (only if EslintFixAll command exists)
       vim.api.nvim_create_autocmd("BufWritePre", {
         pattern = { "*.js", "*.jsx", "*.ts", "*.tsx" },
         callback = function(args)
           local clients = vim.lsp.get_clients({ bufnr = args.buf, name = "eslint" })
-          if #clients > 0 then
+          if #clients > 0 and vim.fn.exists(":EslintFixAll") > 0 then
             vim.cmd("EslintFixAll")
           end
         end,
