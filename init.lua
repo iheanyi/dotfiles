@@ -39,7 +39,7 @@ local function build_go_files()
   end
 end
 
-local slow_format_filetypes = {}
+local slow_format_filetypes = { astro = true }
 
 -- Build plugin list
 local plugins = {
@@ -180,14 +180,14 @@ local plugins = {
             end
           end
 
-          return { timeout_ms = 200, lsp_format = "fallback" }, on_format
+          return { timeout_ms = 200 }, on_format
         end,
 
         format_after_save = function(bufnr)
           if not slow_format_filetypes[vim.bo[bufnr].filetype] then
             return
           end
-          return { lsp_format = "fallback" }
+          return {}
         end,
 
         formatters = {
