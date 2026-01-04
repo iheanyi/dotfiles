@@ -197,6 +197,10 @@ local plugins = {
           rubocop = {
             prepend_args = { "--force-exclusion" },
           },
+          prettier = {
+            -- Use project-local prettier to find plugins in node_modules
+            cwd = require("conform.util").root_file({ "package.json", ".prettierrc", ".prettierrc.json", "prettier.config.js" }),
+          },
         },
 
         formatters_by_ft = formatters_by_ft,
@@ -546,9 +550,11 @@ local plugins = {
       local capabilities = require("blink.cmp").get_lsp_capabilities()
 
       -- Helper to get root directory patterns
+      -- In Neovim 0.11+, root_dir receives buffer number, not filename
       local function root_pattern(...)
         local patterns = { ... }
-        return function(fname)
+        return function(bufnr)
+          local fname = vim.api.nvim_buf_get_name(bufnr)
           for _, pattern in ipairs(patterns) do
             local match = vim.fs.find(pattern, { path = fname, upward = true })[1]
             if match then
@@ -623,8 +629,14 @@ local plugins = {
 
       vim.lsp.config("astro", {
         capabilities = capabilities,
+        cmd = { "astro-ls", "--stdio" },
         filetypes = { "astro" },
-        root_dir = root_pattern("astro.config.mjs", "astro.config.js", "astro.config.ts"),
+        root_dir = root_pattern("astro.config.mjs", "astro.config.js", "astro.config.ts", "package.json"),
+        init_options = {
+          typescript = {
+            tsdk = vim.fs.joinpath(vim.fn.stdpath("data"), "mason", "packages", "typescript-language-server", "node_modules", "typescript", "lib"),
+          },
+        },
       })
 
       vim.lsp.config("eslint", {
