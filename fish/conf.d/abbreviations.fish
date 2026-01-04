@@ -24,4 +24,12 @@ if status is-interactive
 
     # LazyGit
     abbr -a lg lazygit
+
+    # Claude / AI tools
+    abbr -a cn claude                                              # New session
+    abbr -a cr "claude --resume"                                   # Resume last
+    abbr -a cc "claude --continue"                                 # Continue last
+    abbr -a cy "claude --dangerously-skip-permissions"             # Yolo mode
+    abbr -a cry "claude --resume --dangerously-skip-permissions"   # Resume yolo
+    abbr -a ccy "claude --continue --dangerously-skip-permissions" # Continue yolo
 end

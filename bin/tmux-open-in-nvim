@@ -1,0 +1,42 @@
+#!/bin/bash
+# Open file:line reference in nvim running in adjacent tmux pane
+# Usage: tmux-open-in-nvim "src/main.go:42"
+
+selection="$1"
+
+if [[ -z "$selection" ]]; then
+    echo "Usage: tmux-open-in-nvim <file:line>"
+    exit 1
+fi
+
+# Parse file:line format
+if [[ $selection =~ ^([^:]+):([0-9]+) ]]; then
+    file="${BASH_REMATCH[1]}"
+    line="${BASH_REMATCH[2]}"
+
+    # Find nvim socket in adjacent pane (try left pane first, then others)
+    # Get current pane
+    current_pane=$(tmux display -p '#{pane_id}')
+
+    # Try to find an nvim socket in nearby panes
+    for pane in $(tmux list-panes -F '#{pane_id}'); do
+        if [[ "$pane" != "$current_pane" ]]; then
+            socket="/tmp/nvim-$pane.sock"
+            if [[ -S "$socket" ]]; then
+                # Found an nvim server, send the command
+                nvim --server "$socket" --remote-send "<Esc>:e +$line $file<CR>"
+                # Focus that pane
+                tmux select-pane -t "$pane"
+                exit 0
+            fi
+        fi
+    done
+
+    # No nvim server found, copy to clipboard as fallback
+    echo "$selection" | pbcopy
+    tmux display-message "No nvim server found - copied to clipboard"
+else
+    # Not file:line format, just copy
+    echo "$selection" | pbcopy
+    tmux display-message "Copied: $selection"
+fi

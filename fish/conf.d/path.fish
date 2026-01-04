@@ -24,6 +24,7 @@ for p in \
     $HOME/.cargo/bin \
     $HOME/.humanlog/bin \
     $HOME/.bun/bin \
-    $HOME/.antigravity/antigravity/bin
+    $HOME/.antigravity/antigravity/bin \
+    $HOME/.dotfiles/bin
     test -d $p; and fish_add_path $p
 end
