@@ -1,10 +1,13 @@
 #!/bin/bash
-# Create tmux layouts for development workflows
-# Usage: tmux-layout <layout> [directory] [--new-window] [--yolo]
+# Create 2x2 dev layout for tmux
+# Usage: tmux-layout [directory] [--new-window] [--yolo]
 #
-# Layouts:
-#   claude    - Editor (60%) + Claude (40%) side-by-side
-#   dev       - 2x2 grid: Server | Shell / Claude | Nvim
+# Layout:
+# +-------------+-------------+
+# |   Server    |    Shell    |
+# +-------------+-------------+
+# |   Claude    |    Nvim     |
+# +-------------+-------------+
 #
 # Options:
 #   --new-window    Force creating a new window (don't convert current)
@@ -12,27 +15,24 @@
 
 set -e
 
-layout="${1:-claude}"
-shift || true
-
 # Parse args
 dir=""
 force_new=false
 yolo=false
 
-while [[ $# -gt 0 ]]; do
-    case "$1" in
+for arg in "$@"; do
+    case "$arg" in
         --new-window|-n)
             force_new=true
-            shift
             ;;
         --yolo|-y)
             yolo=true
-            shift
+            ;;
+        dev|d)
+            # Ignore layout arg for backwards compat
             ;;
         *)
-            dir="$1"
-            shift
+            dir="$arg"
             ;;
     esac
 done
@@ -56,51 +56,23 @@ if [[ "$pane_count" -eq 1 ]] && [[ "$force_new" == false ]]; then
     should_convert=true
 fi
 
-case "$layout" in
-    claude|c)
-        if [[ "$should_convert" == true ]]; then
-            # Convert current pane: split and set up
-            tmux split-window -h -l 40% -c "$dir"
-            tmux send-keys "$claude_cmd" Enter
-            tmux select-pane -L
-            tmux send-keys "nvim ." Enter
-        else
-            # New window
-            tmux new-window -c "$dir"
-            tmux send-keys "nvim ." Enter
-            tmux split-window -h -l 40% -c "$dir"
-            tmux send-keys "$claude_cmd" Enter
-            tmux select-pane -L
-        fi
-        ;;
-
-    dev|d)
-        # 2x2 grid: Server | Shell / Claude | Nvim
-        if [[ "$should_convert" == true ]]; then
-            # Convert current pane
-            tmux split-window -h -c "$dir"           # Shell (right)
-            tmux split-window -v -c "$dir"           # Nvim (bottom right)
-            tmux send-keys "nvim ." Enter
-            tmux select-pane -t 0
-            tmux split-window -v -c "$dir"           # Claude (bottom left)
-            tmux send-keys "$claude_cmd" Enter
-            tmux select-pane -t 0                    # Back to Server (top left)
-        else
-            # New window
-            tmux new-window -c "$dir"
-            tmux split-window -h -c "$dir"
-            tmux split-window -v -c "$dir"
-            tmux send-keys "nvim ." Enter
-            tmux select-pane -t 0
-            tmux split-window -v -c "$dir"
-            tmux send-keys "$claude_cmd" Enter
-            tmux select-pane -t 0
-        fi
-        ;;
-
-    *)
-        echo "Unknown layout: $layout"
-        echo "Available: claude (c), dev (d)"
-        exit 1
-        ;;
-esac
+if [[ "$should_convert" == true ]]; then
+    # Convert current pane to 2x2 grid
+    tmux split-window -h -c "$dir"           # Shell (right)
+    tmux split-window -v -c "$dir"           # Nvim (bottom right)
+    tmux send-keys "nvim ." Enter
+    tmux select-pane -t 0
+    tmux split-window -v -c "$dir"           # Claude (bottom left)
+    tmux send-keys "$claude_cmd" Enter
+    tmux select-pane -t 0                    # Back to Server (top left)
+else
+    # New window with 2x2 grid
+    tmux new-window -c "$dir"
+    tmux split-window -h -c "$dir"
+    tmux split-window -v -c "$dir"
+    tmux send-keys "nvim ." Enter
+    tmux select-pane -t 0
+    tmux split-window -v -c "$dir"
+    tmux send-keys "$claude_cmd" Enter
+    tmux select-pane -t 0
+fi
