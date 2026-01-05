@@ -1,0 +1,78 @@
+#!/bin/bash
+# Create 2x2 dev layout for tmux
+# Usage: tmux-layout [directory] [--new-window] [--yolo]
+#
+# Layout:
+# +-------------+-------------+
+# |   Server    |    Shell    |
+# +-------------+-------------+
+# |   Claude    |    Nvim     |
+# +-------------+-------------+
+#
+# Options:
+#   --new-window    Force creating a new window (don't convert current)
+#   --yolo          Use claude --dangerously-skip-permissions
+
+set -e
+
+# Parse args
+dir=""
+force_new=false
+yolo=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --new-window|-n)
+            force_new=true
+            ;;
+        --yolo|-y)
+            yolo=true
+            ;;
+        dev|d)
+            # Ignore layout arg for backwards compat
+            ;;
+        *)
+            dir="$arg"
+            ;;
+    esac
+done
+
+# Build claude command
+claude_cmd="claude"
+if [[ "$yolo" == true ]]; then
+    claude_cmd="claude --dangerously-skip-permissions"
+fi
+
+# Default to current pane's directory
+if [[ -z "$dir" ]]; then
+    dir="$(tmux display -p '#{pane_current_path}')"
+fi
+
+# Check if we should convert current window or create new
+pane_count=$(tmux display -p '#{window_panes}')
+should_convert=false
+
+if [[ "$pane_count" -eq 1 ]] && [[ "$force_new" == false ]]; then
+    should_convert=true
+fi
+
+if [[ "$should_convert" == true ]]; then
+    # Convert current pane to 2x2 grid
+    tmux split-window -h -c "$dir"           # Shell (right)
+    tmux split-window -v -c "$dir"           # Nvim (bottom right)
+    tmux send-keys "nvim ." Enter
+    tmux select-pane -t 0
+    tmux split-window -v -c "$dir"           # Claude (bottom left)
+    tmux send-keys "$claude_cmd" Enter
+    tmux select-pane -t 0                    # Back to Server (top left)
+else
+    # New window with 2x2 grid
+    tmux new-window -c "$dir"
+    tmux split-window -h -c "$dir"
+    tmux split-window -v -c "$dir"
+    tmux send-keys "nvim ." Enter
+    tmux select-pane -t 0
+    tmux split-window -v -c "$dir"
+    tmux send-keys "$claude_cmd" Enter
+    tmux select-pane -t 0
+fi
