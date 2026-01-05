@@ -167,20 +167,47 @@ The fish configuration automatically detects the OS and adjusts paths accordingl
 - `Cmd+Shift+Enter` - Zoom split
 
 ### Tmux
-- Prefix: `Ctrl+a`
-- `<prefix>"` - Split horizontal
-- `<prefix>%` - Split vertical
-- `<prefix>h/j/k/l` - Pane navigation
-- `<prefix>r` - Reload config
-- `Shift+Left/Right` - Switch windows
-- `<prefix>[` then `v` to select, `y` to yank (vi copy mode, copies to system clipboard)
 
-**Modern features:**
+Prefix: `Ctrl+a`
+
+#### Navigation
+| Key | Action |
+|-----|--------|
+| `Shift+←/→` | Previous/next window |
+| `Shift+↓` | New window |
+| `Ctrl+←/→` | Swap window left/right |
+| `<prefix>h/j/k/l` | Navigate panes (vim-style) |
+| `<prefix>"` | Split horizontal (same dir) |
+| `<prefix>%` | Split vertical (same dir) |
+| `<prefix>c` | New window (same dir) |
+| `<prefix>r` | Reload config |
+
+#### Copy Mode (`<prefix>[`)
+| Key | Action |
+|-----|--------|
+| `v` | Start selection |
+| `y` | Yank to clipboard |
+| `Y` | Copy entire line |
+| `D` | Copy to end of line |
+| `Ctrl+v` | Rectangle/block select |
+| `/` or `?` | Search forward/backward |
+| `Ctrl+u/d` | Half-page up/down |
+
+#### Dev Workflows
+| Key | Action |
+|-----|--------|
+| `<prefix>C` | Claude popup (85% screen) |
+| `<prefix>g c` | Dev layout (2x2 grid, YOLO mode) |
+| `<prefix>g C` | Dev layout in new window |
+| `<prefix>f` | fzf file picker from scrollback |
+| `<prefix>`` ` | Search backward for ``` (code blocks) |
+
+**Features:**
 - Ghostty passthrough (images, graphics protocols)
 - Title sync (tmux window name → Ghostty tab)
-- Smart status bar (hides shell names, shows command indicators)
+- Smart status bar with emoji indicators (🤖 AI, ⌨️ editors)
 - Undercurl support (LSP diagnostics in Neovim)
-- Extended keys (Ctrl+Shift combos work in apps)
+- Extended keys (Ctrl+Shift combos work)
 - tmux-resurrect/continuum for session persistence
 
 ### Git Aliases (from .gitconfig)

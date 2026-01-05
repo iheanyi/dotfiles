@@ -447,6 +447,9 @@ local plugins = {
     end,
   },
 
+  -- open file:line format (e.g., nvim file.lua:42)
+  { "lewis6991/fileline.nvim" },
+
   -- Alternate between files, such as foo.go and foo_test.go
   {
     "rgroli/other.nvim",
