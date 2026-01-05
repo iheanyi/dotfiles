@@ -1,6 +1,6 @@
 #!/bin/bash
 # Create tmux layouts for development workflows
-# Usage: tmux-layout <layout> [directory] [--new-window]
+# Usage: tmux-layout <layout> [directory] [--new-window] [--yolo]
 #
 # Layouts:
 #   claude    - Editor (60%) + Claude (40%) side-by-side
@@ -8,6 +8,7 @@
 #
 # Options:
 #   --new-window    Force creating a new window (don't convert current)
+#   --yolo          Use claude --dangerously-skip-permissions
 
 set -e
 
@@ -17,11 +18,16 @@ shift || true
 # Parse args
 dir=""
 force_new=false
+yolo=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --new-window|-n)
             force_new=true
+            shift
+            ;;
+        --yolo|-y)
+            yolo=true
             shift
             ;;
         *)
@@ -30,6 +36,12 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Build claude command
+claude_cmd="claude"
+if [[ "$yolo" == true ]]; then
+    claude_cmd="claude --dangerously-skip-permissions"
+fi
 
 # Default to current pane's directory
 if [[ -z "$dir" ]]; then
@@ -49,7 +61,7 @@ case "$layout" in
         if [[ "$should_convert" == true ]]; then
             # Convert current pane: split and set up
             tmux split-window -h -l 40% -c "$dir"
-            tmux send-keys "claude" Enter
+            tmux send-keys "$claude_cmd" Enter
             tmux select-pane -L
             tmux send-keys "nvim ." Enter
         else
@@ -57,7 +69,7 @@ case "$layout" in
             tmux new-window -c "$dir"
             tmux send-keys "nvim ." Enter
             tmux split-window -h -l 40% -c "$dir"
-            tmux send-keys "claude" Enter
+            tmux send-keys "$claude_cmd" Enter
             tmux select-pane -L
         fi
         ;;
@@ -71,7 +83,7 @@ case "$layout" in
             tmux send-keys "nvim ." Enter
             tmux select-pane -t 0
             tmux split-window -v -c "$dir"           # Claude (bottom left)
-            tmux send-keys "claude" Enter
+            tmux send-keys "$claude_cmd" Enter
             tmux select-pane -t 0                    # Back to Server (top left)
         else
             # New window
@@ -81,7 +93,7 @@ case "$layout" in
             tmux send-keys "nvim ." Enter
             tmux select-pane -t 0
             tmux split-window -v -c "$dir"
-            tmux send-keys "claude" Enter
+            tmux send-keys "$claude_cmd" Enter
             tmux select-pane -t 0
         fi
         ;;
