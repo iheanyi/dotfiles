@@ -705,6 +705,16 @@ local plugins = {
     end,
   },
 
+  -- Better % matching with treesitter support
+  {
+    "andymass/vim-matchup",
+    event = "BufReadPost",
+    init = function()
+      vim.g.matchup_matchparen_offscreen = { method = "popup" }
+      vim.g.matchup_surround_enabled = 1
+    end,
+  },
+
   -- Highlight, edit, and navigate code
   {
     "nvim-treesitter/nvim-treesitter",
@@ -772,9 +782,7 @@ local plugins = {
         },
         matchup = {
           enable = true,
-          config = function()
-            vim.g.matchup_matchparen_offscreen = { method = "popup" }
-          end,
+          include_match_words = true,
         },
         highlight = {
           enable = true,
