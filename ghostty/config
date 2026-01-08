@@ -82,3 +82,9 @@ keybind = cmd+shift+e=equalize_splits
 
 # Claude Code shift+enter support
 keybind = shift+enter=text:\n
+
+# Bell notifications (for remote Claude alerts)
+# system = macOS notification banner
+# attention = dock icon bounce
+# audio = play sound
+bell-features = system,attention,audio

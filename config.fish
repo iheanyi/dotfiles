@@ -47,6 +47,8 @@ if status is-interactive
         and source $GHOSTTY_RESOURCES_DIR/shell-integration/fish/vendor_conf.d/ghostty-shell-integration.fish
     end
 
+    fish_add_path /Applications/Ghostty.app/Contents/MacOS
+
     # OrbStack integration
     test -f ~/.orbstack/shell/init2.fish; and source ~/.orbstack/shell/init2.fish 2>/dev/null
 
