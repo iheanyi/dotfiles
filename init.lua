@@ -533,7 +533,7 @@ local plugins = {
   {
     "mason-org/mason-lspconfig.nvim",
     opts = {
-      ensure_installed = { "lua_ls", "ts_ls", "ruby_lsp", "gopls", "buf_ls", "eslint", "astro" },
+      ensure_installed = { "lua_ls", "ts_ls", "ruby_lsp", "gopls", "buf_ls", "eslint", "astro", "herb_ls" },
     },
     dependencies = {
       "mason-org/mason.nvim",
@@ -664,10 +664,15 @@ local plugins = {
         },
       })
 
+      vim.lsp.config("herb_ls", {
+        capabilities = capabilities,
+        filetypes = { "eruby", "erb" },
+      })
+
       -- Enable all configured LSP servers
       -- Note: When private config is loaded, it may provide custom LSP wrappers
       -- that replace the base servers for better monorepo support
-      local base_servers = { "gopls", "ruby_lsp", "ts_ls", "buf_ls", "astro", "eslint", "lua_ls" }
+      local base_servers = { "gopls", "ruby_lsp", "ts_ls", "buf_ls", "astro", "eslint", "lua_ls", "herb_ls" }
 
       if private.setup_lsp then
         -- Private config may have its own gopls and ruby wrappers, so exclude the base ones
