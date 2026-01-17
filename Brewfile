@@ -24,6 +24,7 @@ brew "git-delta"      # better git diff pager
 brew "difftastic"     # structural diff (AST-aware)
 brew "mergiraf"       # structural merge driver
 brew "ncdu"           # better du (disk usage)
+brew "trash"          # safer rm (moves to Trash)
 brew "tldr"           # better man (simplified examples)
 brew "entr"           # run commands on file changes
 brew "zoxide"         # better cd/autojump
