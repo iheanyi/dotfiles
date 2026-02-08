@@ -1,47 +1,23 @@
 {
   "alwaysThinkingEnabled": true,
   "enabledPlugins": {
-    "beads@beads-marketplace": true,
     "code-review@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
     "database-design@claude-code-workflows": true,
+    "design-and-refine@design-plugins": true,
     "dev-browser@dev-browser-marketplace": true,
     "document-skills@anthropic-agent-skills": true,
     "frontend-design@claude-plugins-official": true,
     "github@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
     "ralph-wiggum@claude-plugins-official": true,
     "sentry@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true
+    "superpowers@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
+    "tasuku@tasuku-marketplace": true
   },
-  "hooks": {
-    "PreCompact": [
-      {
-        "hooks": [
-          {
-            "command": "bd prime",
-            "type": "command"
-          }
-        ],
-        "matcher": ""
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "command": "bd prime",
-            "type": "command"
-          }
-        ],
-        "matcher": ""
-      }
-    ]
-  },
+  "hooks": {},
   "mcpServers": {
-    "tasuku": {
-      "args": ["serve"],
-      "command": "/Users/iheanyi/development/go/bin/tk"
-    },
     "context7": {
       "args": ["-y", "@context7/mcp-server"],
       "command": "npx"
