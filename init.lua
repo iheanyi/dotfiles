@@ -693,13 +693,15 @@ local plugins = {
         group = vim.api.nvim_create_augroup("ts_imports", { clear = true }),
         pattern = { "*.tsx", "*.ts" },
         callback = function()
-          local params = vim.lsp.util.make_range_params()
+          local clients = vim.lsp.get_clients({ bufnr = 0, name = "ts_ls" })
+          local encoding = (clients[1] and clients[1].offset_encoding) or "utf-16"
+          local params = vim.lsp.util.make_range_params(0, encoding)
           params.context = { only = { "source.removeUnused.ts" }, diagnostics = {} }
           local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 1000)
           for _, res in pairs(result or {}) do
             for _, r in pairs(res.result or {}) do
               if r.edit then
-                vim.lsp.util.apply_workspace_edit(r.edit, "utf-16")
+                vim.lsp.util.apply_workspace_edit(r.edit, encoding)
               elseif r.command then
                 vim.lsp.buf.execute_command(r.command)
               end

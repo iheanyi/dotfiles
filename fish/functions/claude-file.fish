@@ -9,7 +9,7 @@ function claude-file
         return 1
     end
 
-    set -l output ""
+    set -l first_file 1
 
     for file in $argv
         if not test -f $file
@@ -25,13 +25,14 @@ function claude-file
             set display_path (string replace "$git_root/" "" $abs_path)
         end
 
-        # Add file with header
-        if test -n "$output"
-            set output "$output\n\n"
+        # Add file with header, separated by blank lines
+        if test $first_file -eq 0
+            echo
+            echo
         end
-        set output "$output// $display_path\n"(cat $file)
-    end
-
-    echo -e $output | pbcopy
+        echo "// $display_path"
+        command cat $file
+        set first_file 0
+    end | pbcopy
     echo "Copied "(count $argv)" file(s) to clipboard"
 end

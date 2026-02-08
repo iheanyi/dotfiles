@@ -2,6 +2,7 @@
 # Run: brew bundle install
 
 # Core CLI tools
+brew "just"            # command runner (runs this Brewfile via justfile)
 brew "fish"
 brew "starship"
 brew "neovim"

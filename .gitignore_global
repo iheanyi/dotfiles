@@ -45,7 +45,6 @@ __pycache__/
 .env
 .env.local
 .env.*.local
-.envrc
 
 # Secrets (never commit these)
 *.pem

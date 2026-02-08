@@ -25,14 +25,20 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
 })
 
 -- old habits for git commands
-vim.api.nvim_create_user_command("GBrowse", 'lua require("git.browse").open(true)<CR>', {
+vim.api.nvim_create_user_command("GBrowse", function()
+  require("git.browse").open(true)
+end, {
   range = true,
   bang = true,
   nargs = "*",
 })
 
-vim.api.nvim_create_user_command("GBlame", 'lua require("git.blame").blame()<CR>', {})
-vim.api.nvim_create_user_command("Gblame", 'lua require("git.blame").blame()<CR>', {})
+vim.api.nvim_create_user_command("GBlame", function()
+  require("git.blame").blame()
+end, {})
+vim.api.nvim_create_user_command("Gblame", function()
+  require("git.blame").blame()
+end, {})
 
 -- Go uses gofmt, which uses tabs for indentation and spaces for alignment.
 -- Hence override our indentation rules.
@@ -64,13 +70,15 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   group = vim.api.nvim_create_augroup("setGoFormatting", { clear = true }),
   pattern = "*.go",
   callback = function()
-    local params = vim.lsp.util.make_range_params()
+    local clients = vim.lsp.get_clients({ bufnr = 0, name = "gopls" })
+    local encoding = (clients[1] and clients[1].offset_encoding) or "utf-16"
+    local params = vim.lsp.util.make_range_params(0, encoding)
     params.context = { only = { "source.organizeImports" } }
     local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 2000)
     for _, res in pairs(result or {}) do
       for _, r in pairs(res.result or {}) do
         if r.edit then
-          vim.lsp.util.apply_workspace_edit(r.edit, "utf-16")
+          vim.lsp.util.apply_workspace_edit(r.edit, encoding)
         else
           vim.lsp.buf.execute_command(r.command)
         end
@@ -89,7 +97,10 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 })
 
 -- automatically resize all vim buffers if I resize the terminal window
-vim.api.nvim_command("autocmd VimResized * wincmd =")
+vim.api.nvim_create_autocmd("VimResized", {
+  pattern = "*",
+  command = "wincmd =",
+})
 
 -- https://github.com/neovim/neovim/issues/21771
 local exitgroup = vim.api.nvim_create_augroup("setDir", { clear = true })

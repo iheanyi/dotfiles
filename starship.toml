@@ -40,9 +40,6 @@ vimcmd_symbol = "\n[❮](green)"
 [battery]
 disabled = true
 
-[cmd_duration]
-format = "[$duration](gray)"
-
 [directory]
 format = "[](bright-mint)[ ](bg:bright-mint)[](bg:lower-mint fg:bright-mint)[ $path ](bg:lower-mint fg:black)"
 

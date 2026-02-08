@@ -42,11 +42,12 @@
     autoStash = true
 
 [merge]
-    conflictstyle = diff3
+    conflictstyle = zdiff3
 
 [diff]
     colorMoved = default
     tool = difftastic
+    algorithm = histogram
 
 [difftool]
     prompt = false

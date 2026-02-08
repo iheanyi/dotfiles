@@ -7,7 +7,8 @@ vim.keymap.set("n", "<Leader>q", ":q!<CR>", { silent = true })
 
 -- Some useful quickfix shortcuts for quickfix
 vim.keymap.set("n", "<C-n>", "<cmd>cnext<CR>zz")
-vim.keymap.set("n", "<C-m>", "<cmd>cprev<CR>zz")
+-- NOTE: <C-m> removed because it is equivalent to <CR> (Enter) in terminals,
+-- which breaks Enter key behavior everywhere. Use :cprev or [q instead.
 vim.keymap.set("n", "<leader>a", "<cmd>cclose<CR>")
 
 -- Visual linewise up and down

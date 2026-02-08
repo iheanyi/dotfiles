@@ -19,7 +19,7 @@ function claude-diff
         return 1
     end
 
-    echo $diff_output | pbcopy
-    set -l lines (echo $diff_output | wc -l | string trim)
+    printf '%s\n' $diff_output | pbcopy
+    set -l lines (count $diff_output)
     echo "Copied $lines lines of diff to clipboard"
 end

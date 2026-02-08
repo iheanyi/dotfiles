@@ -45,9 +45,10 @@ setup-git:
         git config --global push.autoSetupRemote true
         git config --global fetch.prune true
         git config --global rebase.autoStash true
-        git config --global merge.conflictstyle diff3
+        git config --global merge.conflictstyle zdiff3
         git config --global diff.colorMoved default
         git config --global diff.tool difftastic
+        git config --global diff.algorithm histogram
         git config --global difftool.prompt false
         git config --global difftool.difftastic.cmd 'difft "$LOCAL" "$REMOTE"'
         git config --global pager.difftool true
@@ -277,7 +278,7 @@ backup-brew:
 check:
     #!/usr/bin/env bash
     echo "Checking installed tools..."
-    tools=("fish" "nvim" "starship" "fzf" "git" "tmux" "ghostty" "bat" "fd" "rg" "zoxide" "direnv" "difft" "mergiraf")
+    tools=("just" "fish" "nvim" "starship" "fzf" "git" "tmux" "ghostty" "bat" "eza" "fd" "rg" "jq" "gh" "delta" "difft" "mergiraf" "zoxide" "lazygit" "direnv" "atuin")
     for tool in "${tools[@]}"; do
         if command -v $tool &> /dev/null; then
             echo "✓ $tool"

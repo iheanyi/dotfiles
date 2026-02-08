@@ -1,7 +1,9 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "alwaysThinkingEnabled": true,
   "enabledPlugins": {
     "code-review@claude-plugins-official": true,
+    "compound-engineering@every-marketplace": true,
     "context7@claude-plugins-official": true,
     "database-design@claude-code-workflows": true,
     "design-and-refine@design-plugins": true,
@@ -9,6 +11,7 @@
     "document-skills@anthropic-agent-skills": true,
     "frontend-design@claude-plugins-official": true,
     "github@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true,
     "ralph-loop@claude-plugins-official": true,
     "ralph-wiggum@claude-plugins-official": true,
     "sentry@claude-plugins-official": true,
@@ -16,39 +19,94 @@
     "swift-lsp@claude-plugins-official": true,
     "tasuku@tasuku-marketplace": true
   },
-  "hooks": {},
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "tk hooks plan-sync '$PLAN_FILE' --dry-run # tasuku-hook",
+            "type": "command"
+          }
+        ],
+        "matcher": "ExitPlanMode"
+      },
+      {
+        "hooks": [
+          {
+            "command": "tk hooks todo-check # tasuku-hook",
+            "type": "command"
+          }
+        ],
+        "matcher": "TodoWrite"
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "command": "tk hooks pre-compact # tasuku-hook",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "tk hooks session # tasuku-hook",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "tk hooks stop-reminder # tasuku-hook",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "command": "tk hooks subagent-done # tasuku-hook",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "tk hooks prompt-check # tasuku-hook",
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  },
   "mcpServers": {
-    "context7": {
-      "args": ["-y", "@context7/mcp-server"],
-      "command": "npx"
-    },
-    "figma": {
-      "transport": "http",
-      "url": "https://mcp.figma.com/mcp"
-    },
-    "linear": {
-      "transport": "http",
-      "url": "https://mcp.linear.app/mcp"
-    },
-    "playwright": {
-      "args": ["@playwright/mcp@latest", "--isolated"],
-      "command": "npx"
-    },
-    "sentry": {
-      "args": ["-y", "@sentry/mcp-server"],
-      "command": "npx"
-    },
-    "tasuku": {
-      "args": ["serve"],
-      "command": "/Users/iheanyi/development/go/bin/tk"
+    "Notion": {
+      "url": "https://mcp.notion.com/mcp"
     }
   },
   "permissions": {
-    "allow": ["Skill(dev-browser:dev-browser)", "Bash(npx tsx:*)"]
+    "allow": [
+      "Skill(dev-browser:dev-browser)",
+      "Bash(npx tsx:*)"
+    ]
   },
   "statusLine": {
     "command": "/bin/bash ~/.claude/statusline-command.sh",
     "type": "command"
   }
 }
-
