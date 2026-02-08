@@ -42,11 +42,21 @@ vim.api.nvim_create_autocmd("Filetype", {
   command = "setlocal noexpandtab tabstop=4 shiftwidth=4",
 })
 
--- Update configuration for Markdown
+-- Update configuration for Markdown/MDX — soft wrap, no hard line breaks, spellcheck
 vim.api.nvim_create_autocmd("Filetype", {
-  group = vim.api.nvim_create_augroup("setMarkdownIndent", { clear = true }),
-  pattern = { "markdown" },
-  command = "setlocal expandtab tabstop=2 shiftwidth=2",
+  group = vim.api.nvim_create_augroup("setMarkdownConfig", { clear = true }),
+  pattern = { "markdown", "mdx" },
+  callback = function()
+    vim.opt_local.expandtab = true
+    vim.opt_local.tabstop = 2
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.textwidth = 0
+    vim.opt_local.wrapmargin = 0
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true
+    vim.opt_local.spell = true
+    vim.opt_local.spelllang = "en_us"
+  end,
 })
 
 -- Run gofmt/gofmpt, import packages automatically on save
