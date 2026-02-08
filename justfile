@@ -219,12 +219,21 @@ link-starship:
     @ln -sf {{justfile_directory()}}/starship.toml ~/.config/starship.toml
     @echo "✓ Starship config linked"
 
-# Link Claude Code configuration
+# Deploy Claude Code configuration (copy settings, symlink statusline script)
+# Settings are copied (not symlinked) because Claude Code overwrites symlinks
+# with regular files on every settings change. Use `just pull-claude` to sync
+# changes back to the dotfiles repo.
 link-claude:
     @mkdir -p ~/.claude
-    @ln -sf {{justfile_directory()}}/claude/settings.json ~/.claude/settings.json
+    @cp {{justfile_directory()}}/claude/settings.json ~/.claude/settings.json
     @ln -sf {{justfile_directory()}}/claude/statusline-command.sh ~/.claude/statusline-command.sh
-    @echo "✓ Claude config linked"
+    @echo "✓ Claude config deployed (settings copied, statusline linked)"
+
+# Pull Claude settings back into dotfiles repo (after Claude/agentctl modifies them)
+pull-claude:
+    @cp ~/.claude/settings.json {{justfile_directory()}}/claude/settings.json
+    @echo "✓ Claude settings pulled into dotfiles repo"
+    @echo "  Review changes with: git diff claude/settings.json"
 
 # Link helper scripts (tmux-open-in-nvim, tmux-fzf-files, etc.)
 link-bin:
@@ -304,7 +313,6 @@ doctor:
         "$HOME/.tmux.conf"
         "$HOME/.gitignore_global"
         "$HOME/.config/git/attributes"
-        "$HOME/.claude/settings.json"
         "$HOME/.claude/statusline-command.sh"
     )
     for link in "${links[@]}"; do
@@ -318,6 +326,16 @@ doctor:
             ((errors++))
         fi
     done
+
+    # Check copied files (not symlinked because the tool overwrites symlinks)
+    echo ""
+    echo "=== Managed Copies ==="
+    if [ -f "$HOME/.claude/settings.json" ]; then
+        echo "✓ ~/.claude/settings.json"
+    else
+        echo "✗ ~/.claude/settings.json (missing - run: just link-claude)"
+        ((errors++))
+    fi
     echo ""
 
     # Check plugin managers
