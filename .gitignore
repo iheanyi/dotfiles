@@ -1,6 +1,12 @@
 # Local Claude Code settings
 .claude/
 
+# Tasuku local state
+.tasuku/
+
+# Neovim logs
+.nvimlog
+
 # Private Settings
 .private.fish
 lua/private/
