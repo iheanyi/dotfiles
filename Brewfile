@@ -32,6 +32,7 @@ brew "zoxide"         # better cd/autojump
 brew "lazygit"        # TUI for git (interactive staging, rebase, etc.)
 
 # Language version managers
+brew "mise"
 brew "rbenv"
 brew "ruby-build"     # required for rbenv to install Ruby versions
 brew "pyenv"

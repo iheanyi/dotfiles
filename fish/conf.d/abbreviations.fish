@@ -14,7 +14,7 @@ if status is-interactive
     abbr -a ls eza
     abbr -a ll "eza -la --git"
     abbr -a la "eza -a"
-    abbr -a lt "eza --tree --level=2"
+
     abbr -a .. "cd .."
     abbr -a ... "cd ../.."
 

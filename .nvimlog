@@ -1,0 +1,2 @@
+WRN 2026-02-08T15:18:43.241 ?.82202    server_start:199: Failed to start server: operation not permitted: /var/folders/74/d3dwy9q171v6zjzx4pghctv00000gn/T/nvim.iheanyi/mRJoGe/nvim.82202.0
+WRN 2026-02-08T15:18:43.320 ?.82202    server_start:199: Failed to start server: operation not permitted: /var/folders/74/d3dwy9q171v6zjzx4pghctv00000gn/T/nvim.iheanyi/mRJoGe/fzf-lua.1770585523.82202.1

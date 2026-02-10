@@ -16,7 +16,7 @@ os := if os() == "macos" { "macos" } else if os() == "linux" { "linux" } else { 
 # ============================================================================
 
 # Full installation (run this on a new machine)
-install: install-homebrew install-packages install-fish install-tmux-plugins link setup-git
+install: install-homebrew install-packages install-fish install-tmux-plugins link install-mise setup-git
     @echo "✓ Installation complete! Restart your terminal."
 
 # Configure git with base settings and user info
@@ -154,6 +154,19 @@ install-fish:
     fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
     fish -c "fisher update"
 
+# Install mise tool versions (partial migration for node/python)
+install-mise:
+    #!/usr/bin/env bash
+    if command -v mise &> /dev/null; then
+        if [ -f "$HOME/.config/mise/config.toml" ]; then
+            mise install
+        else
+            echo "⚠ mise config not found at ~/.config/mise/config.toml (run: just link-mise)"
+        fi
+    else
+        echo "⚠ mise not installed (run: brew install mise)"
+    fi
+
 # Install tmux plugin manager (TPM)
 install-tmux-plugins:
     #!/usr/bin/env bash
@@ -171,7 +184,7 @@ install-tmux-plugins:
 # ============================================================================
 
 # Link all dotfiles to home directory
-link: link-fish link-neovim link-terminal link-git link-tmux link-starship link-claude link-bin
+link: link-fish link-neovim link-terminal link-git link-tmux link-starship link-mise link-claude link-bin
     @echo "✓ All configs linked"
 
 # Link fish configuration
@@ -191,7 +204,12 @@ link-neovim:
     @ln -sf {{justfile_directory()}}/init.lua ~/.config/nvim/init.lua
     @ln -sf {{justfile_directory()}}/.stylua.toml ~/.config/nvim/.stylua.toml
     @for f in {{justfile_directory()}}/lua/config/*.lua; do ln -sf "$$f" ~/.config/nvim/lua/config/; done
-    @for f in {{justfile_directory()}}/lua/plugins/*.lua; do ln -sf "$$f" ~/.config/nvim/lua/plugins/; done
+    @if [ -d {{justfile_directory()}}/lua/plugins ]; then \
+        for f in {{justfile_directory()}}/lua/plugins/*.lua; do \
+            [ -e "$$f" ] || continue; \
+            ln -sf "$$f" ~/.config/nvim/lua/plugins/; \
+        done; \
+    fi
     @echo "✓ Neovim config linked"
 
 # Link terminal emulator configs
@@ -218,6 +236,12 @@ link-starship:
     @mkdir -p ~/.config
     @ln -sf {{justfile_directory()}}/starship.toml ~/.config/starship.toml
     @echo "✓ Starship config linked"
+
+# Link mise config (partial migration for node/python)
+link-mise:
+    @mkdir -p ~/.config/mise
+    @ln -sf {{justfile_directory()}}/mise/config.toml ~/.config/mise/config.toml
+    @echo "✓ Mise config linked"
 
 # Deploy Claude Code configuration (copy settings, symlink statusline script)
 # Settings are copied (not symlinked) because Claude Code overwrites symlinks

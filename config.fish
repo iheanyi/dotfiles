@@ -23,7 +23,12 @@ if status is-interactive
     command -q rbenv; and rbenv init - fish | source
 
     # Python version manager
-    command -q pyenv; and pyenv init - | source
+    if command -q mise
+        # Prefer mise for Python/Node (partial migration)
+        mise activate fish | source
+    else
+        command -q pyenv; and pyenv init - | source
+    end
 
     # Direnv (auto-load .envrc files)
     command -q direnv; and direnv hook fish | source
