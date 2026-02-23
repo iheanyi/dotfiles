@@ -19,6 +19,14 @@ if status is-interactive
     # FZF key bindings (Ctrl+R for history, Ctrl+T for files)
     command -q fzf; and fzf --fish 2>/dev/null | source
 
+    # Enhanced FZF widgets (override default Ctrl+T, add Ctrl+G)
+    if command -q fzf; and command -q fd
+        bind \ct _fzf_file_enhanced
+        bind -M insert \ct _fzf_file_enhanced
+        bind \cg _fzf_cd_enhanced
+        bind -M insert \cg _fzf_cd_enhanced
+    end
+
     # Ruby version manager
     command -q rbenv; and rbenv init - fish | source
 
