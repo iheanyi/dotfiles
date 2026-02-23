@@ -1,4 +1,4 @@
-# Private fish configuration - copy to ~/.private.fish
+# Private fish configuration - copy to ~/.config/fish/private.fish
 # This file is sourced by config.fish if it exists
 # Add machine-specific or sensitive configuration here
 

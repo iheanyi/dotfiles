@@ -195,6 +195,7 @@ link-fish:
     @ln -sf {{justfile_directory()}}/fish_plugins ~/.config/fish/fish_plugins
     @for f in {{justfile_directory()}}/fish/conf.d/*.fish; do ln -sf "$$f" ~/.config/fish/conf.d/; done
     @for f in {{justfile_directory()}}/fish/functions/*.fish; do ln -sf "$$f" ~/.config/fish/functions/; done
+    @test -f {{justfile_directory()}}/.private.fish && ln -sf {{justfile_directory()}}/.private.fish ~/.config/fish/private.fish || true
     @echo "✓ Fish config linked"
 
 # Link Neovim configuration

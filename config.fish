@@ -56,5 +56,5 @@ if status is-interactive
     test -f ~/.orbstack/shell/init2.fish; and source ~/.orbstack/shell/init2.fish 2>/dev/null
 
     # Private/work-related config (not in git)
-    test -f ~/.private.fish; and source ~/.private.fish
+    test -f ~/.config/fish/private.fish; and source ~/.config/fish/private.fish
 end
