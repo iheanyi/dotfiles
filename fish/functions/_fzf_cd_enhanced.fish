@@ -10,7 +10,7 @@
 #   Ctrl+G  - Drill into the highlighted directory
 #   Ctrl+R  - Jump to the git repo root (nearest .git; no-op outside a repo)
 #   Ctrl+T  - Switch to file search within the highlighted directory
-#   Enter   - cd into the highlighted directory
+#   Enter   - Insert the highlighted directory path on the command line
 #   Escape  - Cancel
 #
 # Accepts an optional starting directory argument (used by other widgets).
@@ -66,9 +66,16 @@ function _fzf_cd_enhanced --description "FZF directory switcher with navigation"
             _fzf_file_enhanced "$search_dir"
             break
         else
-            # Enter pressed — cd into the selected directory
+            # Enter pressed — insert the path on the command line
+            # Use relative path when under pwd, absolute otherwise
             if test -n "$selected"
-                cd "$base/$selected"
+                set -l full "$base/$selected"
+                set -l rel (string replace (pwd)"/" "" "$full")
+                if test "$rel" != "$full"
+                    commandline -i -- "$rel"
+                else
+                    commandline -i -- "$full"
+                end
             end
             break
         end

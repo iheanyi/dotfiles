@@ -34,7 +34,7 @@ set -gx FZF_ALT_C_COMMAND 'fd --type d --hidden --follow --exclude .git --exclud
 set -gx FZF_ALT_C_OPTS '--preview "eza --tree --level=2 --color=always {}"'
 
 # Bat configuration (used for cat replacement and man pager)
-set -gx BAT_THEME "base16"
+set -gx BAT_THEME "Nord"
 set -gx MANPAGER "sh -c 'col -bx | bat -l man -p'"
 set -gx MANROFFOPT "-c"
 

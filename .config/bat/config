@@ -1,0 +1,8 @@
+# bat configuration
+# See: https://github.com/sharkdp/bat#configuration-file
+
+# Show line numbers and git changes
+--style="numbers,changes,header"
+
+# Use italic text on the terminal
+--italic-text=always

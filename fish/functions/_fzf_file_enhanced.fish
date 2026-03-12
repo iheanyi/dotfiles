@@ -66,8 +66,15 @@ function _fzf_file_enhanced --description "FZF file finder with navigation"
             end
         else
             # Enter pressed — insert the file path at the cursor position
+            # Use relative path when under pwd, absolute otherwise
             if test -n "$selected"
-                commandline -it -- "$base/$selected"
+                set -l full "$base/$selected"
+                set -l rel (string replace (pwd)"/" "" "$full")
+                if test "$rel" != "$full"
+                    commandline -it -- "$rel"
+                else
+                    commandline -it -- "$full"
+                end
             end
             break
         end

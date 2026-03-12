@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Quick CPU and memory stats for tmux statusline with color thresholds
+# Works on both macOS and Linux
+
+# Colors (poimandres-inspired)
+NORMAL="#868cad"
+WARN="#fffac2"
+CRIT="#d0679d"
+
+colorize() {
+    local val=$1
+    if ((val >= 80)); then
+        echo "$CRIT"
+    elif ((val >= 60)); then
+        echo "$WARN"
+    else
+        echo "$NORMAL"
+    fi
+}
+
+case "$(uname)" in
+    Darwin)
+        # macOS: use vm_stat for memory, top for CPU
+        # Memory: pages * page_size / total
+        page_size=$(sysctl -n hw.pagesize)
+        mem_total=$(sysctl -n hw.memsize)
+        # vm_stat reports pages — sum active + wired + compressed for "used"
+        eval "$(vm_stat | awk -v ps="$page_size" '
+            /Pages active/    { active = $NF * ps }
+            /Pages wired/     { wired = $NF * ps }
+            /Pages occupied by compressor/ { compressed = $NF * ps }
+            END { printf "mem_used=%d\n", active + wired + compressed }
+        ' | tr -d '.')"
+        mem=$((100 * mem_used / mem_total))
+
+        # CPU: top snapshot (1 sample, 0 delay)
+        cpu=$(top -l 1 -n 0 2>/dev/null | awk '/CPU usage/ {
+            gsub(/%/, "")
+            # user + sys = used
+            printf "%.0f", $3 + $5
+        }')
+        ;;
+    *)
+        # Linux: /proc/meminfo and /proc/stat
+        mem=$(awk '/MemTotal/{t=$2}/MemAvailable/{a=$2}END{printf "%.0f", (t-a)/t*100}' /proc/meminfo)
+
+        read -r _ user nice system idle _ < /proc/stat
+        total1=$((user + nice + system + idle))
+        idle1=$idle
+        sleep 0.3
+        read -r _ user nice system idle _ < /proc/stat
+        total2=$((user + nice + system + idle))
+        idle2=$idle
+        cpu=$((100 * (total2 - total1 - (idle2 - idle1)) / (total2 - total1)))
+        ;;
+esac
+
+cpu_color=$(colorize "$cpu")
+mem_color=$(colorize "$mem")
+
+echo "#[fg=${cpu_color}]${cpu}% CPU #[fg=${mem_color}]${mem}% MEM"

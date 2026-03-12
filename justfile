@@ -184,7 +184,7 @@ install-tmux-plugins:
 # ============================================================================
 
 # Link all dotfiles to home directory
-link: link-fish link-neovim link-terminal link-git link-tmux link-starship link-mise link-claude link-bin
+link: link-fish link-neovim link-terminal link-git link-tmux link-starship link-mise link-claude link-bin link-bat
     @echo "✓ All configs linked"
 
 # Link fish configuration
@@ -237,6 +237,20 @@ link-starship:
     @mkdir -p ~/.config
     @ln -sf {{justfile_directory()}}/starship.toml ~/.config/starship.toml
     @echo "✓ Starship config linked"
+
+# Link bat config and theme
+link-bat:
+    @mkdir -p ~/.config/bat/themes
+    @ln -sf {{justfile_directory()}}/.config/bat/config ~/.config/bat/config
+    @test -f {{justfile_directory()}}/.config/bat/themes/poimandres.tmTheme && ln -sf {{justfile_directory()}}/.config/bat/themes/poimandres.tmTheme ~/.config/bat/themes/poimandres.tmTheme || true
+    @command -v bat > /dev/null && bat cache --build > /dev/null 2>&1 || true
+    @echo "✓ Bat config linked"
+
+# Link glow config
+link-glow:
+    @mkdir -p ~/.config/glow
+    @ln -sf {{justfile_directory()}}/.config/glow/glow.yml ~/.config/glow/glow.yml
+    @echo "✓ Glow config linked"
 
 # Link mise config (partial migration for node/python)
 link-mise:

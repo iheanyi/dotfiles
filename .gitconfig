@@ -99,6 +99,10 @@
     sp = stash pop
     ss = stash save
 
+    # Structural diff (AST-aware, inline without difftool)
+    difft = -c diff.external=difft diff
+    dlog = -c diff.external=difft log -p --ext-diff
+
     # Clean
     cleanup = "!git branch --merged | grep -v '\\*\\|main\\|master' | xargs -n 1 git branch -d"
 
