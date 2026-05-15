@@ -35,7 +35,7 @@ if status is-interactive
         # Prefer mise for Python/Node (partial migration)
         mise activate fish | source
     else
-        command -q pyenv; and pyenv init - | source
+        command -q pyenv; and pyenv init --no-rehash - fish | source
     end
 
     # Direnv (auto-load .envrc files)

@@ -193,8 +193,8 @@ link-fish:
     @mkdir -p ~/.config/fish/functions
     @ln -sf {{justfile_directory()}}/config.fish ~/.config/fish/config.fish
     @ln -sf {{justfile_directory()}}/fish_plugins ~/.config/fish/fish_plugins
-    @for f in {{justfile_directory()}}/fish/conf.d/*.fish; do ln -sf "$$f" ~/.config/fish/conf.d/; done
-    @for f in {{justfile_directory()}}/fish/functions/*.fish; do ln -sf "$$f" ~/.config/fish/functions/; done
+    @for f in {{justfile_directory()}}/fish/conf.d/*.fish; do ln -sf "$f" ~/.config/fish/conf.d/; done
+    @for f in {{justfile_directory()}}/fish/functions/*.fish; do ln -sf "$f" ~/.config/fish/functions/; done
     @test -f {{justfile_directory()}}/.private.fish && ln -sf {{justfile_directory()}}/.private.fish ~/.config/fish/private.fish || true
     @echo "✓ Fish config linked"
 
@@ -204,11 +204,11 @@ link-neovim:
     @mkdir -p ~/.config/nvim/lua/plugins
     @ln -sf {{justfile_directory()}}/init.lua ~/.config/nvim/init.lua
     @ln -sf {{justfile_directory()}}/.stylua.toml ~/.config/nvim/.stylua.toml
-    @for f in {{justfile_directory()}}/lua/config/*.lua; do ln -sf "$$f" ~/.config/nvim/lua/config/; done
+    @for f in {{justfile_directory()}}/lua/config/*.lua; do ln -sf "$f" ~/.config/nvim/lua/config/; done
     @if [ -d {{justfile_directory()}}/lua/plugins ]; then \
         for f in {{justfile_directory()}}/lua/plugins/*.lua; do \
-            [ -e "$$f" ] || continue; \
-            ln -sf "$$f" ~/.config/nvim/lua/plugins/; \
+            [ -e "$f" ] || continue; \
+            ln -sf "$f" ~/.config/nvim/lua/plugins/; \
         done; \
     fi
     @echo "✓ Neovim config linked"
@@ -277,7 +277,7 @@ pull-claude:
 # Link helper scripts (tmux-open-in-nvim, tmux-fzf-files, etc.)
 link-bin:
     @mkdir -p ~/.dotfiles/bin
-    @for f in {{justfile_directory()}}/bin/*; do ln -sf "$$f" ~/.dotfiles/bin/; done
+    @for f in {{justfile_directory()}}/bin/*; do ln -sf "$f" ~/.dotfiles/bin/; done
     @echo "✓ Helper scripts linked"
 
 # ============================================================================
