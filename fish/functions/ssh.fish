@@ -7,5 +7,7 @@ function ssh --wraps=ssh --description "SSH with tab title"
 
     __set_terminal_title $host
     command ssh $argv
+    set -l ssh_status $status
     __reset_terminal_title
+    return $ssh_status
 end
