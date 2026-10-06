@@ -44,11 +44,10 @@ if status is-interactive
     # Zoxide (smarter cd)
     command -q zoxide; and zoxide init fish --cmd j | source
 
-    # Homebrew completions (use cached HOMEBREW_PREFIX)
+    # Homebrew completions (use cached HOMEBREW_PREFIX). Only vendor_completions.d:
+    # share/fish/completions holds Homebrew fish's own builtins, which break when
+    # the running fish is a different version.
     if set -q HOMEBREW_PREFIX
-        if test -d "$HOMEBREW_PREFIX/share/fish/completions"
-            set -p fish_complete_path $HOMEBREW_PREFIX/share/fish/completions
-        end
         if test -d "$HOMEBREW_PREFIX/share/fish/vendor_completions.d"
             set -p fish_complete_path $HOMEBREW_PREFIX/share/fish/vendor_completions.d
         end

@@ -15,7 +15,6 @@
     "ralph-loop@claude-plugins-official": true,
     "ralph-wiggum@claude-plugins-official": true,
     "sentry@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true,
     "swift-lsp@claude-plugins-official": true,
     "tasuku@tasuku-marketplace": true
   },
