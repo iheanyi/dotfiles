@@ -1,53 +1,41 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "alwaysThinkingEnabled": true,
-  "enabledPlugins": {
-    "code-review@claude-plugins-official": true,
-    "compound-engineering@every-marketplace": true,
-    "context7@claude-plugins-official": true,
-    "database-design@claude-code-workflows": true,
-    "design-and-refine@design-plugins": true,
-    "dev-browser@dev-browser-marketplace": true,
-    "document-skills@anthropic-agent-skills": true,
-    "frontend-design@claude-plugins-official": true,
-    "github@claude-plugins-official": true,
-    "gopls-lsp@claude-plugins-official": true,
-    "ralph-loop@claude-plugins-official": true,
-    "ralph-wiggum@claude-plugins-official": true,
-    "sentry@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true,
-    "tasuku@tasuku-marketplace": true
-  },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
+  "permissions": {
+    "allow": [
+      "Skill(dev-browser:dev-browser)",
+      "Bash(npx tsx:*)"
+    ]
+  },
+  "model": "opus",
   "hooks": {
     "PostToolUse": [
       {
+        "matcher": "ExitPlanMode",
         "hooks": [
           {
-            "command": "tk hooks plan-sync '$PLAN_FILE' --dry-run # tasuku-hook",
-            "type": "command"
+            "type": "command",
+            "command": "tk hooks plan-sync '$PLAN_FILE' --dry-run # tasuku-hook"
           }
-        ],
-        "matcher": "ExitPlanMode"
+        ]
       },
       {
+        "matcher": "TodoWrite",
         "hooks": [
           {
-            "command": "tk hooks todo-check # tasuku-hook",
-            "type": "command"
+            "type": "command",
+            "command": "tk hooks todo-check # tasuku-hook"
           }
-        ],
-        "matcher": "TodoWrite"
+        ]
       }
     ],
     "PreCompact": [
       {
         "hooks": [
           {
-            "command": "tk hooks pre-compact # tasuku-hook",
-            "type": "command"
+            "type": "command",
+            "command": "tk hooks pre-compact # tasuku-hook"
           }
         ]
       }
@@ -56,8 +44,8 @@
       {
         "hooks": [
           {
-            "command": "tk hooks session # tasuku-hook",
-            "type": "command"
+            "type": "command",
+            "command": "tk hooks session # tasuku-hook"
           }
         ]
       }
@@ -66,8 +54,8 @@
       {
         "hooks": [
           {
-            "command": "tk hooks stop-reminder # tasuku-hook",
-            "type": "command"
+            "type": "command",
+            "command": "tk hooks stop-reminder # tasuku-hook"
           }
         ]
       }
@@ -76,8 +64,28 @@
       {
         "hooks": [
           {
-            "command": "tk hooks subagent-done # tasuku-hook",
-            "type": "command"
+            "type": "command",
+            "command": "tk hooks subagent-done # tasuku-hook"
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "tk hooks task-completed # tasuku-hook"
+          }
+        ]
+      }
+    ],
+    "TeammateIdle": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "tk hooks teammate-idle # tasuku-hook"
           }
         ]
       }
@@ -86,26 +94,97 @@
       {
         "hooks": [
           {
-            "command": "tk hooks prompt-check # tasuku-hook",
-            "type": "command"
+            "type": "command",
+            "command": "tk hooks prompt-check # tasuku-hook"
           }
         ]
       }
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "/bin/bash ~/.claude/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "code-review@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "design-and-refine@design-plugins": true,
+    "document-skills@anthropic-agent-skills": true,
+    "frontend-design@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
+    "ruby-lsp@claude-plugins-official": true,
+    "sentry@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
+    "tasuku@tasuku-marketplace": true,
+    "mattpocock-skills@claude-plugins-official": true,
+    "cc-plugin-you-should-know@builtin": false,
+    "carta-cap-table@synced": false,
+    "cloudflare@cloudflare": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/anthropics/claude-plugins-official.git"
+      }
+    },
+    "cloudflare": {
+      "source": {
+        "source": "github",
+        "repo": "cloudflare/skills"
+      }
+    }
+  },
+  "sandbox": {
+    "enabled": false
+  },
+  "alwaysThinkingEnabled": true,
+  "effortLevel": "high",
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  },
+  "tui": "fullscreen",
+  "skipDangerousModePermissionPrompt": true,
+  "editorMode": "vim",
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true,
   "mcpServers": {
     "Notion": {
       "url": "https://mcp.notion.com/mcp"
+    },
+    "dev-browser": {
+      "_managedBy": "agentctl",
+      "command": "node"
+    },
+    "figma": {
+      "_managedBy": "agentctl",
+      "transport": "http",
+      "url": "https://mcp.figma.com/mcp"
+    },
+    "linear": {
+      "_managedBy": "agentctl",
+      "transport": "http",
+      "url": "https://mcp.linear.app/mcp"
+    },
+    "playwright": {
+      "_managedBy": "agentctl",
+      "args": [
+        "@playwright/mcp@latest",
+        "--isolated"
+      ],
+      "command": "npx"
+    },
+    "sentry": {
+      "_managedBy": "agentctl",
+      "args": [
+        "-y",
+        "@sentry/mcp-server"
+      ],
+      "command": "npx"
     }
-  },
-  "permissions": {
-    "allow": [
-      "Skill(dev-browser:dev-browser)",
-      "Bash(npx tsx:*)"
-    ]
-  },
-  "statusLine": {
-    "command": "/bin/bash ~/.claude/statusline-command.sh",
-    "type": "command"
   }
 }
