@@ -232,6 +232,11 @@ link-tmux:
     @ln -sf {{justfile_directory()}}/.tmux.conf ~/.tmux.conf
     @echo "✓ Tmux config linked"
 
+# Link Rex configuration without replacing an existing config
+link-rex:
+    @mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/rex"
+    @target="${XDG_CONFIG_HOME:-$HOME/.config}/rex/init.lua"; source="{{justfile_directory()}}/rex/init.lua"; test "$(readlink "$target")" = "$source" || ln -s "$source" "$target"
+
 # Link starship prompt
 link-starship:
     @mkdir -p ~/.config

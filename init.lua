@@ -4,6 +4,24 @@
 -- i.e: <leader>w saves the current file
 vim.g.mapleader = ","
 
+-- Give the Rex file picker a stable socket for this pane.
+local rex_pane = (vim.env.REX_BLOCK or ""):match("^block:([%x-]+)$")
+if rex_pane and vim.env.HOME then
+  local directory = vim.env.HOME .. "/.cache/rex-nvim"
+  vim.fn.mkdir(directory, "p", 448)
+  local socket = directory .. "/" .. rex_pane
+  local connected, channel = pcall(vim.fn.sockconnect, "pipe", socket, { rpc = true })
+  if connected and channel > 0 then
+    vim.fn.chanclose(channel)
+  else
+    local entry = vim.uv.fs_lstat(socket)
+    if entry and entry.type == "socket" then
+      vim.uv.fs_unlink(socket)
+    end
+    pcall(vim.fn.serverstart, socket)
+  end
+end
+
 -- Load config files
 require("config.options")
 require("config.keymaps")
