@@ -67,3 +67,5 @@ yarn-error.log*
 /.cursor/
 
 /.playwright-mcp/
+
+**/.claude/settings.local.json
