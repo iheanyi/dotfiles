@@ -32,4 +32,6 @@ if status is-interactive
     abbr -a cy "claude --dangerously-skip-permissions"             # Yolo mode
     abbr -a cry "claude --resume --dangerously-skip-permissions"   # Resume yolo
     abbr -a ccy "claude --continue --dangerously-skip-permissions" # Continue yolo
+    abbr -a cx codex
+    abbr -a cxy "codex --dangerously-bypass-approvals-and-sandbox"
 end
