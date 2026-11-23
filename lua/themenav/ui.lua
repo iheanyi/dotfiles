@@ -662,12 +662,14 @@ function M.export_current(slug_override)
     local rex_target = rex_dir .. "/" .. theme_title
     local ghostty_target = ghostty_dir .. "/" .. theme_title
 
+    local import_path = rex_target
     if has_dotfiles then
       vim.fn.mkdir(dotfiles_rex_themes, "p")
       local repo_rex_target = dotfiles_rex_themes .. "/" .. theme_title
       local rf = assert(io.open(repo_rex_target, "w"))
       rf:write(rex_conf)
       rf:close()
+      import_path = repo_rex_target
       for _, dest in ipairs({ rex_target, ghostty_target }) do
         pcall(vim.uv.fs_unlink, dest)
         local ok_rlink = pcall(vim.uv.fs_symlink, repo_rex_target, dest)
@@ -687,10 +689,40 @@ function M.export_current(slug_override)
     vim.g.colors_name = slug
     ctx.status_msg = "Exported :colorscheme " .. slug
     render()
-    vim.notify(
-      string.format("Exported %s\n  Neovim: %s\n  Rex/Ghostty: %s", slug, nvim_target, rex_target),
-      vim.log.levels.INFO
-    )
+
+    if rex.is_in_rex() then
+      rex.import_into_rex(import_path, function(ok, err)
+        if ok then
+          ctx.status_msg = "Exported & imported into Rex: " .. theme_title
+          render()
+          vim.notify(
+            string.format(
+              "Exported %s & imported into Rex\n  Neovim: %s\n  Rex/Ghostty: %s",
+              theme_title,
+              nvim_target,
+              import_path
+            ),
+            vim.log.levels.INFO
+          )
+        else
+          vim.notify(
+            string.format(
+              "Exported %s (Rex import skipped: %s)\n  Neovim: %s\n  Rex/Ghostty: %s",
+              slug,
+              err or "unknown error",
+              nvim_target,
+              import_path
+            ),
+            vim.log.levels.WARN
+          )
+        end
+      end)
+    else
+      vim.notify(
+        string.format("Exported %s\n  Neovim: %s\n  Rex/Ghostty: %s", slug, nvim_target, import_path),
+        vim.log.levels.INFO
+      )
+    end
   end
 
   if slug_override and slug_override ~= "" then
