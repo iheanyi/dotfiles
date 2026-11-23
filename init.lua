@@ -521,6 +521,25 @@ local plugins = {
 
   -- markdown
   {
+    "MeanderingProgrammer/render-markdown.nvim",
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-tree/nvim-web-devicons",
+    },
+    ft = { "markdown", "mdx" },
+    opts = {
+      file_types = { "markdown", "mdx" },
+    },
+    keys = {
+      {
+        "<leader>mr",
+        "<cmd>RenderMarkdown toggle<cr>",
+        ft = { "markdown", "mdx" },
+        desc = "Toggle Markdown render",
+      },
+    },
+  },
+  {
     "iamcco/markdown-preview.nvim",
     dependencies = {
       "zhaozg/vim-diagram",

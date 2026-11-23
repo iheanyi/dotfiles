@@ -30,6 +30,7 @@ brew "tldr"           # better man (simplified examples)
 brew "entr"           # run commands on file changes
 brew "zoxide"         # better cd/autojump
 brew "lazygit"        # TUI for git (interactive staging, rebase, etc.)
+brew "glow"           # terminal markdown renderer
 
 # Language version managers
 brew "mise"
