@@ -202,13 +202,22 @@ link-fish:
 link-neovim:
     @mkdir -p ~/.config/nvim/lua/config
     @mkdir -p ~/.config/nvim/lua/plugins
+    @mkdir -p ~/.config/nvim/lua/themenav
+    @mkdir -p ~/.config/nvim/colors
     @ln -sf {{justfile_directory()}}/init.lua ~/.config/nvim/init.lua
     @ln -sf {{justfile_directory()}}/.stylua.toml ~/.config/nvim/.stylua.toml
     @for f in {{justfile_directory()}}/lua/config/*.lua; do ln -sf "$f" ~/.config/nvim/lua/config/; done
+    @for f in {{justfile_directory()}}/lua/themenav/*.lua; do ln -sf "$f" ~/.config/nvim/lua/themenav/; done
     @if [ -d {{justfile_directory()}}/lua/plugins ]; then \
         for f in {{justfile_directory()}}/lua/plugins/*.lua; do \
             [ -e "$f" ] || continue; \
             ln -sf "$f" ~/.config/nvim/lua/plugins/; \
+        done; \
+    fi
+    @if [ -d {{justfile_directory()}}/colors ]; then \
+        for f in {{justfile_directory()}}/colors/*.lua; do \
+            [ -e "$f" ] || continue; \
+            ln -sf "$f" ~/.config/nvim/colors/; \
         done; \
     fi
     @echo "✓ Neovim config linked"

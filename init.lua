@@ -1050,6 +1050,9 @@ vim.keymap.set("n", "<leader>ch", fzf.command_history, { desc = "FzfLua Command 
 
 vim.keymap.set("n", "<leader>F", ":FzfLua files<CR>")
 
+-- Real-time OKLCH Theme Navigator & Studio (:ThemeNav, <leader>ut)
+require("themenav").setup()
+
 -- vim-go
 vim.keymap.set("n", "<leader>b", build_go_files)
 
