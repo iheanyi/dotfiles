@@ -46,9 +46,6 @@ vim.opt.rtp:prepend(vim.env.LAZY or lazypath)
 vim.o.background = "dark"
 pcall(vim.cmd.colorscheme, "poimandres-noir")
 
--- Save undo history
-vim.o.undofile = true
-
 -- run :GoBuild or :GoTestCompile based on the go file
 local function build_go_files()
   if vim.endswith(vim.api.nvim_buf_get_name(0), "_test.go") then
@@ -150,6 +147,8 @@ local plugins = {
   -- formatter
   {
     "stevearc/conform.nvim",
+    event = { "BufWritePre" },
+    cmd = { "ConformInfo" },
     config = function()
       -- Base formatters_by_ft
       local formatters_by_ft = {
@@ -182,6 +181,9 @@ local plugins = {
       end
 
       require("conform").setup({
+        default_format_opts = {
+          lsp_format = "fallback",
+        },
         format_on_save = function(bufnr)
           if slow_format_filetypes[vim.bo[bufnr].filetype] then
             return
@@ -211,7 +213,12 @@ local plugins = {
           },
           prettier = {
             -- Use project-local prettier to find plugins in node_modules
-            cwd = require("conform.util").root_file({ "package.json", ".prettierrc", ".prettierrc.json", "prettier.config.js" }),
+            cwd = require("conform.util").root_file({
+              "package.json",
+              ".prettierrc",
+              ".prettierrc.json",
+              "prettier.config.js",
+            }),
           },
         },
 
@@ -223,7 +230,95 @@ local plugins = {
   -- fzf-lua: Fuzzy finder and picker
   {
     "ibhagwan/fzf-lua",
+    cmd = "FzfLua",
     dependencies = { "nvim-tree/nvim-web-devicons" }, -- optional for icon support
+    keys = {
+      {
+        "<leader>ff",
+        function()
+          require("fzf-lua").files()
+        end,
+        desc = "FzfLua Files",
+      },
+      {
+        "<leader>fg",
+        function()
+          require("fzf-lua").live_grep()
+        end,
+        desc = "FzfLua Live Grep",
+      },
+      {
+        "<leader>fb",
+        function()
+          require("fzf-lua").buffers()
+        end,
+        desc = "FzfLua Buffers",
+      },
+      {
+        "<leader>fh",
+        function()
+          require("fzf-lua").help_tags()
+        end,
+        desc = "FzfLua Help Tags",
+      },
+      {
+        "<C-p>",
+        function()
+          require("fzf-lua").git_files()
+        end,
+        desc = "FzfLua Git Files",
+      },
+      {
+        "<C-b>",
+        function()
+          require("fzf-lua").files()
+        end,
+        desc = "FzfLua Files",
+      },
+      {
+        "<C-g>",
+        function()
+          require("fzf-lua").lsp_document_symbols()
+        end,
+        desc = "FzfLua LSP Document Symbols",
+      },
+      {
+        "<leader>td",
+        function()
+          require("fzf-lua").diagnostics_document()
+        end,
+        desc = "FzfLua Diagnostics (Document)",
+      },
+      {
+        "<leader>gs",
+        function()
+          require("fzf-lua").grep_cword()
+        end,
+        desc = "FzfLua Grep Word Under Cursor",
+      },
+      {
+        "<leader>gg",
+        function()
+          require("fzf-lua").live_grep()
+        end,
+        desc = "FzfLua Live Grep",
+      },
+      {
+        "<leader>fp",
+        function()
+          require("fzf-lua").oldfiles()
+        end,
+        desc = "FzfLua OldFiles",
+      },
+      {
+        "<leader>ch",
+        function()
+          require("fzf-lua").command_history()
+        end,
+        desc = "FzfLua Command History",
+      },
+      { "<leader>F", "<cmd>FzfLua files<CR>", desc = "FzfLua Files" },
+    },
     config = function()
       require("fzf-lua").setup({
         -- Customize your fzf-lua setup here if needed
@@ -234,6 +329,7 @@ local plugins = {
   -- vim-go setup
   {
     "fatih/vim-go",
+    ft = { "go", "gomod" },
     config = function()
       -- we disable most of these features because treesitter and nvim-lsp
       -- take care of it
@@ -352,12 +448,14 @@ local plugins = {
 
   {
     "dinhhuy258/git.nvim",
+    lazy = true,
     config = function()
       require("git").setup()
     end,
   },
   {
     "lewis6991/gitsigns.nvim",
+    event = { "BufReadPre", "BufNewFile" },
     config = function()
       require("gitsigns").setup()
     end,
@@ -559,10 +657,12 @@ local plugins = {
   -- Mason for installing LSP servers
   {
     "mason-org/mason.nvim",
+    cmd = { "Mason", "MasonInstall", "MasonUpdate", "MasonUninstall", "MasonLog" },
     opts = {},
   },
   {
     "mason-org/mason-lspconfig.nvim",
+    event = { "BufReadPre", "BufNewFile" },
     opts = {
       ensure_installed = { "lua_ls", "ts_ls", "ruby_lsp", "gopls", "buf_ls", "eslint", "astro", "herb_ls" },
     },
@@ -668,7 +768,15 @@ local plugins = {
         root_dir = root_pattern("astro.config.mjs", "astro.config.js", "astro.config.ts", "package.json"),
         init_options = {
           typescript = {
-            tsdk = vim.fs.joinpath(vim.fn.stdpath("data"), "mason", "packages", "typescript-language-server", "node_modules", "typescript", "lib"),
+            tsdk = vim.fs.joinpath(
+              vim.fn.stdpath("data"),
+              "mason",
+              "packages",
+              "typescript-language-server",
+              "node_modules",
+              "typescript",
+              "lib"
+            ),
           },
         },
       })
@@ -903,6 +1011,7 @@ local plugins = {
 
   {
     "L3MON4D3/LuaSnip",
+    lazy = true,
     dependencies = { "rafamadriz/friendly-snippets" },
     build = "make install_jsregexp",
     config = function()
@@ -989,6 +1098,11 @@ local plugins = {
   -- Git commands
   {
     "tpope/vim-fugitive",
+    cmd = { "G", "Git", "Gdiffsplit", "Gread", "Gwrite", "Ggrep", "GMove", "GDelete", "GBrowse" },
+    keys = {
+      { "<leader>gy", "<CMD>GBrowse!<CR>", mode = "n", desc = "Copy git URL to clipboard" },
+      { "<leader>gy", ":'<,'>GBrowse!<CR>", mode = "x", desc = "Copy git URL to clipboard (selection)" },
+    },
     dependencies = { "tpope/vim-rhubarb" },
     init = function()
       -- Support GitHub enterprise (configured in private config if needed)
@@ -1001,16 +1115,16 @@ local plugins = {
   -- Task runner
   {
     "stevearc/overseer.nvim",
+    cmd = { "OverseerToggle", "OverseerRun", "OverseerQuickAction", "OverseerTaskAction" },
+    keys = {
+      { "<leader>ot", "<cmd>OverseerToggle<CR>", desc = "[O]verseer [T]oggle" },
+      { "<leader>or", "<cmd>OverseerRun<CR>", desc = "[O]verseer [R]un" },
+      { "<leader>oq", "<cmd>OverseerQuickAction<CR>", desc = "[O]verseer [Q]uick action" },
+      { "<leader>oa", "<cmd>OverseerTaskAction<CR>", desc = "[O]verseer task [A]ction" },
+    },
     opts = {
       templates = { "builtin" },
     },
-    config = function(_, opts)
-      require("overseer").setup(opts)
-      vim.keymap.set("n", "<leader>ot", "<cmd>OverseerToggle<CR>", { desc = "[O]verseer [T]oggle" })
-      vim.keymap.set("n", "<leader>or", "<cmd>OverseerRun<CR>", { desc = "[O]verseer [R]un" })
-      vim.keymap.set("n", "<leader>oq", "<cmd>OverseerQuickAction<CR>", { desc = "[O]verseer [Q]uick action" })
-      vim.keymap.set("n", "<leader>oa", "<cmd>OverseerTaskAction<CR>", { desc = "[O]verseer task [A]ction" })
-    end,
   },
 }
 
@@ -1027,23 +1141,6 @@ require("lazy").setup(plugins)
 --- POST-SETUP ---
 ------------------
 
--- === FZF-LUA KEYMAPS ===
-local fzf = require("fzf-lua")
-vim.keymap.set("n", "<leader>ff", fzf.files, { desc = "FzfLua Files" })
-vim.keymap.set("n", "<leader>fg", fzf.live_grep, { desc = "FzfLua Live Grep" })
-vim.keymap.set("n", "<leader>fb", fzf.buffers, { desc = "FzfLua Buffers" })
-vim.keymap.set("n", "<leader>fh", fzf.help_tags, { desc = "FzfLua Help Tags" })
-vim.keymap.set("n", "<C-p>", fzf.git_files, { desc = "FzfLua Git Files" })
-vim.keymap.set("n", "<C-b>", fzf.files, { desc = "FzfLua Files" })
-vim.keymap.set("n", "<C-g>", fzf.lsp_document_symbols, { desc = "FzfLua LSP Document Symbols" })
-vim.keymap.set("n", "<leader>td", fzf.diagnostics_document, { desc = "FzfLua Diagnostics (Document)" })
-vim.keymap.set("n", "<leader>gs", fzf.grep_cword, { desc = "FzfLua Grep Word Under Cursor" })
-vim.keymap.set("n", "<leader>gg", fzf.live_grep, { desc = "FzfLua Live Grep" })
-vim.keymap.set("n", "<leader>fp", fzf.oldfiles, { desc = "FzfLua OldFiles" })
-vim.keymap.set("n", "<leader>ch", fzf.command_history, { desc = "FzfLua Command History" })
-
-vim.keymap.set("n", "<leader>F", ":FzfLua files<CR>")
-
 -- Real-time OKLCH Theme Navigator & Studio (:ThemeNav, <leader>ut)
 require("themenav").setup()
 
@@ -1053,7 +1150,7 @@ vim.keymap.set("n", "<leader>b", build_go_files)
 -- Use LspAttach autocommand to only map the following keys
 -- after the language server attaches to the current buffer
 vim.api.nvim_create_autocmd("LspAttach", {
-  group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+  group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
   callback = function(ev)
     vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
 
@@ -1062,17 +1159,25 @@ vim.api.nvim_create_autocmd("LspAttach", {
     local opts = { buffer = ev.buf }
 
     vim.keymap.set("n", "<leader>v", function()
-      fzf.lsp_definitions({ jump_to_single = false, winopts = { split = "vsplit" } })
+      require("fzf-lua").lsp_definitions({ jump_to_single = false, winopts = { split = "vsplit" } })
     end, opts)
     vim.keymap.set("n", "<leader>h", function()
-      fzf.lsp_definitions({ jump_to_single = false, winopts = { split = "split" } })
+      require("fzf-lua").lsp_definitions({ jump_to_single = false, winopts = { split = "split" } })
     end, opts)
-    vim.keymap.set("n", "gd", fzf.lsp_definitions, opts)
-    vim.keymap.set("n", "gT", fzf.lsp_typedefs, opts)
-    vim.keymap.set("n", "gr", fzf.lsp_references, opts)
+    vim.keymap.set("n", "gd", function()
+      require("fzf-lua").lsp_definitions()
+    end, opts)
+    vim.keymap.set("n", "gT", function()
+      require("fzf-lua").lsp_typedefs()
+    end, opts)
+    vim.keymap.set("n", "gr", function()
+      require("fzf-lua").lsp_references()
+    end, opts)
     vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
     vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-    vim.keymap.set("n", "gi", fzf.lsp_implementations, opts)
+    vim.keymap.set("n", "gi", function()
+      require("fzf-lua").lsp_implementations()
+    end, opts)
 
     vim.keymap.set("n", "<leader>cl", vim.lsp.codelens.run, opts)
     vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)

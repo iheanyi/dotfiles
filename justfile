@@ -184,7 +184,7 @@ install-tmux-plugins:
 # ============================================================================
 
 # Link all dotfiles to home directory
-link: link-fish link-neovim link-terminal link-git link-tmux link-starship link-mise link-claude link-bin link-bat
+link: link-fish link-neovim link-terminal link-rex link-git link-tmux link-starship link-mise link-claude link-bin link-bat link-glow
     @echo "✓ All configs linked"
 
 # Link fish configuration
@@ -372,6 +372,8 @@ doctor:
     links=(
         "$HOME/.config/fish/config.fish"
         "$HOME/.config/nvim/init.lua"
+        "$HOME/.config/nvim/colors/poimandres-noir.lua"
+        "$HOME/.config/rex/init.lua"
         "$HOME/.config/ghostty/config"
         "$HOME/.config/starship.toml"
         "$HOME/.tmux.conf"

@@ -3,7 +3,7 @@
 
 -- automatically switch to insert mode when entering a Term buffer
 vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "TermOpen" }, {
-  group = vim.api.nvim_create_augroup("openTermInsert", {}),
+  group = vim.api.nvim_create_augroup("openTermInsert", { clear = true }),
   callback = function(args)
     -- we don't use vim.startswith() and look for test:// because of vim-test
     -- vim-test starts tests in a terminal, which we want to keep in normal mode
@@ -15,7 +15,7 @@ vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "TermOpen" }, {
 
 -- Open help window in a vertical split to the right.
 vim.api.nvim_create_autocmd("BufWinEnter", {
-  group = vim.api.nvim_create_augroup("help_window_right", {}),
+  group = vim.api.nvim_create_augroup("help_window_right", { clear = true }),
   pattern = { "*.txt" },
   callback = function()
     if vim.o.filetype == "help" then
@@ -65,13 +65,16 @@ vim.api.nvim_create_autocmd("Filetype", {
   end,
 })
 
--- Run gofmt/gofmpt, import packages automatically on save
+-- Organize Go imports via gopls on save (formatting is handled by conform.nvim)
 vim.api.nvim_create_autocmd("BufWritePre", {
   group = vim.api.nvim_create_augroup("setGoFormatting", { clear = true }),
   pattern = "*.go",
   callback = function()
     local clients = vim.lsp.get_clients({ bufnr = 0, name = "gopls" })
-    local encoding = (clients[1] and clients[1].offset_encoding) or "utf-16"
+    if #clients == 0 then
+      return
+    end
+    local encoding = clients[1].offset_encoding or "utf-16"
     local params = vim.lsp.util.make_range_params(0, encoding)
     params.context = { only = { "source.organizeImports" } }
     local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 2000)
@@ -79,20 +82,11 @@ vim.api.nvim_create_autocmd("BufWritePre", {
       for _, r in pairs(res.result or {}) do
         if r.edit then
           vim.lsp.util.apply_workspace_edit(r.edit, encoding)
-        else
+        elseif r.command then
           vim.lsp.buf.execute_command(r.command)
         end
       end
     end
-
-    vim.lsp.buf.format()
-  end,
-})
-
-vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = "*.rb",
-  callback = function()
-    vim.lsp.buf.format()
   end,
 })
 

@@ -1,9 +1,9 @@
 -- Keymaps are automatically loaded on the VeryLazy event
 -- Add any additional keymaps here
 
--- Fast saving
+-- Fast saving & safe quitting (use :q! explicitly to discard unsaved changes)
 vim.keymap.set("n", "<Leader>s", ":write!<CR>")
-vim.keymap.set("n", "<Leader>q", ":q!<CR>", { silent = true })
+vim.keymap.set("n", "<Leader>q", ":q<CR>", { silent = true })
 
 -- Some useful quickfix shortcuts for quickfix
 vim.keymap.set("n", "<C-n>", "<cmd>cnext<CR>zz")
@@ -84,38 +84,29 @@ end, { desc = "Open file/URL under cursor" })
 vim.keymap.set("n", "<leader>gb", '<CMD>lua require("git.blame").blame()<CR>')
 vim.keymap.set("n", "<leader>go", "<CMD>lua require('git.browse').open(false)<CR>")
 vim.keymap.set("x", "<leader>go", ":<C-u> lua require('git.browse').open(true)<CR>")
--- Copy git URL to clipboard (fugitive) - useful when browser open fails
-vim.keymap.set("n", "<leader>gy", "<CMD>GBrowse!<CR>", { desc = "Copy git URL to clipboard" })
-vim.keymap.set("x", "<leader>gy", ":'<,'>GBrowse!<CR>", { desc = "Copy git URL to clipboard (selection)" })
 
 -- File explorer (oil.nvim)
 -- Note: `-` opens parent dir (set in init.lua), these are extras
 vim.keymap.set("n", "<leader>e", "<CMD>Oil<CR>", { noremap = true, desc = "Open file explorer" })
 
+local function git_relative_path(fallback_abs)
+  local git_prefix = vim.fn.system("git rev-parse --show-prefix"):gsub("\n", "")
+  if vim.v.shell_error == 0 then
+    return git_prefix .. vim.fn.expand("%")
+  end
+  return vim.fn.expand(fallback_abs and "%:p" or "%")
+end
+
 -- Copy current filepath to system clipboard (git-relative, fallback to absolute)
 vim.keymap.set("n", "<leader>yp", function()
-  local git_prefix = vim.fn.system("git rev-parse --show-prefix"):gsub("\n", "")
-  local path
-  if vim.v.shell_error == 0 then
-    path = git_prefix .. vim.fn.expand("%")
-  else
-    path = vim.fn.expand("%:p")
-  end
+  local path = git_relative_path(true)
   vim.fn.setreg("+", path)
   print("Copied: " .. path)
 end, { silent = true, desc = "Copy filepath to clipboard" })
 
 -- Copy filepath:line to clipboard (great for referencing code to Claude)
 vim.keymap.set("n", "<leader>yl", function()
-  local git_prefix = vim.fn.system("git rev-parse --show-prefix"):gsub("\n", "")
-  local path
-  if vim.v.shell_error == 0 then
-    path = git_prefix .. vim.fn.expand("%")
-  else
-    path = vim.fn.expand("%")
-  end
-  local line = vim.fn.line(".")
-  local result = path .. ":" .. line
+  local result = git_relative_path(false) .. ":" .. vim.fn.line(".")
   vim.fn.setreg("+", result)
   print("Copied: " .. result)
 end, { desc = "Copy filepath:line to clipboard" })
@@ -136,32 +127,18 @@ vim.keymap.set("n", "<leader>yd", function()
   print("Copied " .. #diagnostics .. " diagnostic(s)")
 end, { desc = "Copy diagnostic to clipboard" })
 
--- Copy visual selection with file context header
+-- Copy visual selection with file context header (without clobbering any register)
 vim.keymap.set("v", "<leader>yc", function()
-  -- Get visual selection range
-  local start_line = vim.fn.line("v")
-  local end_line = vim.fn.line(".")
-  if start_line > end_line then
-    start_line, end_line = end_line, start_line
-  end
+  local vpos = vim.fn.getpos("v")
+  local cpos = vim.fn.getpos(".")
+  local start_line = math.min(vpos[2], cpos[2])
+  local end_line = math.max(vpos[2], cpos[2])
 
-  -- Get file path
-  local git_prefix = vim.fn.system("git rev-parse --show-prefix"):gsub("\n", "")
-  local path
-  if vim.v.shell_error == 0 then
-    path = git_prefix .. vim.fn.expand("%")
-  else
-    path = vim.fn.expand("%")
-  end
-
-  -- Get selected text
-  vim.cmd('noautocmd normal! "xy')
-  local code = vim.fn.getreg("x")
-
-  -- Build result with context header
+  local path = git_relative_path(false)
+  local lines = vim.fn.getregion(vpos, cpos, { type = vim.fn.mode() })
   local header = "// " .. path .. ":" .. start_line .. "-" .. end_line
-  local result = header .. "\n" .. code
-  vim.fn.setreg("+", result)
+  vim.fn.setreg("+", header .. "\n" .. table.concat(lines, "\n"))
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
   print("Copied with context: " .. path)
 end, { desc = "Copy selection with file context" })
 
