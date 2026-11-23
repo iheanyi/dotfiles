@@ -310,9 +310,9 @@ local function references(block_id, directory, home)
   return items, by_id
 end
 
-local function open_in_editor(block_id, path, line)
-  local source = assert(rex.session.describe_block({ block_id = block_id })).block
-  local view = assert(rex.session.view({}))
+local function open_in_editor(block_id, path, line, session_id)
+  local source = assert(rex.session.describe_block({ session_id = session_id, block_id = block_id })).block
+  local view = assert(rex.session.view({ session_id = session_id }))
   local path_json = assert(rex.json.encode(path)):gsub("'", "''")
   local edit_cmd = line and ("edit +" .. line .. " ") or "edit "
   local expression = "execute('" .. edit_cmd .. "' . fnameescape(json_decode('" .. path_json .. "')))"
@@ -321,7 +321,7 @@ local function open_in_editor(block_id, path, line)
       for _, layer in ipairs(window.layers) do
         for _, block in ipairs(layer.blocks) do
           if block.creator_name == terminal then
-            local process = rex.block.call(terminal, "process", { block_id = block.block_id })
+            local process = rex.block.call(terminal, "process", { session_id = session_id, block_id = block.block_id })
             local foreground = process and process.foreground
             local pane_id = block.block_id:match("^block:([%x-]+)$")
             if foreground and foreground.name == "nvim" and process.home and pane_id then
@@ -334,7 +334,7 @@ local function open_in_editor(block_id, path, line)
                 if not result.ok then
                   error(result.stderr ~= "" and result.stderr or "Neovim did not open the reference", 0)
                 end
-                return assert(rex.session.focus_block({ block_id = block.block_id }))
+                return assert(rex.session.focus_block({ session_id = session_id, block_id = block.block_id }))
               end
             end
           end
@@ -343,6 +343,256 @@ local function open_in_editor(block_id, path, line)
     end
   end
 end
+
+local function session_view(session_id)
+  local view = rex.session.view({ session_id = session_id })
+  if view then
+    return view
+  end
+  local attached = rex.call("session.attach", { session_id = session_id })
+  return (attached and attached.view) or rex.session.view({ session_id = session_id })
+end
+
+local function find_target_for_file(path)
+  local listed = assert(rex.call("session.list", {}))
+  local best_cwd_match, best_cwd_len = nil, -1
+  local scrollback_match = nil
+  local fallback = nil
+
+  for _, session in ipairs(listed.sessions or {}) do
+    local view = session_view(session.session_id)
+    if view and view.windows and #view.windows > 0 then
+      local active_window
+      for _, window in ipairs(view.windows) do
+        if window.window_id == view.active_window_id then
+          active_window = window
+          break
+        end
+      end
+      active_window = active_window or view.windows[1]
+
+      local anchor_block_id = active_window.focused_block_id
+      local window_dir
+      for _, layer in ipairs(active_window.layers or {}) do
+        for _, block in ipairs(layer.blocks or {}) do
+          if block.creator_name == terminal then
+            anchor_block_id = anchor_block_id or block.block_id
+            local process = rex.block.call(terminal, "process", {
+              session_id = session.session_id,
+              block_id = block.block_id,
+            })
+            local dir = process and process.foreground and process.foreground.cwd
+            if not dir and process then
+              for _, ancestor in ipairs(process.ancestors or {}) do
+                if ancestor.cwd then
+                  dir = ancestor.cwd
+                  break
+                end
+              end
+            end
+            if dir then
+              window_dir = window_dir or dir
+              local home = process and process.home
+              if
+                dir ~= "/"
+                and dir ~= home
+                and (path == dir or path:sub(1, #dir + 1) == dir .. "/")
+                and #dir > best_cwd_len
+              then
+                best_cwd_len = #dir
+                best_cwd_match = {
+                  session_id = session.session_id,
+                  window_id = active_window.window_id,
+                  block_id = anchor_block_id,
+                  directory = dir,
+                }
+              end
+            end
+            if not scrollback_match then
+              local out = rex.block.call(terminal, "format", {
+                session_id = session.session_id,
+                block_id = block.block_id,
+                format = "vt",
+                trim = true,
+                unwrap = true,
+                max_bytes = 262144,
+              })
+              if out and out.content and out.content:find(path, 1, true) then
+                scrollback_match = {
+                  session_id = session.session_id,
+                  window_id = active_window.window_id,
+                  block_id = block.block_id,
+                  directory = dir or window_dir,
+                }
+              end
+            end
+          end
+        end
+      end
+
+      if not fallback and anchor_block_id then
+        fallback = {
+          session_id = session.session_id,
+          window_id = active_window.window_id,
+          block_id = anchor_block_id,
+          directory = window_dir,
+        }
+      end
+    end
+  end
+
+  return best_cwd_match or scrollback_match or fallback
+end
+
+local function is_markdown_path(path)
+  local lower = path:lower()
+  return lower:match("%.md$") ~= nil
+    or lower:match("%.mdx$") ~= nil
+    or lower:match("%.markdown$") ~= nil
+    or lower:match("%.mkd$") ~= nil
+end
+
+local function open_floating(block_id, label, directory, command, bounds, extra, session_id)
+  local source = assert(rex.session.describe_block({ session_id = session_id, block_id = block_id })).block
+  return assert(rex.session.new_layer({
+    session_id = session_id,
+    window_id = source.window_id,
+    bounds = bounds or { 0.04, 0.05, 0.92, 0.90 },
+    focus = true,
+    layout = pane(label, directory, command, extra),
+  }))
+end
+
+local function resolve_explicit_target(session_id, block_id)
+  if not (session_id and block_id) then
+    return nil
+  end
+  local described = rex.session.describe_block({ session_id = session_id, block_id = block_id })
+  if not (described and described.block) then
+    return nil
+  end
+  local process = rex.block.call(terminal, "process", { session_id = session_id, block_id = block_id })
+  local dir = process and process.foreground and process.foreground.cwd
+  if not dir and process then
+    for _, ancestor in ipairs(process.ancestors or {}) do
+      if ancestor.cwd then
+        dir = ancestor.cwd
+        break
+      end
+    end
+  end
+  return {
+    session_id = session_id,
+    window_id = described.block.window_id,
+    block_id = block_id,
+    directory = dir,
+  }
+end
+
+rex.action({
+  name = "open_file",
+  title = "Open File in Rex",
+  args = {
+    path = "string",
+    line = "string?",
+    mode = "string?",
+    session_id = "string?",
+    block_id = "string?",
+  },
+  run = function(ctx, args)
+    local path = args.path
+    local line = args.line
+    local mode = args.mode or "split"
+    local basename = path:match("([^/]+)$") or "Editor"
+    local file_dir = path:match("^(.+)/[^/]+$") or "/"
+
+    if mode == "pick" then
+      local choices = {
+        { id = "split", title = "Open in Neovim Split", subtitle = basename, icon = "code" },
+        { id = "float", title = "Open in Floating Neovim", subtitle = basename, icon = "document" },
+        { id = "tab", title = "Open in New Tab", subtitle = basename, icon = "terminal" },
+      }
+      if is_markdown_path(path) then
+        choices[#choices + 1] = {
+          id = "glow",
+          title = "Preview in Glow (Markdown)",
+          subtitle = basename,
+          icon = "document",
+        }
+      end
+      choices[#choices + 1] = {
+        id = "tuicr",
+        title = "Annotate in tuicr",
+        subtitle = basename,
+        icon = "branch",
+      }
+      mode = rex.ui.pick({
+        title = "Open " .. basename,
+        placeholder = "Choose how to open this file in Rex",
+        items = choices,
+      })
+      if not mode then
+        return
+      end
+    end
+
+    local target = resolve_explicit_target(args.session_id, args.block_id)
+      or resolve_explicit_target(ctx.session_id, ctx.block_id)
+      or find_target_for_file(path)
+
+    local nvim_cmd = line and { "nvim", "+" .. line, "--", path } or { "nvim", "--", path }
+    local tuicr_cmd = line and { "tuicr", "--file", path, "--line", line } or { "tuicr", "--file", path }
+    local glow_cmd = { "glow", "-t", path }
+
+    if target then
+      local work_dir = target.directory or file_dir
+      local selected_window_id = target.window_id
+      local result
+
+      if mode == "float" then
+        result = open_floating(target.block_id, basename, work_dir, nvim_cmd, nil, nil, target.session_id)
+      elseif mode == "glow" then
+        result = open_floating(target.block_id, basename, work_dir, glow_cmd, nil, nil, target.session_id)
+      elseif mode == "tuicr" then
+        result = open_floating(target.block_id, "Review " .. basename, work_dir, tuicr_cmd, nil, nil, target.session_id)
+      elseif mode == "tab" or mode == "window" then
+        result = assert(rex.session.new_window({
+          session_id = target.session_id,
+          window_label = basename,
+          layout = pane("Editor", work_dir, nvim_cmd),
+        }))
+        selected_window_id = result.window_id
+      else
+        result = open_in_editor(target.block_id, path, line, target.session_id)
+          or assert(rex.session.new_split({
+            session_id = target.session_id,
+            anchor_id = target.block_id,
+            direction = "horizontal",
+            side = "after",
+            focus = true,
+            layout = pane("Editor", work_dir, nvim_cmd),
+          }))
+      end
+
+      rex.client.queue("session.select", { session_id = target.session_id, window_id = selected_window_id })
+      return result
+    end
+
+    local cmd = mode == "glow" and glow_cmd or (mode == "tuicr" and tuicr_cmd or nvim_cmd)
+    local created = assert(rex.call("session.create", {
+      label = "editor",
+      initial_windows = {
+        {
+          window_label = basename,
+          layout = pane("Editor", file_dir, cmd),
+        },
+      },
+    }))
+    local window_id = created.initial_windows and created.initial_windows[1] and created.initial_windows[1].window_id
+    rex.client.queue("session.select", { session_id = created.session_id, window_id = window_id })
+    return created
+  end,
+})
 
 rex.action({
   name = "open_file_reference",
@@ -373,14 +623,6 @@ rex.action({
   end,
 })
 rex.bind("ctrl+a>f", "open_file_reference")
-
-local function is_markdown_path(path)
-  local lower = path:lower()
-  return lower:match("%.md$") ~= nil
-    or lower:match("%.mdx$") ~= nil
-    or lower:match("%.markdown$") ~= nil
-    or lower:match("%.mkd$") ~= nil
-end
 
 rex.action({
   name = "preview_markdown",
@@ -491,16 +733,6 @@ local function git_info(directory)
     dirty = dirty,
     ahead = ahead,
   }
-end
-
-local function open_floating(block_id, label, directory, command, bounds, extra)
-  local source = assert(rex.session.describe_block({ block_id = block_id })).block
-  return assert(rex.session.new_layer({
-    window_id = source.window_id,
-    bounds = bounds or { 0.04, 0.05, 0.92, 0.90 },
-    focus = true,
-    layout = pane(label, directory, command, extra),
-  }))
 end
 
 rex.action({
@@ -672,7 +904,7 @@ local function list_agent_panes(current_session_id, exclude_block_id)
   local listed = assert(rex.call("session.list", {}))
   local entries = {}
   for _, session in ipairs(listed.sessions or {}) do
-    local view = rex.session.view({ session_id = session.session_id })
+    local view = session_view(session.session_id)
     if view then
       for _, window in ipairs(view.windows or {}) do
         for _, layer in ipairs(window.layers or {}) do
@@ -1313,7 +1545,7 @@ rex.action({
     local listed = assert(rex.call("session.list", {}))
     local entries = {}
     for _, session in ipairs(listed.sessions or {}) do
-      local view = rex.session.view({ session_id = session.session_id })
+      local view = session_view(session.session_id)
       if view then
         for _, window in ipairs(view.windows or {}) do
           for _, layer in ipairs(window.layers or {}) do

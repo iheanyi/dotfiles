@@ -237,6 +237,17 @@ link-rex:
     @mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/rex"
     @target="${XDG_CONFIG_HOME:-$HOME/.config}/rex/init.lua"; source="{{justfile_directory()}}/rex/init.lua"; test "$(readlink "$target")" = "$source" || ln -s "$source" "$target"
 
+# Build and register Rex Neovim.app as default macOS handler for Markdown & code files
+install-rex-nvim-app:
+    @app="$HOME/Applications/Rex Neovim.app"; \
+    mkdir -p "$app/Contents/MacOS"; \
+    cp "{{justfile_directory()}}/rex/rex-nvim-app/Info.plist" "$app/Contents/Info.plist"; \
+    swiftc -O "{{justfile_directory()}}/rex/rex-nvim-app/main.swift" -o "$app/Contents/MacOS/rex-neovim"; \
+    codesign --force --deep --sign - "$app" >/dev/null 2>&1; \
+    /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$app"; \
+    "$app/Contents/MacOS/rex-neovim" --register; \
+    echo "✓ Installed and registered $app"
+
 # Link starship prompt
 link-starship:
     @mkdir -p ~/.config
