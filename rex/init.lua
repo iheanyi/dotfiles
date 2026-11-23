@@ -884,50 +884,113 @@ local function read_markdown_heading(path)
     return nil
   end
   local heading
-  for _ = 1, 12 do
+  local in_frontmatter = false
+  for line_num = 1, 25 do
     local line = file:read("*l")
     if not line then
       break
     end
-    local match = line:match("^#%s+(.+)$")
-    if match then
-      heading = match:gsub("%s+$", "")
-      break
+    if line_num == 1 and line:match("^%-%-%-%s*$") then
+      in_frontmatter = true
+    elseif in_frontmatter then
+      if line:match("^%-%-%-%s*$") then
+        in_frontmatter = false
+      else
+        local fm_title = line:match("^name:%s*(.+)$") or line:match("^title:%s*(.+)$")
+        if fm_title and not heading then
+          heading = fm_title:gsub("^[\"']", ""):gsub("[\"']$", ""):gsub("%s+$", "")
+        end
+      end
+    else
+      local match = line:match("^#%s+(.+)$")
+      if match then
+        heading = match:gsub("%s+$", "")
+        break
+      end
     end
   end
   file:close()
   return heading
 end
 
+local function plan_source_label(path, home, repo_root)
+  if repo_root and path:sub(1, #repo_root + 1) == repo_root .. "/" then
+    return "repo"
+  end
+  if home and path:sub(1, #home + 1) == home .. "/" then
+    local rel = path:sub(#home + 2)
+    if rel:sub(1, 24) == ".gemini/antigravity-cli/" then
+      return "agy-cli"
+    elseif rel:sub(1, 20) == ".gemini/antigravity/" then
+      return "agy"
+    elseif rel:sub(1, 7) == ".claude" then
+      return "claude"
+    elseif rel:sub(1, 6) == ".codex" then
+      return "codex"
+    elseif rel:sub(1, 7) == ".cursor" then
+      return "cursor"
+    end
+  end
+  return "plan"
+end
+
 rex.action({
   name = "open_recent_plan",
-  title = "Open Recent Antigravity Plan…",
+  title = "Open Recent Plan / Artifact…",
   run = function(ctx)
     local directory, home = pane_info(ctx.block_id)
-    local brain_dir = assert(home, "Home directory not available") .. "/.gemini/antigravity-cli/brain"
-    local result = exec_with_path({
-      "/bin/sh",
-      "-c",
-      'find "$1" -maxdepth 2 -type f -name "*.md" ! -path "*/.system_generated/*" -exec stat -f "%m	%N" {} + 2>/dev/null | sort -rn | head -n 50',
-      "sh",
-      brain_dir,
-    }, { timeout = 3 })
-    if not (result and result.stdout and result.stdout ~= "") then
-      error("No Antigravity Markdown plans found in " .. brain_dir, 0)
+    local info = git_info(directory)
+    local repo_root = info and info.root
+    local search_dirs = {}
+
+    local function add_dir(dir, depth)
+      if dir then
+        search_dirs[#search_dirs + 1] = { dir = dir, depth = depth }
+      end
     end
 
-    local items = {}
+    if repo_root then
+      add_dir(repo_root .. "/docs/plans", 2)
+      add_dir(repo_root .. "/plans", 2)
+      add_dir(repo_root .. "/.claude/plans", 2)
+      add_dir(repo_root .. "/.cursor/plans", 2)
+      add_dir(repo_root .. "/.codex/plans", 2)
+    end
+    if home then
+      add_dir(home .. "/.gemini/antigravity-cli/brain", 2)
+      add_dir(home .. "/.gemini/antigravity/brain", 2)
+      add_dir(home .. "/.claude/plans", 2)
+      add_dir(home .. "/.codex/plans", 2)
+      add_dir(home .. "/.codex/memories/rollout_summaries", 1)
+      add_dir(home .. "/.codex/memories_v2/rollout_summaries", 1)
+      add_dir(home .. "/.cursor/plans", 2)
+    end
+
+    local argv = {
+      "/bin/sh",
+      "-c",
+      'for spec in "$@"; do depth=${spec%%:*}; dir=${spec#*:}; [ -d "$dir" ] && find "$dir" -maxdepth "$depth" -type f -name "*.md" ! -path "*/.system_generated/*" -exec stat -f "%m	%N" {} + 2>/dev/null; done | sort -rn | head -n 100',
+      "sh",
+    }
+    for _, entry in ipairs(search_dirs) do
+      argv[#argv + 1] = tostring(entry.depth) .. ":" .. entry.dir
+    end
+
+    local result = exec_with_path(argv, { timeout = 3 })
+    if not (result and result.stdout and result.stdout ~= "") then
+      error("No plans or artifacts found across agent harnesses", 0)
+    end
+
+    local items, seen = {}, {}
     for line in result.stdout:gmatch("[^\n]+") do
       local mtime_str, path = line:match("^(%d+)\t(.+)$")
-      if mtime_str and path then
+      if mtime_str and path and not seen[path] then
+        seen[path] = true
         local basename = path:match("([^/]+)$") or path
-        local convo_id = path:match("/brain/([^/]+)/") or ""
+        local source = plan_source_label(path, home, repo_root)
         local heading = read_markdown_heading(path)
         local title = heading or basename
-        local subtitle = basename
-        if convo_id ~= "" then
-          subtitle = basename .. " · " .. convo_id:sub(1, 8)
-        end
+        local subtitle = source .. " · " .. basename
         items[#items + 1] = {
           id = path,
           title = title,
@@ -938,12 +1001,12 @@ rex.action({
       end
     end
     if #items == 0 then
-      error("No Antigravity Markdown plans found", 0)
+      error("No plans or artifacts found across agent harnesses", 0)
     end
 
     local selection = rex.ui.pick({
-      title = "Open Recent Antigravity Plan",
-      placeholder = "Filter plans & artifacts (press e in Glow to edit)",
+      title = "Open Recent Plan / Artifact",
+      placeholder = "Filter by title, harness (agy-cli, agy, claude, codex, cursor, repo)…",
       items = items,
     })
     if not selection then
