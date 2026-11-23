@@ -653,11 +653,29 @@ function M.export_current(slug_override)
     end
 
     local rex_dir = (vim.env.XDG_CONFIG_HOME or (vim.env.HOME .. "/.config")) .. "/rex/themes"
+    local dotfiles_rex_themes = vim.fn.expand("~/development/dotfiles/rex/themes")
+    local rex_conf = rex.format_ghostty_conf(slug, ctx.palette)
     vim.fn.mkdir(rex_dir, "p")
     local rex_target = rex_dir .. "/" .. slug .. ".conf"
-    local rf = assert(io.open(rex_target, "w"))
-    rf:write(rex.format_ghostty_conf(slug, ctx.palette))
-    rf:close()
+
+    if has_dotfiles then
+      vim.fn.mkdir(dotfiles_rex_themes, "p")
+      local repo_rex_target = dotfiles_rex_themes .. "/" .. slug .. ".conf"
+      local rf = assert(io.open(repo_rex_target, "w"))
+      rf:write(rex_conf)
+      rf:close()
+      pcall(vim.uv.fs_unlink, rex_target)
+      local ok_rlink = pcall(vim.uv.fs_symlink, repo_rex_target, rex_target)
+      if not ok_rlink then
+        local rf2 = assert(io.open(rex_target, "w"))
+        rf2:write(rex_conf)
+        rf2:close()
+      end
+    else
+      local rf = assert(io.open(rex_target, "w"))
+      rf:write(rex_conf)
+      rf:close()
+    end
 
     ctx.saved_or_kept = true
     vim.g.colors_name = slug

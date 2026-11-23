@@ -224,8 +224,14 @@ link-neovim:
 
 # Link terminal emulator configs
 link-terminal:
-    @mkdir -p ~/.config/ghostty
+    @mkdir -p ~/.config/ghostty/themes
     @ln -sf {{justfile_directory()}}/ghostty/config ~/.config/ghostty/config
+    @if [ -d {{justfile_directory()}}/rex/themes ]; then \
+        for f in {{justfile_directory()}}/rex/themes/*.conf; do \
+            [ -e "$f" ] || continue; \
+            ln -sf "$f" ~/.config/ghostty/themes/; \
+        done; \
+    fi
     @echo "✓ Ghostty config linked"
 
 # Link git configuration
@@ -241,10 +247,17 @@ link-tmux:
     @ln -sf {{justfile_directory()}}/.tmux.conf ~/.tmux.conf
     @echo "✓ Tmux config linked"
 
-# Link Rex configuration without replacing an existing config
+# Link Rex configuration and themes without replacing an existing init.lua
 link-rex:
-    @mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/rex"
+    @mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/rex/themes"
     @target="${XDG_CONFIG_HOME:-$HOME/.config}/rex/init.lua"; source="{{justfile_directory()}}/rex/init.lua"; test "$(readlink "$target")" = "$source" || ln -s "$source" "$target"
+    @if [ -d {{justfile_directory()}}/rex/themes ]; then \
+        for f in {{justfile_directory()}}/rex/themes/*.conf; do \
+            [ -e "$f" ] || continue; \
+            ln -sf "$f" "${XDG_CONFIG_HOME:-$HOME/.config}/rex/themes/"; \
+        done; \
+    fi
+    @echo "✓ Rex config and themes linked"
 
 # Build and register Rex Neovim.app as default macOS handler for Markdown & code files
 install-rex-nvim-app:
@@ -374,6 +387,7 @@ doctor:
         "$HOME/.config/nvim/init.lua"
         "$HOME/.config/nvim/colors/poimandres-noir.lua"
         "$HOME/.config/rex/init.lua"
+        "$HOME/.config/rex/themes/poimandres-noir.conf"
         "$HOME/.config/ghostty/config"
         "$HOME/.config/starship.toml"
         "$HOME/.tmux.conf"
