@@ -227,8 +227,8 @@ link-terminal:
     @mkdir -p ~/.config/ghostty/themes
     @ln -sf {{justfile_directory()}}/ghostty/config ~/.config/ghostty/config
     @if [ -d {{justfile_directory()}}/rex/themes ]; then \
-        for f in {{justfile_directory()}}/rex/themes/*.conf; do \
-            [ -e "$f" ] || continue; \
+        for f in {{justfile_directory()}}/rex/themes/*; do \
+            [ -f "$f" ] || continue; \
             ln -sf "$f" ~/.config/ghostty/themes/; \
         done; \
     fi
@@ -252,12 +252,19 @@ link-rex:
     @mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/rex/themes"
     @target="${XDG_CONFIG_HOME:-$HOME/.config}/rex/init.lua"; source="{{justfile_directory()}}/rex/init.lua"; test "$(readlink "$target")" = "$source" || ln -s "$source" "$target"
     @if [ -d {{justfile_directory()}}/rex/themes ]; then \
-        for f in {{justfile_directory()}}/rex/themes/*.conf; do \
-            [ -e "$f" ] || continue; \
+        for f in {{justfile_directory()}}/rex/themes/*; do \
+            [ -f "$f" ] || continue; \
             ln -sf "$f" "${XDG_CONFIG_HOME:-$HOME/.config}/rex/themes/"; \
         done; \
     fi
     @echo "✓ Rex config and themes linked"
+
+# Import all tracked Rex/Ghostty themes into the running Rex app
+import-rex-themes: link-rex
+    @for f in {{justfile_directory()}}/rex/themes/*; do \
+        [ -f "$f" ] || continue; \
+        rex do client.theme.import "path=$f" && echo "✓ Imported $(basename "$f") into Rex"; \
+    done
 
 # Build and register Rex Neovim.app as default macOS handler for Markdown & code files
 install-rex-nvim-app:
@@ -387,7 +394,7 @@ doctor:
         "$HOME/.config/nvim/init.lua"
         "$HOME/.config/nvim/colors/poimandres-noir.lua"
         "$HOME/.config/rex/init.lua"
-        "$HOME/.config/rex/themes/poimandres-noir.conf"
+        "$HOME/.config/rex/themes/Poimandres Noir"
         "$HOME/.config/ghostty/config"
         "$HOME/.config/starship.toml"
         "$HOME/.tmux.conf"
