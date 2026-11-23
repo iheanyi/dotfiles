@@ -65,3 +65,7 @@ if status is-interactive
     # Private/work-related config (not in git)
     test -f ~/.config/fish/private.fish; and source ~/.config/fish/private.fish
 end
+
+
+# Added by Antigravity CLI installer
+set -gx PATH "/Users/iheanyi/.local/bin" $PATH
