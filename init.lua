@@ -44,6 +44,7 @@ vim.opt.rtp:prepend(vim.env.LAZY or lazypath)
 
 -- Always keep a black background
 vim.o.background = "dark"
+pcall(vim.cmd.colorscheme, "poimandres-noir")
 
 -- Save undo history
 vim.o.undofile = true
@@ -70,17 +71,10 @@ local plugins = {
       })
     end,
   },
-  -- colorscheme
+  -- fallback colorscheme (default is standalone colors/poimandres-noir.lua)
   {
     "jasonlong/poimandres.nvim",
-    lazy = false,
-    priority = 1000,
-    opts = {
-      style = "storm",
-    },
-    config = function()
-      vim.cmd([[colorscheme poimandres]])
-    end,
+    lazy = true,
   },
   {
     "echasnovski/mini.surround",
