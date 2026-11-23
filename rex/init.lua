@@ -735,6 +735,174 @@ local function git_info(directory)
   }
 end
 
+local exec_path = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+local function exec_with_path(argv, opts)
+  local merged = { timeout = 2, env = { PATH = exec_path } }
+  if opts then
+    for key, value in pairs(opts) do
+      if key == "env" then
+        for ek, ev in pairs(value) do
+          merged.env[ek] = ev
+        end
+      else
+        merged[key] = value
+      end
+    end
+  end
+  return rex.exec(argv, merged)
+end
+
+local function fetch_repo_prs(repo_root)
+  local script = [[
+import concurrent.futures, json, subprocess, sys
+
+cwd = sys.argv[1]
+fields = "number,title,author,headRefName,isDraft,reviewDecision,additions,deletions,url"
+
+def run(extra):
+    cmd = ["gh", "pr", "list", "--state", "open", "--json", fields] + extra
+    proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
+    if proc.returncode != 0:
+        return None, (proc.stderr or proc.stdout or "gh pr list failed").strip()
+    try:
+        return json.loads(proc.stdout or "[]"), None
+    except Exception as exc:
+        return None, str(exc)
+
+with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+    f_req = pool.submit(run, ["--search", "review-requested:@me", "--limit", "30"])
+    f_open = pool.submit(run, ["--limit", "50"])
+    req, req_err = f_req.result()
+    open_prs, open_err = f_open.result()
+
+out = {
+    "requested": req or [],
+    "open": open_prs or [],
+    "error": open_err if open_prs is None else (req_err if req is None and not open_prs else None),
+}
+sys.stdout.write(json.dumps(out))
+]]
+  local result = exec_with_path({ "python3", "-c", script, repo_root }, { timeout = 10 })
+  if not (result and result.ok and result.stdout and result.stdout ~= "") then
+    return nil, (result and result.stderr ~= "" and result.stderr) or "Failed to query GitHub PRs via gh"
+  end
+  local ok, decoded = pcall(rex.json.decode, result.stdout)
+  if not (ok and type(decoded) == "table") then
+    return nil, "Could not parse gh pr list output"
+  end
+  if decoded.error and #decoded.open == 0 and #decoded.requested == 0 then
+    return nil, decoded.error
+  end
+  return decoded, nil
+end
+
+local function review_pr_picker(ctx, directory, info)
+  local work_dir = (info and info.root) or directory
+  local items, by_id, seen = {}, {}, {}
+
+  if info then
+    local data, err = fetch_repo_prs(info.root)
+    if not data then
+      error(err or "Could not fetch pull requests", 0)
+    end
+
+    local function append_prs(list, is_requested)
+      for _, pr in ipairs(list or {}) do
+        local num = pr.number
+        if num and not seen[num] then
+          seen[num] = true
+          local id = tostring(num)
+          local author = (type(pr.author) == "table" and pr.author.login) or "unknown"
+          local branch = pr.headRefName or ""
+          local stats = ""
+          if pr.additions ~= nil and pr.deletions ~= nil then
+            stats = string.format("+%d/-%d", pr.additions, pr.deletions)
+          end
+          local sub_parts = { "@" .. author }
+          if branch ~= "" then
+            sub_parts[#sub_parts + 1] = branch
+          end
+          if stats ~= "" then
+            sub_parts[#sub_parts + 1] = stats
+          end
+
+          local detail = "open"
+          if is_requested then
+            detail = pr.isDraft and "draft · review req" or "review requested"
+          elseif pr.isDraft then
+            detail = "draft"
+          elseif pr.reviewDecision == "CHANGES_REQUESTED" then
+            detail = "changes requested"
+          elseif pr.reviewDecision == "APPROVED" then
+            detail = "approved"
+          end
+
+          items[#items + 1] = {
+            id = id,
+            title = "#" .. id .. " " .. (pr.title or ""),
+            subtitle = table.concat(sub_parts, " · "),
+            detail = detail,
+            icon = "branch",
+          }
+          by_id[id] = pr
+        end
+      end
+    end
+
+    append_prs(data.requested, true)
+    append_prs(data.open, false)
+  end
+
+  local selection
+  if #items == 0 then
+    local typed = rex.ui.input({
+      title = "Review Pull Request in tuicr",
+      placeholder = "No open PRs found — enter PR #, owner/repo#N, or PR URL",
+      confirm = "Open in tuicr",
+    })
+    if not typed then
+      return
+    end
+    selection = { text = typed }
+  else
+    selection = rex.ui.pick({
+      title = "Review Pull Request in tuicr",
+      placeholder = "Filter PRs by #number, title, @author, branch, or enter a PR URL",
+      items = items,
+      allow_other = true,
+    })
+    if not selection then
+      return
+    end
+  end
+
+  local target, label
+  if type(selection) == "table" then
+    local typed = selection.text:gsub("^%s+", ""):gsub("%s+$", "")
+    if typed == "" then
+      return
+    end
+    target = typed:gsub("^#(%d+)$", "%1")
+    label = target:match("^%d+$") and ("Review PR #" .. target) or ("Review " .. target)
+  else
+    target = selection
+    label = "Review PR #" .. selection
+  end
+
+  return open_floating(ctx.block_id, label, work_dir, { "tuicr", "pr", target })
+end
+
+rex.action({
+  name = "review_pr_with_tuicr",
+  title = "Review Pull Request in tuicr…",
+  run = function(ctx)
+    local directory = cwd(ctx.block_id)
+    local info = git_info(directory)
+    return review_pr_picker(ctx, directory, info)
+  end,
+})
+rex.bind("ctrl+a>shift+p", "review_pr_with_tuicr")
+
 rex.action({
   name = "review_with_tuicr",
   title = "Review with tuicr…",
@@ -765,6 +933,12 @@ rex.action({
           detail = detail,
         }
       end
+      items[#items + 1] = {
+        id = "pull_requests",
+        title = "Pull requests…",
+        subtitle = "List open & review-requested PRs in this repo",
+        icon = "branch",
+      }
       items[#items + 1] = {
         id = "commits",
         title = "Choose commits…",
@@ -838,6 +1012,8 @@ rex.action({
       cmd = info.dirty > 0 and { "tuicr", "-r", info.base .. "..HEAD", "-w" }
         or { "tuicr", "-r", info.base .. "..HEAD" }
       label = "Review " .. info.branch
+    elseif selection == "pull_requests" then
+      return review_pr_picker(ctx, directory, info)
     elseif selection == "commits" then
       cmd = { "tuicr" }
       label = "Review Commits"
@@ -867,23 +1043,6 @@ rex.action({
   end,
 })
 rex.bind("ctrl+a>shift+r", "review_working_tree")
-
-local exec_path = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-local function exec_with_path(argv, opts)
-  local merged = { timeout = 2, env = { PATH = exec_path } }
-  if opts then
-    for key, value in pairs(opts) do
-      if key == "env" then
-        for ek, ev in pairs(value) do
-          merged.env[ek] = ev
-        end
-      else
-        merged[key] = value
-      end
-    end
-  end
-  return rex.exec(argv, merged)
-end
 
 local agent_names = {
   agy = "Antigravity",
@@ -1248,7 +1407,7 @@ rex.action({
     return open_floating(ctx.block_id, label, directory, { "glow", "-t", selection })
   end,
 })
-rex.bind("ctrl+a>shift+p", "open_recent_plan")
+rex.bind("ctrl+a>shift+a", "open_recent_plan")
 
 rex.action({
   name = "floating_lazygit",
