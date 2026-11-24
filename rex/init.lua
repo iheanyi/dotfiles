@@ -1480,16 +1480,157 @@ rex.action({
 })
 rex.bind("ctrl+a>o", "open_project_session")
 
+local function fallback_url_title(url)
+  local owner, repo, pr_num = url:match("^https?://github%.com/([^/]+)/([^/]+)/pull/(%d+)")
+  if owner and repo and pr_num then
+    return owner .. "/" .. repo .. " PR #" .. pr_num
+  end
+  local i_owner, i_repo, issue_num = url:match("^https?://github%.com/([^/]+)/([^/]+)/issues/(%d+)")
+  if i_owner and i_repo and issue_num then
+    return i_owner .. "/" .. i_repo .. " Issue #" .. issue_num
+  end
+  local c_owner, c_repo, sha = url:match("^https?://github%.com/([^/]+)/([^/]+)/commit/([%x]+)")
+  if c_owner and c_repo and sha then
+    return c_owner .. "/" .. c_repo .. " @ " .. sha:sub(1, 7)
+  end
+  local host = url:match("^https?://([^/%?#]+)") or url
+  host = host:gsub("^www%.", "")
+  local path = url:match("^https?://[^/%?#]+(/[^%?#]*)")
+  if path and path ~= "/" then
+    local tail = path:gsub("/+$", ""):match("([^/]+)$")
+    if tail and tail ~= "" then
+      tail = url_decode(tail):gsub("[_-]+", " ")
+      return host .. " — " .. tail
+    end
+  end
+  return host
+end
+
+local function fetch_url_titles(urls, home)
+  if #urls == 0 then
+    return {}
+  end
+  local cache_path = home and (home .. "/.cache/rex-url-titles.json") or ""
+  local script = [[
+import concurrent.futures, html, json, os, re, subprocess, sys, time
+
+cache_path = sys.argv[1]
+urls = json.loads(sys.stdin.read())
+now = int(time.time())
+cache = {}
+if cache_path and os.path.exists(cache_path):
+    try:
+        with open(cache_path, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+            if isinstance(raw, dict):
+                cache = {k: v for k, v in raw.items() if isinstance(v, dict) and now - v.get("t", 0) < 604800}
+    except Exception:
+        cache = {}
+
+results = {}
+to_fetch = []
+for u in urls:
+    entry = cache.get(u)
+    if entry and entry.get("title"):
+        results[u] = entry["title"]
+    elif len(to_fetch) < 15:
+        to_fetch.append(u)
+
+title_re = re.compile(r"<title[^>]*>(.*?)</title>", re.IGNORECASE | re.DOTALL)
+og_re = re.compile(r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']', re.IGNORECASE)
+
+def fetch_one(url):
+    try:
+        proc = subprocess.run(
+            [
+                "/usr/bin/curl",
+                "-sSL",
+                "--max-time", "1.2",
+                "--connect-timeout", "0.8",
+                "--max-filesize", "262144",
+                "-A", "Mozilla/5.0 (Macintosh; Intel Mac OS X) Rex/1.0",
+                url,
+            ],
+            capture_output=True,
+            timeout=1.5,
+        )
+        chunk = proc.stdout[:32768].decode("utf-8", errors="ignore")
+        m = title_re.search(chunk) or og_re.search(chunk)
+        if m:
+            t = re.sub(r"\s+", " ", html.unescape(m.group(1))).strip()
+            if t:
+                return url, t[:140]
+    except Exception:
+        pass
+    return url, None
+
+if to_fetch:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+        futs = [pool.submit(fetch_one, u) for u in to_fetch]
+        done, _ = concurrent.futures.wait(futs, timeout=1.8)
+        for fut in done:
+            try:
+                u, t = fut.result()
+                if t:
+                    results[u] = t
+                    cache[u] = {"title": t, "t": now}
+            except Exception:
+                pass
+
+if cache_path and to_fetch:
+    try:
+        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+        if len(cache) > 500:
+            trimmed = sorted(cache.items(), key=lambda kv: kv[1].get("t", 0), reverse=True)[:500]
+            cache = dict(trimmed)
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump(cache, f)
+    except Exception:
+        pass
+
+sys.stdout.write(json.dumps(results))
+]]
+  local input_json = rex.json.encode(urls)
+  if not input_json then
+    return {}
+  end
+  local result = exec_with_path({ "python3", "-c", script, cache_path }, { stdin = input_json, timeout = 2.5 })
+  if result and result.ok and result.stdout ~= "" then
+    local decoded = rex.json.decode(result.stdout)
+    if type(decoded) == "table" then
+      return decoded
+    end
+  end
+  return {}
+end
+
 rex.action({
   name = "open_url_reference",
   title = "Open URL from Scrollback…",
   run = function(ctx)
+    local _, home = pane_info(ctx.block_id)
     local text = read_scrollback(ctx.block_id, "text")
     local vt = read_scrollback(ctx.block_id, "vt")
     local urls = {}
+    local labels = {}
 
     local function clean_url(url)
       return (url:gsub("[.,;:!?%)%]'\">`%}%*]+$", ""))
+    end
+
+    local function set_label(url, label)
+      if not label then
+        return
+      end
+      label = label:gsub("\27%[[%d;?]*%a", ""):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+      if label ~= "" and label ~= url and not label:match("^https?://") then
+        labels[url] = label
+      end
+    end
+
+    for label, url in text:gmatch("%[([^%]%\n]+)%]%((https?://[^%s%)]+)%)") do
+      url = clean_url(url)
+      set_label(url, label)
     end
 
     for token in text:gmatch("%S+") do
@@ -1501,35 +1642,58 @@ rex.action({
         end
       end
     end
+
+    for url, label in vt:gmatch("\27%]8;[^;\27\7]*;(https?://[^\27\7]+)\27\\(.-)\27%]8;;") do
+      url = clean_url(url)
+      urls[#urls + 1] = url
+      set_label(url, label)
+    end
+    for url, label in vt:gmatch("\27%]8;[^;\27\7]*;(https?://[^\27\7]+)\7(.-)\27%]8;;") do
+      url = clean_url(url)
+      urls[#urls + 1] = url
+      set_label(url, label)
+    end
     for url in vt:gmatch("\27%]8;[^;\27\7]*;(https?://[^\27\7]+)") do
       urls[#urls + 1] = clean_url(url)
     end
 
-    local items, seen = {}, {}
+    local ordered, seen = {}, {}
     for index = #urls, 1, -1 do
       local url = urls[index]
       if not seen[url] then
         seen[url] = true
-        local host = url:match("^https?://([^/]+)") or url
-        local path = url:match("^https?://[^/]+(/.*)$")
-        items[#items + 1] = {
-          id = url,
-          title = host .. (path or ""),
-          subtitle = host,
-          icon = "globe",
-        }
-        if #items == 200 then
+        ordered[#ordered + 1] = url
+        if #ordered == 200 then
           break
         end
       end
     end
-    if #items == 0 then
+    if #ordered == 0 then
       error("No HTTP(S) URLs found in this pane", 0)
+    end
+
+    local unlabeled = {}
+    for _, url in ipairs(ordered) do
+      if not labels[url] then
+        unlabeled[#unlabeled + 1] = url
+      end
+    end
+    local fetched_titles = fetch_url_titles(unlabeled, home)
+
+    local items = {}
+    for _, url in ipairs(ordered) do
+      local title = labels[url] or fetched_titles[url] or fallback_url_title(url)
+      items[#items + 1] = {
+        id = url,
+        title = title,
+        subtitle = url,
+        icon = "globe",
+      }
     end
 
     local selection = rex.ui.pick({
       title = "Open URL in Browser",
-      placeholder = "Filter URLs from scrollback",
+      placeholder = "Filter by page title or URL",
       items = items,
     })
     if not selection then
