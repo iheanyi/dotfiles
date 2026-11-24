@@ -1604,6 +1604,60 @@ sys.stdout.write(json.dumps(results))
   return {}
 end
 
+local function is_valid_url(url)
+  if type(url) ~= "string" then
+    return false
+  end
+  if url:find("[%s<>%{%}|\\^`%*]") or url:find("%.%.%.") or url:find("…", 1, true) then
+    return false
+  end
+  local authority = url:match("^https?://([^/%?#]+)")
+  if not authority or authority == "" then
+    return false
+  end
+  authority = authority:gsub("^[^@]+@", "")
+
+  local host, port_str
+  if authority:sub(1, 1) == "[" then
+    host, port_str = authority:match("^(%[[%x:]+%]):(.*)$")
+    if not host then
+      host = authority:match("^(%[[%x:]+%])$")
+    end
+  else
+    host, port_str = authority:match("^([^:]+):(.*)$")
+    if not host then
+      host = authority
+    end
+  end
+  if not host or host == "" then
+    return false
+  end
+
+  if port_str ~= nil then
+    if not port_str:match("^%d+$") then
+      return false
+    end
+    local port = tonumber(port_str)
+    if not port or port < 1 or port > 65535 then
+      return false
+    end
+  end
+
+  if host == "localhost" or host:sub(1, 1) == "[" then
+    return true
+  end
+  local a, b, c, d = host:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$")
+  if a then
+    a, b, c, d = tonumber(a), tonumber(b), tonumber(c), tonumber(d)
+    return a <= 255 and b <= 255 and c <= 255 and d <= 255
+  end
+  if host:find("[^%w%-%.]") or host:sub(1, 1) == "." or host:sub(-1) == "." or host:find("%.%.") then
+    return false
+  end
+  local tld = host:match("%.([%a][%a]+)$")
+  return tld ~= nil
+end
+
 rex.action({
   name = "open_url_reference",
   title = "Open URL from Scrollback…",
@@ -1615,7 +1669,20 @@ rex.action({
     local labels = {}
 
     local function clean_url(url)
-      return (url:gsub("[.,;:!?%)%]'\">`%}%*]+$", ""))
+      if url:find("%.%.%.") or url:find("…", 1, true) then
+        return ""
+      end
+      url = url:gsub("[.,;:!?'\">`%}%]%*]+$", "")
+      while url:sub(-1) == ")" do
+        local _, opens = url:gsub("%(", "")
+        local _, closes = url:gsub("%)", "")
+        if closes > opens then
+          url = url:sub(1, -2)
+        else
+          break
+        end
+      end
+      return url
     end
 
     local function set_label(url, label)
@@ -1630,14 +1697,16 @@ rex.action({
 
     for label, url in text:gmatch("%[([^%]%\n]+)%]%((https?://[^%s%)]+)%)") do
       url = clean_url(url)
-      set_label(url, label)
+      if is_valid_url(url) then
+        set_label(url, label)
+      end
     end
 
     for token in text:gmatch("%S+") do
-      local url = token:match("(https?://[^%s%)%]}>\"'`]+)")
+      local url = token:match("(https?://[^%s\"'`]+)")
       if url then
         url = clean_url(url)
-        if #url > 10 then
+        if is_valid_url(url) then
           urls[#urls + 1] = url
         end
       end
@@ -1645,16 +1714,23 @@ rex.action({
 
     for url, label in vt:gmatch("\27%]8;[^;\27\7]*;(https?://[^\27\7]+)\27\\(.-)\27%]8;;") do
       url = clean_url(url)
-      urls[#urls + 1] = url
-      set_label(url, label)
+      if is_valid_url(url) then
+        urls[#urls + 1] = url
+        set_label(url, label)
+      end
     end
     for url, label in vt:gmatch("\27%]8;[^;\27\7]*;(https?://[^\27\7]+)\7(.-)\27%]8;;") do
       url = clean_url(url)
-      urls[#urls + 1] = url
-      set_label(url, label)
+      if is_valid_url(url) then
+        urls[#urls + 1] = url
+        set_label(url, label)
+      end
     end
     for url in vt:gmatch("\27%]8;[^;\27\7]*;(https?://[^\27\7]+)") do
-      urls[#urls + 1] = clean_url(url)
+      url = clean_url(url)
+      if is_valid_url(url) then
+        urls[#urls + 1] = url
+      end
     end
 
     local ordered, seen = {}, {}
